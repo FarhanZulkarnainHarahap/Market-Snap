@@ -1,59 +1,105 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:14532d,100:facc15&height=180&section=header&text=Market%20Snap%20Web&fontColor=ffffff&fontSize=42&animation=twinkling&fontAlignY=36" alt="Market Snap Web banner" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:052e16,45:16a34a,100:facc15&height=210&section=header&text=Market%20Snap%20Web&fontColor=ffffff&fontSize=46&fontAlignY=34&desc=Fresh%20Grocery%20Commerce%20Experience&descAlignY=54&descSize=17&animation=twinkling" alt="Market Snap Web animated banner" />
 
-  <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=700&size=22&duration=2600&pause=800&color=15803D&center=true&vCenter=true&width=820&lines=Fresh+Grocery+Shopping+Experience;Customer+%2B+Admin+%2B+Admin+Store+Dashboard;Connected+to+Market+Snap+Express+API" alt="Typing animation" />
+  <img src="./public/market-snap.png" width="108" alt="Market Snap logo" />
+
+  <br />
+  <br />
+
+  <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=700&size=23&duration=2200&pause=700&color=15803D&center=true&vCenter=true&width=820&lines=Mobile-first+online+grocery+web+app;Nearest+branch+product+discovery;JWT+role-based+customer+and+admin+dashboards;RajaOngkir+shipping+and+Xendit+invoice+checkout" alt="Market Snap animated typing intro" />
 
   <p>
-    <img src="./public/market-snap.png" width="96" alt="Market Snap logo" />
+    A mobile-first grocery commerce frontend with role-based dashboards, location-aware product discovery, cart checkout, RajaOngkir shipping, and Xendit payment handoff.
   </p>
 
   <p>
-    <img src="https://img.shields.io/badge/Next.js-16-111827?style=for-the-badge&logo=next.js" alt="Next.js" />
-    <img src="https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react&logoColor=111827" alt="React" />
-    <img src="https://img.shields.io/badge/Tailwind-4-38bdf8?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind" />
-    <img src="https://img.shields.io/badge/TypeScript-ready-3178c6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Next.js-16.2-111827?style=for-the-badge&logo=next.js" alt="Next.js" />
+    <img src="https://img.shields.io/badge/React-19.2-61dafb?style=for-the-badge&logo=react&logoColor=111827" alt="React" />
+    <img src="https://img.shields.io/badge/TypeScript-5-3178c6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/Vercel-ready-000000?style=for-the-badge&logo=vercel" alt="Vercel ready" />
   </p>
+
+  <img src="https://capsule-render.vercel.app/api?type=rect&color=0:f7fee7,50:dcfce7,100:fef08a&height=3&section=footer" alt="Market Snap animated divider" />
 </div>
 
-## About
+## Overview
 
-Market Snap Web adalah frontend mobile-first untuk online grocery web app. Aplikasi ini menampilkan landing page grocery, login/register, middleware role, dan dashboard untuk `customer`, `admin`, serta `adminStore`.
+Market Snap Web adalah frontend untuk aplikasi online grocery berbasis cabang toko. Customer melihat produk dari toko terdekat, mengelola cart, membuat order, memilih kurir, dan diarahkan ke invoice pembayaran. Admin dan admin store memiliki dashboard terpisah untuk operasional toko, produk, order, diskon, inventory, dan laporan.
 
-Web ini terhubung ke Market Snap API melalui `NEXT_PUBLIC_API_URL`.
+Project ini dibuat sebagai repo frontend terpisah dan terhubung ke Market Snap API melalui `NEXT_PUBLIC_API_URL`.
 
-## Preview Theme
+## Table of Contents
+
+- [Preview Assets](#preview-assets)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [User Roles](#user-roles)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [API Integration](#api-integration)
+- [Available Scripts](#available-scripts)
+- [Deploy to Vercel](#deploy-to-vercel)
+- [Production Checklist](#production-checklist)
+
+## Preview Assets
 
 <div align="center">
-  <img src="./public/product.png" width="140" alt="Product icon" />
-  <img src="./public/coupon.png" width="140" alt="Coupon icon" />
-  <img src="./public/discount-product.png" width="140" alt="Discount product icon" />
-  <img src="./public/pineapple.png" width="140" alt="Pineapple icon" />
+  <img src="./public/product.png" width="130" alt="Product asset" />
+  <img src="./public/coupon.png" width="130" alt="Coupon asset" />
+  <img src="./public/discount-product.png" width="130" alt="Discount product asset" />
+  <img src="./public/pineapple.png" width="130" alt="Pineapple asset" />
 </div>
 
-## Main Features
+## Features
 
-- Landing page grocery dengan hero, promo, kategori, toko terdekat, dan product list.
-- Location-based product display dari API Express.
-- Login demo dengan role `customer`, `admin`, dan `adminStore`.
-- Middleware route guard untuk dashboard role.
-- Customer dashboard: catalog, cart, checkout, address, orders, product detail, store detail.
-- Admin dashboard: store, product, category, inventory report, user, store admin.
-- Admin Store dashboard: product, category, discount, inventory, manage order, store detail.
-- Favicon dan asset grocery Market Snap.
-- Siap deploy Vercel sebagai repo web terpisah.
+### Customer
+
+- Mobile-first grocery landing page with hero, category, promo, nearest store, and product sections.
+- Location-aware catalog powered by the backend nearest-store API.
+- Product listing, product detail, store detail, and stock visibility by selected branch.
+- Authenticated cart flow using JWT Bearer token.
+- Checkout form with RajaOngkir destination ID, courier selection, and payment method.
+- Xendit invoice redirect when the API returns `payment.invoiceUrl`.
+- Customer profile, address page, checkout page, and order tracking pages.
+
+### Admin
+
+- Protected admin dashboard for `admin` and `super_admin`.
+- Store management, product management, category page, inventory report, user list, and store admin creation page.
+- API-backed create forms for admin resources.
+
+### Admin Store
+
+- Protected dashboard for `store_admin`.
+- Store product view, category view, discount management, inventory management, order management, and assigned store page.
 
 ## Tech Stack
 
-| Area | Stack |
+| Area | Technology |
 | --- | --- |
 | Framework | Next.js App Router |
-| UI | React |
-| Styling | Tailwind CSS + custom CSS |
+| UI | React 19 |
 | Language | TypeScript |
-| State | React hooks + local storage |
+| Styling | Tailwind CSS 4 and custom CSS modules |
+| Routing Guard | Next middleware |
+| State | React hooks and local storage |
 | API | Market Snap Express API |
+| Deployment | Vercel |
 
-## Folder Structure
+## User Roles
+
+Login response dari API menentukan dashboard tujuan user. Token JWT disimpan di local storage, sedangkan cookie `market-snap-role` dipakai oleh middleware untuk route guard.
+
+| API Role | Web Role | Redirect |
+| --- | --- | --- |
+| `user` | `customer` | `/dashboard/customer` |
+| `admin` | `admin` | `/dashboard/admin` |
+| `super_admin` | `admin` | `/dashboard/admin` |
+| `store_admin` | `adminStore` | `/dashboard/adminStore` |
+
+## Project Structure
 
 ```txt
 web
@@ -70,8 +116,13 @@ web
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components
-│   └── dashboard
+│   ├── dashboard
+│   └── forms
 ├── lib
+│   ├── api-contracts.ts
+│   ├── api.ts
+│   ├── dashboard-api.ts
+│   └── types.ts
 ├── public
 ├── scripts
 ├── styles
@@ -82,135 +133,120 @@ web
 
 ## Getting Started
 
+Clone the repository and install dependencies.
+
 ```bash
 npm install
+```
+
+Run the development server.
+
+```bash
 npm run dev
 ```
 
-Default URL:
+Open the app:
 
 ```txt
 http://localhost:3000
 ```
 
-Jika port `3000` penuh:
+If port `3000` is already used:
 
 ```bash
 npm run dev -- -p 3200
 ```
 
-Untuk connect ke API lokal:
+## Environment Variables
 
-```bash
-NEXT_PUBLIC_API_URL=http://127.0.0.1:4100/api npm run dev -- -p 3200
-```
-
-## Environment
-
-Buat file `.env.local`.
+Create `.env.local` in the web project.
 
 ```env
 NEXT_PUBLIC_API_URL=http://127.0.0.1:4100/api
 ```
 
-Untuk production Vercel:
+For production:
 
 ```env
 NEXT_PUBLIC_API_URL=https://your-market-snap-api.vercel.app/api
 ```
 
-## Scripts
+The API repo must also allow this frontend origin:
+
+```env
+WEB_ORIGIN=https://your-market-snap-web.vercel.app
+```
+
+## API Integration
+
+Main frontend helpers:
+
+| File | Responsibility |
+| --- | --- |
+| `lib/api.ts` | Auth, catalog, cart, and checkout API client |
+| `lib/api-contracts.ts` | API response and request contracts |
+| `lib/dashboard-api.ts` | Dashboard snapshot fetcher |
+
+Protected requests use:
+
+```txt
+Authorization: Bearer <JWT_TOKEN>
+```
+
+### Checkout Payload
+
+`/dashboard/customer/cart` creates an order by sending this payload to `POST /api/orders`:
+
+```json
+{
+  "total": 150000,
+  "destinationId": "41068",
+  "courier": "jne",
+  "paymentMethod": "xendit",
+  "location": { "lat": -6.2608, "lng": 106.8107 },
+  "items": [
+    { "productId": "PRODUCT_ID", "quantity": 2, "price": 50000 }
+  ]
+}
+```
+
+Expected API behavior:
+
+- Use `location` to select the nearest branch.
+- Use `destinationId` and `courier` to calculate shipping through RajaOngkir.
+- Use `paymentMethod: "xendit"` to create a Xendit invoice.
+- Return `payment.invoiceUrl` so the web can redirect the customer to payment.
+
+## Available Scripts
 
 ```bash
-npm run dev      # start development server
-npm run build    # production build
-npm run start    # start production server
-npm run lint     # run ESLint
+npm run dev      # Start local development server
+npm run build    # Build production assets
+npm run start    # Start production server
+npm run lint     # Run ESLint
 ```
-
-## Demo Login Roles
-
-Login page menyimpan cookie `market-snap-role` untuk middleware.
-
-| Web Role | Dashboard | API Demo User |
-| --- | --- | --- |
-| `customer` | `/dashboard/customer` | `u-user` |
-| `admin` | `/dashboard/admin` | `u-super` |
-| `adminStore` | `/dashboard/adminStore` | `u-store-1` |
-
-## Pages
-
-| Route | Description |
-| --- | --- |
-| `/` | Landing page, location request, nearest store, products, promo |
-| `/login` | Demo login by role |
-| `/register` | Registration page |
-| `/dashboard/customer` | Customer dashboard |
-| `/dashboard/customer/catalog` | Customer product catalog |
-| `/dashboard/customer/cart` | Shopping cart |
-| `/dashboard/customer/checkout` | Checkout and shipping address |
-| `/dashboard/customer/my-orders` | Customer order tracking |
-| `/dashboard/customer/profile` | Customer profile |
-| `/dashboard/customer/profile/address` | Customer address management |
-| `/dashboard/customer/product/[productId]` | Product detail |
-| `/dashboard/customer/product-store/[storeId]` | Store detail |
-| `/dashboard/admin` | Super admin dashboard |
-| `/dashboard/admin/store` | Store management |
-| `/dashboard/admin/product` | Product management |
-| `/dashboard/admin/product/create` | Create product |
-| `/dashboard/admin/category` | Category management |
-| `/dashboard/admin/user` | User management |
-| `/dashboard/admin/user-store` | Store admin management |
-| `/dashboard/admin/inventory-history` | Inventory report |
-| `/dashboard/adminStore` | Store admin dashboard |
-| `/dashboard/adminStore/product` | Store product list |
-| `/dashboard/adminStore/category` | Store category list |
-| `/dashboard/adminStore/discount` | Discount management |
-| `/dashboard/adminStore/inventory-management` | Inventory management |
-| `/dashboard/adminStore/manage-order` | Order management |
-| `/dashboard/adminStore/store` | Assigned store |
-
-## API Connection
-
-Dashboard pages memakai helper:
-
-```txt
-lib/dashboard-api.ts
-```
-
-Landing page product list memakai:
-
-```txt
-lib/api.ts
-```
-
-Saat API tidak aktif, beberapa halaman tetap menampilkan fallback data agar UI bisa dilihat.
 
 ## Deploy to Vercel
 
-Folder `web` bisa dijadikan repository GitHub terpisah.
+This folder can be deployed as a standalone frontend repository.
 
-1. Push isi folder `web` ke repo, misalnya `market-snap-web`.
-2. Import repo web di Vercel.
-3. Framework preset: `Next.js`.
-4. Install command: `npm install`.
-5. Build command: `npm run build`.
-6. Tambahkan Environment Variable:
+1. Push the `web` folder contents to a GitHub repository, for example `market-snap-web`.
+2. Import the repository in Vercel.
+3. Use the `Next.js` framework preset.
+4. Set install command to `npm install`.
+5. Set build command to `npm run build`.
+6. Add `NEXT_PUBLIC_API_URL` in Vercel Environment Variables.
+7. Deploy the API first, then use the API deployment URL in this web project.
 
-```env
-NEXT_PUBLIC_API_URL=https://your-market-snap-api.vercel.app/api
-```
+## Production Checklist
 
-Pastikan API sudah deploy lebih dulu, lalu isi `NEXT_PUBLIC_API_URL` dengan domain API Vercel.
-
-## Design Notes
-
-- Visual mobile-first bertema grocery hijau.
-- Header dua tingkat untuk navigasi cepat.
-- Promo card memakai warna hijau, kuning, cyan, dan putih.
-- Product card menampilkan stok, badge, harga, dan diskon.
-- Dashboard memakai layout ringkas supaya mudah dibaca customer, admin, dan store admin.
+- `NEXT_PUBLIC_API_URL` points to the deployed API domain.
+- API `WEB_ORIGIN` points to the deployed web domain.
+- API has valid `JWT_SECRET`, database URL, RajaOngkir key, and Xendit key.
+- Customer, admin, and store admin accounts exist in the database.
+- Product, store, inventory, and category data exist before testing checkout.
+- Vercel build passes with `npm run build`.
 
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:facc15,100:14532d&height=110&section=footer" alt="footer wave" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:facc15,100:14532d&height=110&section=footer" alt="Market Snap footer wave" />
 </div>

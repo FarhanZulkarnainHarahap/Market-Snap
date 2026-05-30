@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { currentUserHeaders } from "../../lib/api";
 import { Header } from "../Header";
 
 type Role = "customer" | "admin" | "adminStore" | "public";
@@ -25,7 +26,6 @@ type CreateResourceFormProps = {
 };
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4100/api";
-const roleUserId = { customer: "u-user", admin: "u-super", adminStore: "u-store-1", public: "" };
 
 export function CreateResourceForm({ active, description, endpoint, fields, method = "POST", role, title }: CreateResourceFormProps) {
   const [message, setMessage] = useState("Siap submit ke API.");
@@ -94,8 +94,10 @@ function formBody(formData: FormData) {
 }
 
 function headers(role: Role): Record<string, string> {
-  const userId = roleUserId[role];
-  return userId ? { "Content-Type": "application/json", "x-user-id": userId } : { "Content-Type": "application/json" };
+  if (role !== "public") {
+    return { ...currentUserHeaders(), "Content-Type": "application/json" };
+  }
+  return { "Content-Type": "application/json" };
 }
 
 async function responseMessage(response: Response) {

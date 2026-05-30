@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Header } from "../../components/Header";
+import { loginUser, webRole } from "../../lib/api";
 
 const destinations = {
   customer: "/dashboard/customer",
@@ -15,13 +16,24 @@ type Role = keyof typeof destinations;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [role, setRole] = useState<Role>("customer");
+  const [message, setMessage] = useState("Masuk memakai email dan password dari API.");
+  const [submitting, setSubmitting] = useState(false);
 
-  function login(event: React.FormEvent<HTMLFormElement>) {
+  async function login(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    document.cookie = `market-snap-role=${role}; path=/; max-age=86400; SameSite=Lax`;
-    window.localStorage.setItem("market-snap-role", role);
-    router.push(destinations[role]);
+    setSubmitting(true);
+    setMessage("Memproses login...");
+    const form = new FormData(event.currentTarget);
+    try {
+      const payload = await loginUser(String(form.get("email")), String(form.get("password")));
+      const role = webRole(payload.user.role) as Role;
+      setMessage("Login berhasil.");
+      router.push(destinations[role]);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Login gagal.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -29,21 +41,13 @@ export default function LoginPage() {
       <Header active="login" />
       <main className="auth-shell">
         <section className="auth-panel">
-          <span className="mini-label">Role login</span>
+          <span className="mini-label">Login API</span>
           <h1>Masuk ke Market Snap</h1>
-          <p>Pilih role demo untuk masuk ke dashboard yang sesuai.</p>
+          <p>{message}</p>
           <form className="form-grid" onSubmit={login}>
-            <label>Email<input type="email" placeholder="nama@email.com" required /></label>
-            <label>Password<input type="password" placeholder="Minimal 8 karakter" required /></label>
-            <label>
-              Role
-              <select value={role} onChange={(event) => setRole(event.target.value as Role)}>
-                <option value="customer">Customer</option>
-                <option value="admin">Admin</option>
-                <option value="adminStore">Admin Store</option>
-              </select>
-            </label>
-            <button className="primary-button" type="submit">Masuk</button>
+            <label>Email<input name="email" type="email" placeholder="nama@email.com" required /></label>
+            <label>Password<input name="password" type="password" placeholder="Minimal 8 karakter" required /></label>
+            <button className="primary-button" disabled={submitting} type="submit">{submitting ? "Masuk..." : "Masuk"}</button>
           </form>
           <Link className="text-link" href="/register">Belum punya akun? Daftar</Link>
         </section>

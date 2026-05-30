@@ -12,7 +12,7 @@ export default function AdminCreateStorePage() {
         { name: "lat", label: "Latitude", required: true, type: "number" },
         { name: "lng", label: "Longitude", required: true, type: "number" },
         { name: "radiusKm", label: "Radius layanan km", required: true, type: "number" },
-        { name: "adminId", label: "Admin ID", placeholder: "u-store-1", required: true },
+        { name: "adminId", label: "Admin ID", placeholder: "ID admin toko", required: true },
         { name: "isMain", label: "Toko utama", type: "select", options: [{ label: "Tidak", value: "false" }, { label: "Ya", value: "true" }] }
       ]}
       role="admin"

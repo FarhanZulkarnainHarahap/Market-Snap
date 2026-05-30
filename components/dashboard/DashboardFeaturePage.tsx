@@ -84,7 +84,7 @@ export function DashboardFeaturePage(props: FeaturePageProps) {
           </article>
           <article className="admin-panel">
             <h2>Integrasi API</h2>
-            <p className="muted-copy">Halaman ini membaca data dari API Express sesuai role demo melalui header x-user-id.</p>
+            <p className="muted-copy">Halaman ini membaca data dari API Express memakai Bearer token dari sesi login.</p>
             <DataRow row={{ endpoint: endpointLabel(props.resource), role: roleLabel(props.role) }} />
           </article>
         </section>

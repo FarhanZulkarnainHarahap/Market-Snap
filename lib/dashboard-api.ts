@@ -15,14 +15,8 @@ export type DashboardSnapshot = {
   reports: DashboardRecord[];
 };
 
-const roleUserId: Record<DashboardRole, string> = {
-  customer: "u-user",
-  admin: "u-super",
-  adminStore: "u-store-1"
-};
-
 export async function fetchDashboardSnapshot(role: DashboardRole): Promise<DashboardSnapshot> {
-  const headers = { "x-user-id": roleUserId[role] };
+  const headers = authHeaders();
   const [products, categories, stores, orders, users, discounts, addresses, reports] = await Promise.all([
     fetchData("/products?limit=12"),
     fetchData("/categories"),
@@ -44,6 +38,12 @@ export async function fetchDashboardSnapshot(role: DashboardRole): Promise<Dashb
     addresses,
     reports
   };
+}
+
+function authHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = window.localStorage.getItem("market-snap-token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 async function fetchData(path: string, headers?: HeadersInit): Promise<DashboardRecord[]> {

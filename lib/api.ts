@@ -1,51 +1,43 @@
+import type { ApiCartItem, ApiProduct, ApiStore, ApiUser, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse } from "./api-contracts";
 import type { CartItem, Product, Store } from "./types";
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4100/api";
 
-type ApiStore = {
-  id: string;
-  name: string;
-  city: string;
-  lat: number;
-  lng: number;
-  radiusKm: number;
-  distanceKm?: number;
-};
+export async function loginUser(email: string, password: string) {
+  const response = await fetch(`${apiBase}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Login gagal"));
+  const payload = await response.json() as LoginResponse;
+  saveSession(payload);
+  return payload;
+}
 
-type ApiProduct = {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  unit: string;
-  image: string;
-  discount: string | null;
-  organic: boolean;
-  stock: number;
-};
+export function saveSession(payload: LoginResponse) {
+  const role = webRole(payload.user.role);
+  document.cookie = `market-snap-role=${role}; path=/; max-age=86400; SameSite=Lax`;
+  window.localStorage.setItem("market-snap-token", payload.token);
+  window.localStorage.setItem("market-snap-user-id", payload.user.id);
+  window.localStorage.setItem("market-snap-role", role);
+}
 
-type ProductsResponse = {
-  data: ApiProduct[];
-  store: ApiStore;
-  serviceable: boolean;
-};
+export function currentUserHeaders(): Record<string, string> {
+  const token = currentToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
-type ApiCartItem = {
-  id: string;
-  productId: string;
-  storeId: string;
-  quantity: number;
-  product?: ApiProduct;
-  stock: number;
-  subtotal: number;
-};
+export function webRole(role: ApiUser["role"]) {
+  if (role === "super_admin" || role === "admin") return "admin";
+  if (role === "store_admin") return "adminStore";
+  return "customer";
+}
 
-type CartResponse = {
-  data: ApiCartItem[];
-  summary: { totalItems: number; total: number };
-};
-
-const customerHeaders = { "x-user-id": "u-user" };
+function currentToken() {
+  if (typeof window === "undefined") return "";
+  return window.localStorage.getItem("market-snap-token") ?? "";
+}
 
 export async function fetchCategories(): Promise<string[]> {
   const response = await fetch(`${apiBase}/categories`);
@@ -68,7 +60,7 @@ export async function fetchProducts(params: URLSearchParams) {
 }
 
 export async function fetchCart() {
-  const response = await fetch(`${apiBase}/cart`, { headers: customerHeaders, cache: "no-store" });
+  const response = await fetch(`${apiBase}/cart`, { headers: currentUserHeaders(), cache: "no-store" });
   if (!response.ok) throw new Error("Gagal memuat cart");
   const payload = await response.json() as CartResponse;
   return { items: payload.data.map(mapCartItem), summary: payload.summary };
@@ -77,7 +69,7 @@ export async function fetchCart() {
 export async function addCartItem(productId: string, storeId: string, quantity = 1) {
   const response = await fetch(`${apiBase}/cart`, {
     method: "POST",
-    headers: { ...customerHeaders, "Content-Type": "application/json" },
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ productId, storeId, quantity })
   });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal menambahkan cart"));
@@ -88,7 +80,7 @@ export async function addCartItem(productId: string, storeId: string, quantity =
 export async function updateCartItem(cartId: string, quantity: number) {
   const response = await fetch(`${apiBase}/cart/${cartId}`, {
     method: "PATCH",
-    headers: { ...customerHeaders, "Content-Type": "application/json" },
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ quantity })
   });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal update cart"));
@@ -97,27 +89,30 @@ export async function updateCartItem(cartId: string, quantity: number) {
 }
 
 export async function deleteCartItem(cartId: string) {
-  const response = await fetch(`${apiBase}/cart/${cartId}`, { method: "DELETE", headers: customerHeaders });
+  const response = await fetch(`${apiBase}/cart/${cartId}`, { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal hapus cart"));
 }
 
 export async function clearCart() {
-  const response = await fetch(`${apiBase}/cart`, { method: "DELETE", headers: customerHeaders });
+  const response = await fetch(`${apiBase}/cart`, { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal kosongkan cart"));
 }
 
-export async function createOrderFromCart(items: CartItem[], total: number) {
+export async function createOrderFromCart(items: CartItem[], total: number, options: CreateOrderOptions = {}) {
   const response = await fetch(`${apiBase}/orders`, {
     method: "POST",
-    headers: { ...customerHeaders, "Content-Type": "application/json" },
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({
       total,
       items: items.map((item) => ({ productId: item.productId ?? item.id, quantity: item.quantity, price: item.price })),
-      location: { lat: -6.2608, lng: 106.8107 }
+      location: { lat: -6.2608, lng: 106.8107 },
+      courier: options.courier,
+      destinationId: options.destinationId,
+      paymentMethod: options.paymentMethod
     })
   });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal membuat order"));
-  return response.json() as Promise<{ data: { id: string; status: string } }>;
+  return response.json() as Promise<CreateOrderResponse>;
 }
 
 function mapStore(store: ApiStore): Store {
