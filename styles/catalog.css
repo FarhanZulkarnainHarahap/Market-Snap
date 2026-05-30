@@ -1,0 +1,199 @@
+.store-strip,
+.content-section,
+.admin-band,
+.dashboard-shell,
+.footer {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 24px 18px;
+  width: 100%;
+}
+
+.store-strip {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+}
+
+.store-strip h2,
+.section-heading h2,
+.page-heading h1 {
+  font-size: clamp(26px, 6vw, 44px);
+  line-height: 1.05;
+  margin-top: 6px;
+}
+
+.store-strip p,
+.page-heading p {
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.store-status {
+  gap: 8px;
+  font-weight: 800;
+}
+
+.dot {
+  border-radius: 999px;
+  height: 12px;
+  width: 12px;
+}
+
+.section-heading {
+  margin-bottom: 18px;
+  max-width: 760px;
+}
+
+.catalog-toolbar,
+.two-column,
+.checkout-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.catalog-toolbar input,
+.catalog-toolbar select,
+.form-grid input,
+.form-grid select,
+.form-card input,
+.cart-row input {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 46px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.category-tabs {
+  gap: 8px;
+  margin: 14px 0 18px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.category-tabs button {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  flex: 0 0 auto;
+  font-weight: 800;
+  padding: 10px 13px;
+}
+
+.category-tabs button.active {
+  background: var(--leaf-dark);
+  color: #fff;
+}
+
+.range-alert {
+  border-radius: 8px;
+  color: #7f2719;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding: 12px;
+}
+
+.product-grid,
+.promo-grid,
+.admin-grid,
+.metric-grid,
+.admin-workspace {
+  display: grid;
+  gap: 14px;
+}
+
+.product-card,
+.promo-card,
+.admin-panel,
+.auth-panel,
+.form-card,
+.list-card,
+.summary-card,
+.metric-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.product-card {
+  overflow: hidden;
+}
+
+.product-media {
+  aspect-ratio: 5 / 4;
+  background: var(--sky);
+  position: relative;
+}
+
+.discount-badge {
+  background: var(--coral);
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 900;
+  padding: 7px 9px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.product-body,
+.promo-card,
+.admin-panel,
+.auth-panel,
+.form-card,
+.list-card,
+.summary-card,
+.metric-card {
+  padding: 16px;
+}
+
+.product-body h3 {
+  font-size: 18px;
+  margin-top: 5px;
+}
+
+.product-body p,
+.promo-card p {
+  color: var(--muted);
+  margin-top: 7px;
+}
+
+.stock-row {
+  gap: 8px;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.stock-row button,
+.address-row button {
+  background: var(--foreground);
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 800;
+  padding: 9px 12px;
+}
+
+.promo-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.promo-card:nth-child(1) {
+  background: var(--mint);
+}
+
+.promo-card:nth-child(2) {
+  background: var(--sky);
+}
+
+.promo-card:nth-child(3) {
+  background: #fff0c2;
+}
+
+.promo-card span {
+  font-weight: 900;
+}

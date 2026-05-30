@@ -1,0 +1,58 @@
+.dashboard-heading {
+  max-width: 840px;
+}
+
+.dashboard-heading p,
+.muted-copy {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.api-pill {
+  background: #fff4d8;
+  border: 1px solid #ffd884;
+  border-radius: 999px;
+  color: #76500d;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  margin-top: 10px;
+  padding: 7px 12px;
+}
+
+.api-pill.is-online {
+  background: #e6f8ec;
+  border-color: #9fe2b4;
+  color: var(--leaf-dark);
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: -6px 0 18px;
+}
+
+.dashboard-actions a {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--foreground);
+  font-weight: 900;
+  padding: 10px 14px;
+}
+
+.dashboard-table {
+  min-width: 0;
+}
+
+.dashboard-row strong {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.wide-form {
+  max-width: 720px;
+}

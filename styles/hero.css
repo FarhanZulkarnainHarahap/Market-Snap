@@ -1,0 +1,141 @@
+.hero-section {
+  display: grid;
+  gap: 20px;
+  min-height: calc(100svh - 128px);
+  padding: 28px 18px 18px;
+}
+
+.hero-copy {
+  align-self: center;
+  background: #166534;
+  border-radius: 8px;
+  color: #fff;
+  padding: 24px;
+}
+
+.eyebrow,
+.mini-label,
+.category-label {
+  color: var(--leaf-dark);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hero-copy h1 {
+  font-size: clamp(34px, 8vw, 60px);
+  line-height: 1;
+  margin-top: 12px;
+  max-width: 880px;
+}
+
+.hero-text {
+  color: #dcfce7;
+  font-size: 17px;
+  line-height: 1.7;
+  margin-top: 18px;
+  max-width: 650px;
+}
+
+.hero-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.primary-button {
+  background: #facc15;
+  border: 0;
+  border-radius: 8px;
+  color: #111827;
+  font-weight: 800;
+  padding: 13px 16px;
+}
+
+.secondary-button {
+  background: #fff;
+  font-weight: 800;
+}
+
+.service-chip {
+  border-radius: 8px;
+  display: inline-flex;
+  font-weight: 800;
+  margin-top: 16px;
+  padding: 10px 12px;
+}
+
+.service-chip.ok,
+.dot.ok {
+  background: var(--mint);
+}
+
+.service-chip.warn,
+.dot.warn,
+.range-alert {
+  background: #ffe5df;
+}
+
+.hero-visual {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 330px;
+}
+
+.hero-visual img,
+.product-media img,
+.cart-row img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.feature-card {
+  border-radius: 8px;
+  color: #fff;
+  display: grid;
+  gap: 10px;
+  min-height: 190px;
+  place-items: center;
+  padding: 18px;
+  text-align: center;
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.feature-card:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+}
+
+.feature-card img {
+  height: 96px;
+  object-fit: contain;
+  width: 96px;
+}
+
+.feature-card h2 {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.feature-card span {
+  background: #facc15;
+  border-radius: 8px;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
+.feature-card.orange {
+  background: #fb923c;
+}
+
+.feature-card.cyan {
+  background: #0891b2;
+}
+
+.feature-card.green {
+  background: #15803d;
+}
