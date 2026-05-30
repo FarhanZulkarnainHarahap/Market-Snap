@@ -159,23 +159,7 @@ npm run dev -- -p 3200
 
 ## Environment Variables
 
-Create `.env.local` in the web project.
-
-```env
-NEXT_PUBLIC_API_URL=http://127.0.0.1:4100/api
-```
-
-For production:
-
-```env
-NEXT_PUBLIC_API_URL=https://your-market-snap-api.vercel.app/api
-```
-
-The API repo must also allow this frontend origin:
-
-```env
-WEB_ORIGIN=https://your-market-snap-web.vercel.app
-```
+Create `.env.local` in the web project and point `NEXT_PUBLIC_API_URL` to your Market Snap API base URL. In production, set the same variable in Vercel and make sure the API `WEB_ORIGIN` matches the deployed web domain.
 
 ## API Integration
 
