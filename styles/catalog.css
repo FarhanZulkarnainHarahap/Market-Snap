@@ -59,6 +59,7 @@
 .form-grid input,
 .form-grid select,
 .form-card input,
+.form-card textarea,
 .cart-row input {
   background: #fff;
   border: 1px solid var(--line);
@@ -66,6 +67,12 @@
   min-height: 46px;
   padding: 0 12px;
   width: 100%;
+}
+
+.form-card textarea {
+  min-height: 120px;
+  padding: 12px;
+  resize: vertical;
 }
 
 .category-tabs {

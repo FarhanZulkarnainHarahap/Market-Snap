@@ -8,18 +8,14 @@ const roleHome = {
 
 type Role = keyof typeof roleHome;
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const role = request.cookies.get("market-snap-role")?.value as Role | undefined;
   const path = request.nextUrl.pathname;
 
-  if (path === "/dashboard") {
-    return redirect(request, role ? roleHome[role] : "/login");
-  }
-
+  if (path === "/dashboard") return redirect(request, role ? roleHome[role] : "/login");
   if (path.startsWith("/dashboard/customer")) return guard(request, role, "customer");
   if (path.startsWith("/dashboard/adminStore")) return guard(request, role, "adminStore");
   if (path.startsWith("/dashboard/admin")) return guard(request, role, "admin");
-
   return NextResponse.next();
 }
 

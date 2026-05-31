@@ -14,9 +14,10 @@ export function Footer() {
         <p>Multiple Branches, Scheduled Offers, Store Admin</p>
       </div>
       <div className="footer-links">
-        <a href="#products">Product</a>
-        <a href="/dashboard/customer/profile">Address</a>
-        <a href="/dashboard/admin">Admin</a>
+        <a href="/">Home</a>
+        <a href="/catalog">Catalog</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
       </div>
       <div className="footer-bottom">Copyright | The Market Snap | Developed by FARNAJO</div>
     </footer>

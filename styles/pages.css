@@ -179,6 +179,7 @@
     align-items: center;
     grid-template-columns: 1fr auto;
   }
+
 }
 
 @media (min-width: 1040px) {

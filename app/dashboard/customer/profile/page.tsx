@@ -8,7 +8,7 @@ const addresses = [
 export default function ProfilePage() {
   return (
     <>
-      <Header active="profile" />
+      <Header active="profile" mode="customer" />
       <main className="dashboard-shell">
         <section className="page-heading">
           <span className="mini-label">Profil & alamat</span>

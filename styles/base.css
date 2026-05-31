@@ -61,49 +61,6 @@ p {
   margin: 0;
 }
 
-.site-header {
-  background: #fff;
-  border-bottom: 0;
-  display: grid;
-  gap: 0;
-  left: 0;
-  padding: 0;
-  position: sticky;
-  right: 0;
-  top: 0;
-  z-index: 20;
-}
-
-.header-notice {
-  background: #166534;
-  color: #fff;
-  font-size: 14px;
-  padding: 6px 12px;
-  text-align: center;
-}
-
-.header-main {
-  align-items: center;
-  background: #14532d;
-  color: #fff;
-  display: flex;
-  gap: 18px;
-  justify-content: space-between;
-  padding: 14px 18px;
-}
-
-.header-submenu {
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
-  color: #14532d;
-  display: flex;
-  justify-content: center;
-  padding: 10px 18px;
-}
-
-.brand,
-.header-actions,
-.desktop-nav,
 .hero-actions,
 .category-tabs,
 .store-status,
@@ -111,30 +68,6 @@ p {
 .footer-links {
   align-items: center;
   display: flex;
-}
-
-.brand {
-  font-weight: 900;
-  gap: 9px;
-  letter-spacing: .02em;
-  white-space: nowrap;
-}
-
-.brand-mark {
-  background: var(--leaf-dark);
-  border-radius: 8px;
-  color: #fff;
-  display: grid;
-  height: 34px;
-  place-items: center;
-  width: 34px;
-}
-
-.desktop-nav {
-  display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  max-width: 100%;
 }
 
 .nav-link,
@@ -150,10 +83,6 @@ p {
 .ghost-button:hover,
 .secondary-button:hover {
   background: #fff;
-}
-
-.header-actions {
-  gap: 8px;
 }
 
 .ghost-button {

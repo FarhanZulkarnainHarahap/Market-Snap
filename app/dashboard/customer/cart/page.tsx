@@ -78,7 +78,7 @@ export default function CartPage() {
 
   return (
     <>
-      <Header cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} />
+      <Header active="cart" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} mode="customer" />
       <main className="dashboard-shell">
         <section className="page-heading">
           <span className="mini-label">Checkout</span>

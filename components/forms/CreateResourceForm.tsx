@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { currentUserHeaders } from "../../lib/api";
 import { Header } from "../Header";
+import { ManagementHeader } from "../dashboard/ManagementHeader";
 
 type Role = "customer" | "admin" | "adminStore" | "public";
 
@@ -49,7 +50,7 @@ export function CreateResourceForm({ active, description, endpoint, fields, meth
 
   return (
     <>
-      <Header active={active} />
+      <FormHeader active={active} role={role} />
       <main className="auth-shell">
         <section className="auth-panel wide-form">
           <span className="mini-label">Create via API</span>
@@ -64,6 +65,11 @@ export function CreateResourceForm({ active, description, endpoint, fields, meth
       </main>
     </>
   );
+}
+
+function FormHeader({ active, role }: { active: string; role: Role }) {
+  if (role === "admin" || role === "adminStore") return <ManagementHeader role={role} />;
+  return <Header active={active} mode={role === "customer" ? "customer" : "public"} />;
 }
 
 function FieldInput({ field }: { field: Field }) {

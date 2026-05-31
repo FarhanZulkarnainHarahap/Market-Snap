@@ -1,0 +1,165 @@
+.site-header {
+  background: #fff;
+  display: grid;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.header-notice {
+  background: #166534;
+  color: #fff;
+  font-size: 14px;
+  padding: 6px 12px;
+  text-align: center;
+}
+
+.header-main {
+  align-items: center;
+  background: #14532d;
+  color: #fff;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr auto;
+  padding: 14px 18px;
+}
+
+.header-submenu {
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+  color: #14532d;
+  display: flex;
+  justify-content: center;
+  padding: 10px 18px;
+}
+
+.brand,
+.header-actions,
+.desktop-nav {
+  align-items: center;
+  display: flex;
+}
+
+.brand {
+  font-weight: 900;
+  gap: 9px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.brand img,
+.management-brand img {
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.header-search {
+  display: flex;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin: 0 auto;
+  max-width: 620px;
+  width: 100%;
+}
+
+.header-search input {
+  border: 0;
+  border-radius: 8px 0 0 8px;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0 14px;
+  width: 100%;
+}
+
+.header-search button {
+  background: #facc15;
+  border: 0;
+  border-radius: 0 8px 8px 0;
+  color: #111827;
+  font-weight: 900;
+  padding: 0 16px;
+}
+
+.desktop-nav {
+  gap: 4px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.header-actions {
+  gap: 8px;
+}
+
+.management-header {
+  background: #17241d;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.management-bar,
+.management-brand,
+.management-nav {
+  align-items: center;
+  display: flex;
+}
+
+.management-bar {
+  gap: 16px;
+  justify-content: space-between;
+  padding: 12px 18px;
+}
+
+.management-brand {
+  gap: 10px;
+}
+
+.management-brand span {
+  display: grid;
+  gap: 2px;
+}
+
+.management-brand small {
+  color: #b7c9be;
+  font-size: 12px;
+}
+
+.management-exit {
+  border: 1px solid #52685c;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 9px 12px;
+}
+
+.management-nav {
+  background: #fff;
+  color: #203329;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 9px 18px;
+}
+
+.management-nav a {
+  border-radius: 6px;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
+.management-nav a:hover {
+  background: #e6f8ec;
+}
+
+@media (min-width: 720px) {
+  .header-main {
+    grid-template-columns: auto minmax(240px, 620px) auto;
+  }
+
+  .header-search {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}

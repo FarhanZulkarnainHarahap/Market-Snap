@@ -83,14 +83,14 @@ Project ini dibuat sebagai repo frontend terpisah dan terhubung ke Market Snap A
 | UI | React 19 |
 | Language | TypeScript |
 | Styling | Tailwind CSS 4 and custom CSS modules |
-| Routing Guard | Next middleware |
+| Routing Guard | Next proxy |
 | State | React hooks and local storage |
 | API | Market Snap Express API |
 | Deployment | Vercel |
 
 ## User Roles
 
-Login response dari API menentukan dashboard tujuan user. Token JWT disimpan di local storage, sedangkan cookie `market-snap-role` dipakai oleh middleware untuk route guard.
+Login response dari API menentukan dashboard tujuan user. Token JWT disimpan di local storage, sedangkan cookie `market-snap-role` dipakai oleh Next proxy untuk route guard.
 
 | API Role | Web Role | Redirect |
 | --- | --- | --- |
@@ -126,7 +126,7 @@ web
 ├── public
 ├── scripts
 ├── styles
-├── middleware.ts
+├── proxy.ts
 ├── package.json
 └── vercel.json
 ```

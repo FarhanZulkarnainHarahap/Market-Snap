@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AdminPreview } from "./AdminPreview";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { Hero } from "./Hero";
@@ -134,7 +133,6 @@ export function MarketHome() {
           <ProductGrid onAdd={addToCart} products={visibleProducts} storeId={selection.store.id} />
         </section>
         <PromoSection />
-        <AdminPreview />
       </main>
       <Footer />
     </>
