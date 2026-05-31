@@ -7,7 +7,6 @@ import { Hero } from "./Hero";
 import { ProductGrid } from "./ProductGrid";
 import { PromoSection } from "./PromoSection";
 import { StoreStrip } from "./StoreStrip";
-import { categories as fallbackCategories, products as fallbackProducts } from "../lib/market-data";
 import { addCartItem, fetchCart, fetchCategories, fetchProducts } from "../lib/api";
 import { nearestStore, type UserPoint } from "../lib/location";
 import type { CartItem, Product, Store } from "../lib/types";
@@ -21,11 +20,12 @@ export function MarketHome() {
   const [sort, setSort] = useState("featured");
   const [cart, setCart] = useState<CartItem[]>(defaultCart);
   const [apiStore, setApiStore] = useState<Store>();
-  const [apiProducts, setApiProducts] = useState<Product[]>(fallbackProducts);
-  const [apiCategories, setApiCategories] = useState(fallbackCategories);
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [apiCategories, setApiCategories] = useState(["Semua"]);
   const [apiServiceable, setApiServiceable] = useState(true);
   const [apiDistanceKm, setApiDistanceKm] = useState(0);
   const [cartNotice, setCartNotice] = useState("");
+  const [catalogNotice, setCatalogNotice] = useState("");
   const fallbackSelection = nearestStore(point);
   const selection = {
     store: apiStore ?? fallbackSelection.store,
@@ -38,7 +38,7 @@ export function MarketHome() {
   }, []);
 
   useEffect(() => {
-    fetchCategories().then(setApiCategories).catch(() => setApiCategories(fallbackCategories));
+    fetchCategories().then(setApiCategories).catch(() => setApiCategories(["Semua"]));
   }, []);
 
   useEffect(() => {
@@ -51,13 +51,15 @@ export function MarketHome() {
     }
     fetchProducts(params)
       .then((result) => {
+        setCatalogNotice("");
         setApiProducts(result.products);
         setApiStore(result.store);
         setApiServiceable(result.serviceable);
         setApiDistanceKm(result.distanceKm);
       })
       .catch(() => {
-        setApiProducts(fallbackProducts);
+        setCatalogNotice("Produk belum dapat dimuat. Silakan coba kembali beberapa saat lagi.");
+        setApiProducts([]);
         setApiStore(undefined);
       });
   }, [category, point, query, sort]);
@@ -130,6 +132,7 @@ export function MarketHome() {
             <p className="range-alert">Lokasi kamu di luar radius toko terdekat. Produk tetap tampil dari cabang utama, tetapi checkout meminta alamat lain.</p>
           )}
           {cartNotice && <p className="range-alert">{cartNotice}</p>}
+          {catalogNotice && <p className="range-alert">{catalogNotice}</p>}
           <ProductGrid onAdd={addToCart} products={visibleProducts} storeId={selection.store.id} />
         </section>
         <PromoSection />

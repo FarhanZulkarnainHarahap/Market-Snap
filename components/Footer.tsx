@@ -11,7 +11,7 @@ export function Footer() {
       </div>
       <div>
         <strong>Useful Link</strong>
-        <p>Multiple Branches, Scheduled Offers, Store Admin</p>
+        <p>Cabang terdekat, promo pilihan, dan pengiriman praktis.</p>
       </div>
       <div className="footer-links">
         <a href="/">Home</a>

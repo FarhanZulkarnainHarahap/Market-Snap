@@ -4,7 +4,7 @@ export default function AdminCreateStoreUserPage() {
   return (
     <CreateResourceForm
       active="admin"
-      description="Form ini hit POST /admin/users untuk membuat user store admin."
+      description="Tambahkan akun pengelola untuk ditempatkan pada cabang toko."
       endpoint="/admin/users"
       fields={[
         { name: "name", label: "Nama admin", required: true },

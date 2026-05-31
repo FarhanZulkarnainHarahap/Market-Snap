@@ -10,6 +10,8 @@ type ProductGridProps = {
 };
 
 export function ProductGrid({ products, storeId, onAdd }: ProductGridProps) {
+  if (!products.length) return <p className="empty-state">Produk belum tersedia untuk pilihan ini.</p>;
+
   return (
     <div className="product-grid">
       {products.map((product) => {

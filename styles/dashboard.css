@@ -8,7 +8,7 @@
   line-height: 1.6;
 }
 
-.api-pill {
+.status-pill {
   background: #fff4d8;
   border: 1px solid #ffd884;
   border-radius: 999px;
@@ -18,12 +18,6 @@
   font-weight: 900;
   margin-top: 10px;
   padding: 7px 12px;
-}
-
-.api-pill.is-online {
-  background: #e6f8ec;
-  border-color: #9fe2b4;
-  color: var(--leaf-dark);
 }
 
 .dashboard-actions {

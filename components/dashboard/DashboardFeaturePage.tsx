@@ -20,32 +20,17 @@ type FeaturePageProps = {
   detailId?: string;
 };
 
-const fallback: Record<FeatureResource, DashboardRecord[]> = {
-  products: [
-    { name: "Apel Fuji Snap Pack", category: "Buah", price: 42000, stock: 24 },
-    { name: "Bayam Organik", category: "Sayur", price: 14000, stock: 19 }
-  ],
-  categories: [{ name: "Buah" }, { name: "Sayur" }, { name: "Dairy" }],
-  stores: [{ name: "Market Snap Kemang", city: "Jakarta Selatan", radiusKm: 12 }],
-  orders: [{ id: "ORD-260530-001", status: "Diproses", total: 223000 }],
-  users: [{ name: "Naya Customer", email: "naya@marketsnap.test", role: "user" }],
-  discounts: [{ title: "Referral Fresh Start", code: "SNAPWELCOME", value: 15 }],
-  addresses: [{ label: "Rumah", detail: "Jl. Kemang Raya No. 12", isPrimary: true }],
-  reports: [{ key: "totalSales", value: 223000 }, { key: "orders", value: 1 }]
-};
-
 export function DashboardFeaturePage(props: FeaturePageProps) {
-  const [rows, setRows] = useState<DashboardRecord[]>(fallback[props.resource]);
-  const [online, setOnline] = useState(false);
+  const [rows, setRows] = useState<DashboardRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
     fetchDashboardSnapshot(props.role).then((snapshot) => {
       const data = snapshot[props.resource];
-      if (mounted && data.length) {
-        setRows(data);
-        setOnline(true);
-      }
+      if (mounted) setRows(data);
+    }).finally(() => {
+      if (mounted) setLoading(false);
     });
     return () => {
       mounted = false;
@@ -65,7 +50,7 @@ export function DashboardFeaturePage(props: FeaturePageProps) {
           <span className="mini-label">{props.eyebrow}</span>
           <h1>{props.title}</h1>
           <p>{props.description}</p>
-          <span className={online ? "api-pill is-online" : "api-pill"}>{online ? "API connected" : "Fallback data"}</span>
+          <span className="status-pill">{loading ? "Memuat data..." : "Data terbaru"}</span>
         </section>
         {props.actions?.length ? (
           <nav className="dashboard-actions" aria-label="Aksi halaman">
@@ -73,10 +58,10 @@ export function DashboardFeaturePage(props: FeaturePageProps) {
           </nav>
         ) : null}
         <section className="metric-grid">
-          <Metric label="Data tampil" value={visibleRows.length} />
-          <Metric label="Source" value={online ? "API" : "Local"} />
-          <Metric label="Role" value={roleLabel(props.role)} />
-          <Metric label="Module" value={props.resource} />
+          <Metric label="Total data" value={visibleRows.length} />
+          <Metric label="Status" value={loading ? "Memuat" : "Aktif"} />
+          <Metric label="Akses" value={roleLabel(props.role)} />
+          <Metric label="Area" value={resourceLabel(props.resource)} />
         </section>
         <section className="admin-workspace">
           <article className="admin-panel dashboard-table">
@@ -84,9 +69,9 @@ export function DashboardFeaturePage(props: FeaturePageProps) {
             {visibleRows.length ? visibleRows.map((row, index) => <DataRow key={index} row={row} />) : <p>Data belum tersedia.</p>}
           </article>
           <article className="admin-panel">
-            <h2>Integrasi API</h2>
-            <p className="muted-copy">Halaman ini membaca data dari API Express memakai Bearer token dari sesi login.</p>
-            <DataRow row={{ endpoint: endpointLabel(props.resource), role: roleLabel(props.role) }} />
+            <h2>Ringkasan</h2>
+            <p className="muted-copy">{summaryText(props.resource)}</p>
+            <DataRow row={{ area: resourceLabel(props.resource), akses: roleLabel(props.role), status: loading ? "Memuat" : "Siap digunakan" }} />
           </article>
         </section>
       </main>
@@ -124,16 +109,20 @@ function roleLabel(role: DashboardRole) {
   return role === "adminStore" ? "Admin Store" : role === "admin" ? "Admin" : "Customer";
 }
 
-function endpointLabel(resource: FeatureResource) {
+function resourceLabel(resource: FeatureResource) {
   const labels: Record<FeatureResource, string> = {
-    products: "/products",
-    categories: "/categories",
-    stores: "/admin/stores",
-    orders: "/orders",
-    users: "/admin/users",
-    discounts: "/admin/discounts",
-    addresses: "/addresses",
-    reports: "/admin/reports/sales"
+    products: "Produk",
+    categories: "Kategori",
+    stores: "Cabang",
+    orders: "Pesanan",
+    users: "Pengguna",
+    discounts: "Promo",
+    addresses: "Alamat",
+    reports: "Laporan"
   };
   return labels[resource];
+}
+
+function summaryText(resource: FeatureResource) {
+  return `${resourceLabel(resource)} dapat dipantau dan dikelola dari halaman ini. Gunakan menu yang tersedia untuk melanjutkan pekerjaan.`;
 }

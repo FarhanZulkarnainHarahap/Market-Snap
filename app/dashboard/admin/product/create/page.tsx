@@ -4,7 +4,7 @@ export default function AdminCreateProductPage() {
   return (
     <CreateResourceForm
       active="admin"
-      description="Form ini hit POST /admin/products dengan role super admin."
+      description="Tambahkan produk baru ke katalog Market Snap."
       endpoint="/admin/products"
       fields={[
         { name: "name", label: "Nama produk", required: true },

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { ProductGrid } from "./ProductGrid";
-import { categories as fallbackCategories, products as fallbackProducts } from "../lib/market-data";
 import { addCartItem, fetchCart, fetchCategories, fetchProducts } from "../lib/api";
 import type { CartItem, Product, Store } from "../lib/types";
 
@@ -15,14 +14,14 @@ type PublicCatalogProps = {
 export function PublicCatalog({ initialSearch = "" }: PublicCatalogProps) {
   const [query, setQuery] = useState(initialSearch);
   const [category, setCategory] = useState("Semua");
-  const [categories, setCategories] = useState(fallbackCategories);
-  const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [categories, setCategories] = useState(["Semua"]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [store, setStore] = useState<Store>();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetchCategories().then(setCategories).catch(() => setCategories(fallbackCategories));
+    fetchCategories().then(setCategories).catch(() => setCategories(["Semua"]));
     fetchCart().then((result) => setCart(result.items)).catch(() => setCart([]));
   }, []);
 
@@ -33,7 +32,10 @@ export function PublicCatalog({ initialSearch = "" }: PublicCatalogProps) {
     fetchProducts(params).then((result) => {
       setProducts(result.products);
       setStore(result.store);
-    }).catch(() => setProducts(fallbackProducts));
+    }).catch(() => {
+      setProducts([]);
+      setMessage("Produk belum dapat dimuat. Silakan coba kembali beberapa saat lagi.");
+    });
   }, [category, query]);
 
   const visibleProducts = useMemo(() => products.filter((product) => {

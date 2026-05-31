@@ -5,7 +5,7 @@ export function PromoSection() {
     <section className="content-section">
       <div className="section-heading">
         <span className="mini-label">Promo & voucher</span>
-        <h2>Diskon yang bisa disesuaikan admin toko</h2>
+        <h2>Promo pilihan untuk belanja lebih hemat</h2>
       </div>
       <div className="promo-grid">
         {vouchers.map((voucher) => (

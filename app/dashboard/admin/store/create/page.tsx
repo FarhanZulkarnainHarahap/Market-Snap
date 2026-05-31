@@ -4,7 +4,7 @@ export default function AdminCreateStorePage() {
   return (
     <CreateResourceForm
       active="admin"
-      description="Form ini hit POST /admin/stores untuk membuat cabang baru."
+      description="Tambahkan cabang baru beserta lokasi dan radius area layanannya."
       endpoint="/admin/stores"
       fields={[
         { name: "name", label: "Nama toko", required: true },

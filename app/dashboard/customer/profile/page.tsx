@@ -1,10 +1,5 @@
 import { Header } from "../../../../components/Header";
 
-const addresses = [
-  "Jl. Kemang Raya No. 12, Jakarta Selatan",
-  "Green Office Park BSD, Tangerang Selatan"
-];
-
 export default function ProfilePage() {
   return (
     <>
@@ -18,22 +13,14 @@ export default function ProfilePage() {
         <section className="two-column">
           <form className="form-card">
             <h2>Data personal</h2>
-            <label>Nama<input defaultValue="Naya Customer" /></label>
-            <label>Email<input defaultValue="naya@marketsnap.test" /></label>
+            <label>Nama<input placeholder="Nama lengkap" /></label>
+            <label>Email<input placeholder="nama@email.com" type="email" /></label>
             <label>Foto profil<input accept=".jpg,.jpeg,.png,.gif" type="file" /></label>
             <button className="primary-button" type="submit">Simpan profil</button>
           </form>
           <div className="list-card">
             <h2>Alamat tersimpan</h2>
-            {addresses.map((address, index) => (
-              <article className="address-row" key={address}>
-                <div>
-                  <strong>{index === 0 ? "Utama" : "Alamat lain"}</strong>
-                  <p>{address}</p>
-                </div>
-                <button>Ubah</button>
-              </article>
-            ))}
+            <p className="muted-copy">Belum ada alamat tersimpan.</p>
             <button className="secondary-button">Tambah alamat</button>
           </div>
         </section>

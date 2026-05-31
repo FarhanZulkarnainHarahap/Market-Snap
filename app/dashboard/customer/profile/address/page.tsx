@@ -4,7 +4,7 @@ export default function CustomerAddressPage() {
   return (
     <CreateResourceForm
       active="profile"
-      description="Form ini hit POST /addresses untuk menyimpan alamat customer."
+      description="Tambahkan alamat pengiriman agar pesanan dapat dilayani oleh cabang terdekat."
       endpoint="/addresses"
       fields={[
         { name: "label", label: "Label alamat", placeholder: "Rumah / Kantor", required: true },

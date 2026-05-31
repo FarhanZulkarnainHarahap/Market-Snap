@@ -1,0 +1,19 @@
+.promo-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.promo-card:nth-child(1) {
+  background: var(--mint);
+}
+
+.promo-card:nth-child(2) {
+  background: var(--sky);
+}
+
+.promo-card:nth-child(3) {
+  background: #fff0c2;
+}
+
+.promo-card span {
+  font-weight: 900;
+}

@@ -1,0 +1,14 @@
+.stock-row button,
+.address-row button {
+  background: var(--leaf-dark);
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 800;
+  padding: 9px 12px;
+}
+
+.stock-row button:hover,
+.address-row button:hover {
+  background: var(--leaf);
+}

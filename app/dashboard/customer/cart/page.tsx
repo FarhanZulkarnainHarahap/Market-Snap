@@ -8,13 +8,13 @@ import type { CartItem } from "../../../../lib/types";
 
 export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [message, setMessage] = useState("Memuat cart dari API...");
+  const [message, setMessage] = useState("Menyiapkan keranjang belanja...");
   const [busyId, setBusyId] = useState("");
   const [destinationId, setDestinationId] = useState("");
   const [courier, setCourier] = useState("jne");
   const [paymentMethod, setPaymentMethod] = useState<"manual_transfer" | "xendit">("xendit");
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
-  const shippingLabel = destinationId ? "Dihitung API" : "Isi destination ID";
+  const shippingLabel = destinationId ? "Dihitung saat pemesanan" : "Isi kode wilayah";
 
   useEffect(() => {
     loadCart();
@@ -24,9 +24,9 @@ export default function CartPage() {
     try {
       const cart = await fetchCart();
       setItems(cart.items);
-      setMessage(cart.items.length ? "Cart tersambung ke API." : "Keranjang masih kosong.");
+      setMessage(cart.items.length ? "Keranjang belanja siap." : "Keranjang masih kosong.");
     } catch {
-      setMessage("Gagal memuat cart dari API. Pastikan API berjalan.");
+      setMessage("Keranjang belum dapat dimuat. Silakan coba kembali.");
     }
   }
 
@@ -84,7 +84,7 @@ export default function CartPage() {
           <span className="mini-label">Checkout</span>
           <h1>Keranjang belanja</h1>
           <p>Order baru akan berstatus Menunggu Pembayaran sampai bukti bayar diupload.</p>
-          <p className="api-pill is-online">{message}</p>
+          <p className="status-pill">{message}</p>
         </section>
         <section className="checkout-grid">
           <div className="list-card">
@@ -114,19 +114,19 @@ export default function CartPage() {
             <p><span>Subtotal</span><strong>{rupiah(subtotal)}</strong></p>
             <p><span>Ongkir</span><strong>{shippingLabel}</strong></p>
             <p><span>Voucher</span><strong>SNAPSHIP</strong></p>
-            <label>Destination ID RajaOngkir
+            <label>Kode wilayah pengiriman
               <input onChange={(event) => setDestinationId(event.target.value)} placeholder="Contoh: 41068" value={destinationId} />
             </label>
-            <label>Courier
+            <label>Kurir
               <select onChange={(event) => setCourier(event.target.value)} value={courier}>
                 <option value="jne">JNE</option>
                 <option value="jnt">J&T</option>
                 <option value="sicepat">SiCepat</option>
               </select>
             </label>
-            <label>Payment
+            <label>Metode pembayaran
               <select onChange={(event) => setPaymentMethod(event.target.value as "manual_transfer" | "xendit")} value={paymentMethod}>
-                <option value="xendit">Xendit invoice</option>
+                <option value="xendit">Pembayaran online</option>
                 <option value="manual_transfer">Transfer manual</option>
               </select>
             </label>

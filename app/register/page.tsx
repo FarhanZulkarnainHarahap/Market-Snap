@@ -4,7 +4,7 @@ export default function RegisterPage() {
   return (
     <CreateResourceForm
       active="register"
-      description="Form ini hit POST /auth/register dan membuat customer belum terverifikasi."
+      description="Daftarkan akun untuk mulai berbelanja grocery dari cabang terdekat."
       endpoint="/auth/register"
       fields={[
         { name: "name", label: "Nama lengkap", required: true },

@@ -29,7 +29,7 @@ type CreateResourceFormProps = {
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4100/api";
 
 export function CreateResourceForm({ active, description, endpoint, fields, method = "POST", role, title }: CreateResourceFormProps) {
-  const [message, setMessage] = useState("Siap submit ke API.");
+  const [message, setMessage] = useState("Lengkapi data dengan benar sebelum menyimpan.");
   const [submitting, setSubmitting] = useState(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -40,9 +40,9 @@ export function CreateResourceForm({ active, description, endpoint, fields, meth
       const response = await fetch(`${apiBase}${endpoint}`, { method, headers: headers(role), body: JSON.stringify(body) });
       if (!response.ok) throw new Error(await responseMessage(response));
       event.currentTarget.reset();
-      setMessage("Data berhasil dibuat dari web ke API.");
+      setMessage("Data berhasil disimpan.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Gagal submit data.");
+      setMessage(error instanceof Error ? error.message : "Data belum berhasil disimpan.");
     } finally {
       setSubmitting(false);
     }
@@ -53,10 +53,10 @@ export function CreateResourceForm({ active, description, endpoint, fields, meth
       <FormHeader active={active} role={role} />
       <main className="auth-shell">
         <section className="auth-panel wide-form">
-          <span className="mini-label">Create via API</span>
+          <span className="mini-label">Form data</span>
           <h1>{title}</h1>
           <p>{description}</p>
-          <p className="api-pill is-online">{message}</p>
+          <p className="status-pill">{message}</p>
           <form className="form-grid" onSubmit={submit}>
             {fields.map((field) => <FieldInput field={field} key={field.name} />)}
             <button className="primary-button" disabled={submitting} type="submit">{submitting ? "Menyimpan..." : "Simpan"}</button>
@@ -108,5 +108,5 @@ function headers(role: Role): Record<string, string> {
 
 async function responseMessage(response: Response) {
   const payload = await response.json().catch(() => null) as { message?: string } | null;
-  return payload?.message ?? "Request API gagal.";
+  return payload?.message ?? "Permintaan belum berhasil diproses.";
 }

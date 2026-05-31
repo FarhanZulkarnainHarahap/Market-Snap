@@ -4,7 +4,7 @@ export default function StoreAdminCreateDiscountPage() {
   return (
     <CreateResourceForm
       active="adminStore"
-      description="Form ini hit POST /admin/discounts untuk promo cabang."
+      description="Buat promo baru untuk meningkatkan penjualan pada cabang toko."
       endpoint="/admin/discounts"
       fields={[
         { name: "title", label: "Nama promo", required: true },

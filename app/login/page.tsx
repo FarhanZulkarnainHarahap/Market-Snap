@@ -16,7 +16,7 @@ type Role = keyof typeof destinations;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [message, setMessage] = useState("Masuk memakai email dan password dari API.");
+  const [message, setMessage] = useState("Masuk untuk melanjutkan belanja atau mengelola toko.");
   const [submitting, setSubmitting] = useState(false);
 
   async function login(event: React.FormEvent<HTMLFormElement>) {
@@ -41,7 +41,7 @@ export default function LoginPage() {
       <Header active="login" />
       <main className="auth-shell">
         <section className="auth-panel">
-          <span className="mini-label">Login API</span>
+          <span className="mini-label">Akun Market Snap</span>
           <h1>Masuk ke Market Snap</h1>
           <p>{message}</p>
           <form className="form-grid" onSubmit={login}>
