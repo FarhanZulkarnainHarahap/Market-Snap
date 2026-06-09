@@ -1,5 +1,5 @@
 import { SnapAdminDashboard } from "@/components/snap/SnapAdminDashboard";
 
-export default function AdminPage() {
+export default function AdminPreviewPage() {
   return <SnapAdminDashboard />;
 }

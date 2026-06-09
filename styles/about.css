@@ -1,0 +1,170 @@
+.about-hero,
+.about-benefits,
+.about-flow,
+.about-bottom {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 34px 18px;
+}
+
+.about-hero {
+  align-items: center;
+  display: grid;
+  gap: 20px;
+  min-height: 470px;
+}
+
+.about-hero h1 {
+  font-size: clamp(38px, 8vw, 70px);
+  line-height: 1;
+  margin-top: 10px;
+  max-width: 780px;
+}
+
+.about-hero p,
+.about-flow p,
+.about-benefit p,
+.about-bottom p {
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 12px;
+}
+
+.about-cta,
+.about-bottom a {
+  align-items: center;
+  background: var(--leaf-dark);
+  border-radius: 8px;
+  color: #fff;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 13px 16px;
+}
+
+.about-visual {
+  background: #e6f8ec;
+  border-radius: 8px;
+  min-height: 300px;
+  overflow: hidden;
+  position: relative;
+}
+
+.about-visual > img:first-child {
+  display: block;
+  height: 100%;
+  margin: auto;
+  object-fit: contain;
+  width: min(82%, 350px);
+}
+
+.about-tomato,
+.about-pineapple {
+  object-fit: contain;
+  position: absolute;
+}
+
+.about-tomato {
+  left: 16px;
+  top: 18px;
+}
+
+.about-pineapple {
+  bottom: 16px;
+  right: 18px;
+}
+
+.about-benefits {
+  background: #fff;
+  max-width: none;
+}
+
+.about-benefits > * {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1144px;
+}
+
+.about-benefit-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.about-benefit,
+.about-steps p {
+  border-top: 1px solid var(--line);
+  padding: 18px 0;
+}
+
+.about-benefit svg {
+  color: var(--leaf);
+  font-size: 28px;
+}
+
+.about-benefit h3 {
+  margin-top: 12px;
+}
+
+.about-flow {
+  display: grid;
+  gap: 20px;
+}
+
+.about-flow h2,
+.about-bottom h2 {
+  font-size: clamp(26px, 5vw, 42px);
+  line-height: 1.05;
+  margin-top: 8px;
+}
+
+.about-steps p {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.about-steps svg {
+  color: var(--leaf);
+  flex: 0 0 auto;
+  font-size: 24px;
+}
+
+.about-steps span {
+  display: grid;
+  gap: 5px;
+}
+
+.about-steps strong {
+  color: var(--leaf-dark);
+  font-size: 13px;
+}
+
+.about-bottom {
+  align-items: center;
+  background: #fff0c2;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.about-bottom > svg {
+  color: var(--leaf-dark);
+  font-size: 34px;
+}
+
+@media (min-width: 720px) {
+  .about-hero,
+  .about-flow {
+    grid-template-columns: 1.05fr .95fr;
+  }
+
+  .about-benefit-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .about-bottom {
+    grid-template-columns: auto 1fr auto;
+    padding: 24px;
+  }
+}

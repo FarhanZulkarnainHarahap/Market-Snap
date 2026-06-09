@@ -1,4 +1,4 @@
-import { PublicCatalog } from "../../components/PublicCatalog";
+import { SnapCatalogPage } from "../../components/snap/SnapCatalogPage";
 
 type CatalogPageProps = {
   searchParams: Promise<{ search?: string }>;
@@ -6,5 +6,5 @@ type CatalogPageProps = {
 
 export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const params = await searchParams;
-  return <PublicCatalog initialSearch={params.search ?? ""} />;
+  return <SnapCatalogPage initialSearch={params.search ?? ""} />;
 }

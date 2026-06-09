@@ -1,5 +1,5 @@
-import { MarketHome } from "../components/MarketHome";
+import { SnapHomePage } from "../components/snap/SnapCatalogPage";
 
 export default function Home() {
-  return <MarketHome />;
+  return <SnapHomePage />;
 }

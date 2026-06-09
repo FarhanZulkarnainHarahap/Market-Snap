@@ -1,0 +1,79 @@
+.contact-heading {
+  background: #e6f8ec;
+}
+
+.contact-panel {
+  background: var(--leaf-dark);
+  border-radius: 8px;
+  color: #fff;
+  padding: 22px;
+}
+
+.contact-main-icon {
+  color: var(--sun);
+  font-size: 34px;
+}
+
+.contact-panel h2,
+.contact-form h2 {
+  font-size: 28px;
+  margin-top: 12px;
+}
+
+.contact-panel > p,
+.contact-form > p {
+  color: #d9f5e2;
+  line-height: 1.7;
+  margin-top: 8px;
+}
+
+.contact-form > p {
+  color: var(--muted);
+}
+
+.contact-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.contact-list > div,
+.contact-location {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.contact-list svg,
+.contact-location svg {
+  color: var(--sun);
+  flex: 0 0 auto;
+  font-size: 20px;
+}
+
+.contact-list span {
+  display: grid;
+  gap: 4px;
+}
+
+.contact-list small {
+  color: #bde8c9;
+}
+
+.contact-location {
+  border-top: 1px solid rgba(255, 255, 255, .24);
+  margin-top: 26px;
+  padding-top: 18px;
+}
+
+.contact-form {
+  align-self: start;
+}
+
+.contact-form .mini-label {
+  color: var(--leaf);
+}
+
+.contact-form label:first-of-type {
+  margin-top: 8px;
+}
