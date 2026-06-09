@@ -1,10 +1,9 @@
-import type { ApiCartItem, ApiProduct, ApiStore, ApiUser, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse } from "./api-contracts";
+import type { ApiCartItem, ApiProduct, ApiStore, ApiUser, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
+import { apiUrl } from "./api-url";
 import type { CartItem, Product, Store } from "./types";
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4100/api";
-
 export async function loginUser(email: string, password: string) {
-  const response = await fetch(`${apiBase}/auth/login`, {
+  const response = await fetch(apiUrl("/auth/login"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
@@ -13,6 +12,16 @@ export async function loginUser(email: string, password: string) {
   const payload = await response.json() as LoginResponse;
   saveSession(payload);
   return payload;
+}
+
+export async function registerUser(payload: { name: string; email: string; password: string; referralCode?: string }) {
+  const response = await fetch(apiUrl("/auth/register"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Registrasi gagal"));
+  return response.json() as Promise<RegisterResponse>;
 }
 
 export function saveSession(payload: LoginResponse) {
@@ -40,14 +49,14 @@ function currentToken() {
 }
 
 export async function fetchCategories(): Promise<string[]> {
-  const response = await fetch(`${apiBase}/categories`);
+  const response = await fetch(apiUrl("/categories"));
   if (!response.ok) throw new Error("Gagal memuat kategori");
   const payload = await response.json() as { data: string[] };
   return ["Semua", ...payload.data];
 }
 
 export async function fetchProducts(params: URLSearchParams) {
-  const response = await fetch(`${apiBase}/products?${params.toString()}`);
+  const response = await fetch(apiUrl(`/products?${params.toString()}`));
   if (!response.ok) throw new Error("Gagal memuat produk");
   const payload = await response.json() as ProductsResponse;
   const store = mapStore(payload.store);
@@ -59,15 +68,37 @@ export async function fetchProducts(params: URLSearchParams) {
   };
 }
 
+export async function fetchStores(): Promise<Store[]> {
+  const response = await fetch(apiUrl("/stores"), { cache: "no-store" });
+  if (!response.ok) throw new Error("Gagal memuat cabang");
+  const payload = await response.json() as { data: ApiStore[] };
+  return payload.data.map(mapStore);
+}
+
+export async function fetchNearestStore(params: URLSearchParams = new URLSearchParams()) {
+  const response = await fetch(apiUrl(`/stores/nearest?${params.toString()}`), { cache: "no-store" });
+  if (!response.ok) throw new Error("Gagal memuat cabang terdekat");
+  const payload = await response.json() as { store: ApiStore; serviceable: boolean; inRange?: boolean };
+  return { store: mapStore(payload.store), serviceable: payload.serviceable ?? payload.inRange ?? true };
+}
+
+export async function fetchProductDetail(productId: string, params: URLSearchParams = new URLSearchParams()) {
+  const response = await fetch(apiUrl(`/products/${productId}?${params.toString()}`), { cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Produk tidak ditemukan"));
+  const payload = await response.json() as { data: ApiProduct; store: ApiStore };
+  const store = mapStore(payload.store);
+  return { product: mapProduct(payload.data, store.id), store };
+}
+
 export async function fetchCart() {
-  const response = await fetch(`${apiBase}/cart`, { headers: currentUserHeaders(), cache: "no-store" });
+  const response = await fetch(apiUrl("/cart"), { headers: currentUserHeaders(), cache: "no-store" });
   if (!response.ok) throw new Error("Gagal memuat cart");
   const payload = await response.json() as CartResponse;
   return { items: payload.data.map(mapCartItem), summary: payload.summary };
 }
 
 export async function addCartItem(productId: string, storeId: string, quantity = 1) {
-  const response = await fetch(`${apiBase}/cart`, {
+  const response = await fetch(apiUrl("/cart"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ productId, storeId, quantity })
@@ -78,7 +109,7 @@ export async function addCartItem(productId: string, storeId: string, quantity =
 }
 
 export async function updateCartItem(cartId: string, quantity: number) {
-  const response = await fetch(`${apiBase}/cart/${cartId}`, {
+  const response = await fetch(apiUrl(`/cart/${cartId}`), {
     method: "PATCH",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ quantity })
@@ -89,17 +120,17 @@ export async function updateCartItem(cartId: string, quantity: number) {
 }
 
 export async function deleteCartItem(cartId: string) {
-  const response = await fetch(`${apiBase}/cart/${cartId}`, { method: "DELETE", headers: currentUserHeaders() });
+  const response = await fetch(apiUrl(`/cart/${cartId}`), { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal hapus cart"));
 }
 
 export async function clearCart() {
-  const response = await fetch(`${apiBase}/cart`, { method: "DELETE", headers: currentUserHeaders() });
+  const response = await fetch(apiUrl("/cart"), { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal kosongkan cart"));
 }
 
 export async function createOrderFromCart(items: CartItem[], total: number, options: CreateOrderOptions = {}) {
-  const response = await fetch(`${apiBase}/orders`, {
+  const response = await fetch(apiUrl("/orders"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -123,7 +154,8 @@ function mapStore(store: ApiStore): Store {
     lat: store.lat,
     lng: store.lng,
     radiusKm: store.radiusKm,
-    eta: store.distanceKm ? `${Math.max(12, Math.round(store.distanceKm * 3))} min` : "18-28 min"
+    eta: store.distanceKm ? `${Math.max(12, Math.round(store.distanceKm * 3))} min` : "18-28 min",
+    distanceKm: store.distanceKm
   };
 }
 
@@ -134,6 +166,7 @@ function mapProduct(product: ApiProduct, storeId: string): Product {
     category: product.category,
     price: product.price,
     unit: product.unit,
+    description: product.description,
     image: product.image,
     discount: product.discount ?? undefined,
     badge: product.organic ? "Pilihan" : undefined,

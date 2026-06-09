@@ -1,4 +1,4 @@
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4100/api";
+import { apiUrl } from "./api-url";
 
 export type DashboardRole = "customer" | "admin" | "adminStore";
 
@@ -48,7 +48,7 @@ function authHeaders(): Record<string, string> {
 
 async function fetchData(path: string, headers?: HeadersInit): Promise<DashboardRecord[]> {
   try {
-    const response = await fetch(`${apiBase}${path}`, { headers, cache: "no-store" });
+    const response = await fetch(apiUrl(path), { headers, cache: "no-store" });
     if (!response.ok) return [];
     const payload = await response.json() as { data?: unknown };
     return normalize(payload.data);

@@ -6,6 +6,7 @@ export type Store = {
   lng: number;
   radiusKm: number;
   eta: string;
+  distanceKm?: number;
 };
 
 export type Product = {
@@ -14,6 +15,7 @@ export type Product = {
   category: string;
   price: number;
   unit: string;
+  description?: string;
   image: string;
   discount?: string;
   badge?: string;

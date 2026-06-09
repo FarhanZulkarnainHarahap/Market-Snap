@@ -14,6 +14,7 @@ export type ApiProduct = {
   category: string;
   price: number;
   unit: string;
+  description?: string;
   image: string;
   discount: string | null;
   organic: boolean;
@@ -51,6 +52,11 @@ export type ApiUser = {
 export type LoginResponse = {
   token: string;
   user: ApiUser;
+};
+
+export type RegisterResponse = {
+  data: ApiUser;
+  verificationExpiresInMinutes?: number;
 };
 
 export type CreateOrderOptions = {

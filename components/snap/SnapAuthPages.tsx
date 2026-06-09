@@ -1,20 +1,46 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { FiEyeOff, FiLock, FiLogIn, FiMail, FiShoppingBag, FiTag, FiTruck, FiUser, FiUserPlus } from "react-icons/fi";
+import { loginUser, registerUser } from "@/lib/api";
 import { BenefitStrip, GroceryVisual, SnapFooter, SnapHeader } from "./SnapCommon";
 
 export function SnapLoginPage() {
+  const router = useRouter();
+  const [message, setMessage] = useState("Masuk untuk melanjutkan belanja kebutuhan harian.");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setBusy(true);
+    setMessage("Memproses login...");
+    try {
+      const payload = await loginUser(String(form.get("email")), String(form.get("password")));
+      setMessage("Login berhasil.");
+      const role = payload.user.role;
+      router.push(role === "super_admin" || role === "admin" ? "/admin" : role === "store_admin" ? "/dashboard/adminStore" : "/catalog");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Login gagal.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
       <SnapHeader simple />
       <main className="auth-capture login-capture">
         <section className="auth-left">
           <h1>Masuk ke Market Snap</h1>
-          <p>Masuk untuk melanjutkan belanja kebutuhan harian atau kelola tokomu dengan mudah dan praktis.</p>
-          <form className="capture-form">
-            <label>Email <span><FiMail /><input placeholder="Masukkan email Anda" type="email" /></span></label>
-            <label>Password <span><FiLock /><input placeholder="Masukkan password Anda" type="password" /><FiEyeOff /></span></label>
+          <p>{message}</p>
+          <form className="capture-form" onSubmit={submit}>
+            <label>Email <span><FiMail /><input name="email" placeholder="customer@marketsnap.id" required type="email" /></span></label>
+            <label>Password <span><FiLock /><input name="password" placeholder="password123" required type="password" /><FiEyeOff /></span></label>
             <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/login">Lupa password?</Link></div>
-            <button className="primary-snap wide" type="button"><FiLogIn /> Masuk</button>
+            <button className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> {busy ? "Masuk..." : "Masuk"}</button>
             <em>atau</em>
             <Link className="secondary-snap wide" href="/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
           </form>
@@ -31,6 +57,36 @@ export function SnapLoginPage() {
 }
 
 export function SnapRegisterPage() {
+  const router = useRouter();
+  const [message, setMessage] = useState("Daftar gratis dan mulai belanja kebutuhan harian dengan mudah.");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const password = String(form.get("password"));
+    const confirm = String(form.get("confirmPassword"));
+    if (password !== confirm) {
+      setMessage("Konfirmasi password tidak sama.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await registerUser({
+        name: String(form.get("name")),
+        email: String(form.get("email")),
+        password,
+        referralCode: String(form.get("referralCode") || "")
+      });
+      setMessage("Registrasi berhasil. Silakan login.");
+      router.push("/login");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Registrasi gagal.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
       <SnapHeader simple={false} active="home" />
@@ -38,13 +94,16 @@ export function SnapRegisterPage() {
         <section className="register-card">
           <FiUserPlus className="auth-big-icon" />
           <h1>Buat akun Market Snap</h1>
-          <p>Daftar gratis dan mulai belanja kebutuhan harian dengan mudah.</p>
-          <form className="capture-form compact">
-            {["Nama lengkap", "Email", "Nomor HP", "Password", "Konfirmasi Password", "Kode referral (opsional)"].map((label) => (
-              <label key={label}>{label}<input placeholder={label === "Nomor HP" ? "Contoh: 0812-3456-7890" : `Masukkan ${label.toLowerCase()}`} type={label.includes("Password") ? "password" : "text"} /></label>
-            ))}
-            <label className="agree-line"><input type="checkbox" /> Saya setuju dengan Syarat & Ketentuan dan Kebijakan Privasi</label>
-            <button className="primary-snap wide" type="button">Daftar</button>
+          <p>{message}</p>
+          <form className="capture-form compact" onSubmit={submit}>
+            <label>Nama lengkap<input name="name" placeholder="Masukkan nama lengkap Anda" required /></label>
+            <label>Email<input name="email" placeholder="Masukkan email Anda" required type="email" /></label>
+            <label>Nomor HP<input name="phone" placeholder="Contoh: 0812-3456-7890" /></label>
+            <label>Password<input name="password" placeholder="Buat password" required type="password" /></label>
+            <label>Konfirmasi Password<input name="confirmPassword" placeholder="Ulangi password" required type="password" /></label>
+            <label>Kode referral (opsional)<input name="referralCode" placeholder="Masukkan kode referral" /></label>
+            <label className="agree-line"><input required type="checkbox" /> Saya setuju dengan Syarat & Ketentuan dan Kebijakan Privasi</label>
+            <button className="primary-snap wide" disabled={busy} type="submit">{busy ? "Mendaftarkan..." : "Daftar"}</button>
             <p className="center-copy">Sudah punya akun? <Link href="/login">Masuk di sini</Link></p>
           </form>
         </section>

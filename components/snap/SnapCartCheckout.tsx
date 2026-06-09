@@ -1,15 +1,54 @@
+"use client";
+
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiClock, FiHome, FiLock, FiMapPin, FiMinus, FiPlus, FiShield, FiShoppingBag, FiTrash2, FiTruck, FiZap } from "react-icons/fi";
-import { branches, cartItems, products, rupiah } from "@/lib/snap-data";
+import { clearCart, createOrderFromCart, deleteCartItem, fetchCart, fetchNearestStore, updateCartItem } from "@/lib/api";
+import { rupiah } from "@/lib/format";
+import type { CartItem, Store } from "@/lib/types";
 import { BenefitStrip, SnapFooter, SnapHeader } from "./SnapCommon";
 
 export function SnapCartPage() {
-  const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const total = subtotal + 10000 - 20000;
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [store, setStore] = useState<Store>();
+  const [message, setMessage] = useState("Memuat keranjang dari database...");
+  const subtotal = useMemo(() => items.reduce((sum, item) => sum + (item.subtotal ?? item.price * item.quantity), 0), [items]);
+  const discount = subtotal >= 50000 ? Math.min(20000, Math.round(subtotal * 0.2)) : 0;
+  const shipping = items.length ? 10000 : 0;
+  const total = Math.max(0, subtotal + shipping - discount);
+
+  const loadCart = useCallback(async () => {
+    try {
+      const [cart, nearest] = await Promise.all([fetchCart(), fetchNearestStore().catch(() => null)]);
+      setItems(cart.items);
+      setStore(nearest?.store);
+      setMessage(cart.items.length ? "" : "Keranjang masih kosong. Tambahkan produk dari katalog.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Silakan login untuk melihat keranjang.");
+    }
+  }, []);
+
+  useEffect(() => {
+    void Promise.resolve().then(loadCart);
+  }, [loadCart]);
+
+  async function updateQuantity(item: CartItem, quantity: number) {
+    if (!item.cartId) return;
+    try {
+      if (quantity < 1) {
+        await deleteCartItem(item.cartId);
+      } else {
+        await updateCartItem(item.cartId, quantity);
+      }
+      await loadCart();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Gagal memperbarui cart.");
+    }
+  }
 
   return (
     <>
-      <SnapHeader active="home" cartCount={4} />
+      <SnapHeader active="home" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} />
       <main>
         <section className="snap-page-title">
           <h1>Keranjang Belanja</h1>
@@ -18,30 +57,31 @@ export function SnapCartPage() {
         <section className="cart-layout">
           <div>
             <article className="cart-list">
-              <header><span><FiShoppingBag /> Cabang aktif</span><h2>{branches[0].name}</h2><button type="button">Ubah cabang</button></header>
-              {cartItems.map(({ product, quantity }) => (
-                <div className="cart-item-row" key={product.id}>
-                  <img alt={product.name} src={product.image} />
-                  <div><h3>{product.name}</h3><p>{product.unit}</p><strong>Stok: {product.stock}</strong><span>{branches[0].name}</span></div>
-                  <div className="qty-stepper"><button type="button"><FiMinus /></button><span>{quantity}</span><button type="button"><FiPlus /></button></div>
-                  <b>{rupiah(product.price * quantity)}</b>
-                  <button className="trash-button" type="button"><FiTrash2 /></button>
+              <header><span><FiShoppingBag /> Cabang aktif</span><h2>{store?.name ?? items[0]?.storeId ?? "Market Snap"}</h2><Link className="outline-action" href="/catalog">Ubah cabang</Link></header>
+              {message && <p className="catalog-message">{message}</p>}
+              {items.map((item) => (
+                <div className="cart-item-row" key={item.cartId ?? item.id}>
+                  <img alt={item.name} src={item.image} />
+                  <div><h3>{item.name}</h3><p>{item.unit}</p><strong>Stok: {item.stock ?? "-"}</strong><span>{store?.name ?? item.storeId}</span></div>
+                  <div className="qty-stepper"><button onClick={() => updateQuantity(item, item.quantity - 1)} type="button"><FiMinus /></button><span>{item.quantity}</span><button onClick={() => updateQuantity(item, item.quantity + 1)} type="button"><FiPlus /></button></div>
+                  <b>{rupiah(item.subtotal ?? item.price * item.quantity)}</b>
+                  <button className="trash-button" onClick={() => updateQuantity(item, 0)} type="button"><FiTrash2 /></button>
                 </div>
               ))}
             </article>
             <article className="voucher-box">
-              <div><h3>Punya kode voucher?</h3><div><input placeholder="Masukkan kode voucher" /><button type="button">Terapkan</button></div></div>
-              <div><p>Voucher tersedia untukmu</p><button type="button">SNAPWELCOME<br /><small>Diskon 20%</small></button><button type="button">SNAPSHIP<br /><small>Gratis Ongkir</small></button></div>
+              <div><h3>Punya kode voucher?</h3><div><input defaultValue="SNAPWELCOME" placeholder="Masukkan kode voucher" /><button type="button">Terapkan</button></div></div>
+              <div><p>Voucher tersedia dari database seed</p><button type="button">SNAPWELCOME<br /><small>Diskon 20%</small></button><button type="button">SNAPSHIP<br /><small>Gratis Ongkir</small></button></div>
             </article>
           </div>
           <aside className="cart-side">
-            <Summary subtotal={subtotal} total={total} />
+            <Summary discount={discount} shipping={shipping} subtotal={subtotal} total={total} />
             <article className="nearest-card">
               <img alt="" src="/market-snap-favicon-transparent.png" />
               <h3>Cabang Terdekat</h3>
-              <strong>{branches[0].name}</strong>
-              <p>{branches[0].address}</p>
-              <span> Buka {branches[0].hours}</span>
+              <strong>{store?.name ?? "Market Snap Kemang"}</strong>
+              <p>{store?.area ?? "Jakarta Selatan"}</p>
+              <span>Radius layanan {store?.radiusKm ?? 0} km</span>
               <button type="button"><FiMapPin /> Lihat di Peta</button>
             </article>
             <article className="trust-card">
@@ -57,67 +97,93 @@ export function SnapCartPage() {
   );
 }
 
-function Summary({ subtotal, total }: { subtotal: number; total: number }) {
+function Summary({ subtotal, shipping, discount, total }: { subtotal: number; shipping: number; discount: number; total: number }) {
   return (
     <article className="summary-panel">
       <h2>Ringkasan Belanja</h2>
-      <p><span>Subtotal (4 item)</span><strong>{rupiah(subtotal)}</strong></p>
-      <p><span>Estimasi Ongkir</span><strong>Rp 10.000</strong></p>
-      <p className="green"><span>Diskon Voucher</span><strong>- Rp 20.000</strong></p>
+      <p><span>Subtotal</span><strong>{rupiah(subtotal)}</strong></p>
+      <p><span>Estimasi Ongkir</span><strong>{rupiah(shipping)}</strong></p>
+      <p className="green"><span>Diskon Voucher</span><strong>- {rupiah(discount)}</strong></p>
       <hr />
       <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
-      <div className="eta-card"><FiClock /><span><strong>Estimasi Tiba Hari ini, 18:00 - 20:00</strong><small>Pengantaran cepat di area Kemang</small></span></div>
+      <div className="eta-card"><FiClock /><span><strong>Estimasi Tiba Hari ini, 18:00 - 20:00</strong><small>Pengantaran cepat di area cabang aktif</small></span></div>
       <Link className="primary-snap wide" href="/checkout"><FiLock /> Checkout Sekarang</Link>
     </article>
   );
 }
 
 export function SnapCheckoutPage() {
-  const checkoutProducts = [products[4], products[7], products[0]];
-  const subtotal = 42700;
-  const total = 34400;
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [store, setStore] = useState<Store>();
+  const [message, setMessage] = useState("Memuat checkout dari database...");
+  const subtotal = useMemo(() => items.reduce((sum, item) => sum + (item.subtotal ?? item.price * item.quantity), 0), [items]);
+  const shipping = items.length ? 10000 : 0;
+  const discount = subtotal >= 50000 ? Math.min(20000, Math.round(subtotal * 0.2)) : 0;
+  const total = Math.max(0, subtotal + shipping - discount);
+
+  useEffect(() => {
+    Promise.all([fetchCart(), fetchNearestStore().catch(() => null)])
+      .then(([cart, nearest]) => {
+        setItems(cart.items);
+        setStore(nearest?.store);
+        setMessage(cart.items.length ? "" : "Cart kosong. Checkout membutuhkan produk.");
+      })
+      .catch((error) => setMessage(error instanceof Error ? error.message : "Silakan login untuk checkout."));
+  }, []);
+
+  async function submitOrder() {
+    try {
+      const result = await createOrderFromCart(items, total, { courier: "manual", paymentMethod: "manual_transfer" });
+      await clearCart().catch(() => undefined);
+      setItems([]);
+      setMessage(`Order ${result.data.id} berhasil dibuat dengan status ${result.data.status}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Gagal membuat order.");
+    }
+  }
 
   return (
     <>
-      <SnapHeader active="home" />
+      <SnapHeader active="home" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} />
       <main>
         <section className="checkout-title-row">
           <div><h1>Checkout</h1><p>Lengkapi informasi di bawah untuk menyelesaikan pesanan Anda.</p></div>
           <div className="stepper"><span className="active">1</span><span>2</span><span>3</span><span>4</span></div>
         </section>
+        {message && <p className="catalog-message">{message}</p>}
         <section className="checkout-page-grid">
           <div className="checkout-forms">
             <CheckoutBlock title="1. Alamat Pengiriman" action="Ubah Alamat">
-              <div className="address-card"><FiHome /><div><strong>Rumah <span>Utama</span></strong><p>{branches[0].address}</p><small>Penerima Andi Pratama - 0812-3456-7890</small></div></div>
+              <div className="address-card"><FiHome /><div><strong>Rumah <span>Utama</span></strong><p>Jl. Kemang Raya No. 72, Bangka, Mampang Prapatan, Jakarta Selatan</p><small>Gunakan alamat utama seed customer</small></div></div>
               <button className="dashed-add" type="button"><FiPlus /> Tambah alamat baru</button>
             </CheckoutBlock>
             <CheckoutBlock title="2. Jadwal Pengiriman">
-              <div className="date-row">{["Hari ini Kamis 22 Mei", "Jumat 23 Mei", "Sabtu 24 Mei", "Minggu 25 Mei", "Senin 26 Mei"].map((date, index) => <button className={index === 0 ? "active" : ""} key={date} type="button">{date}</button>)}</div>
+              <div className="date-row">{["Hari ini", "Besok", "Lusa", "Akhir Pekan"].map((date, index) => <button className={index === 0 ? "active" : ""} key={date} type="button">{date}</button>)}</div>
               <select><option>08:00 - 10:00</option><option>18:00 - 20:00</option></select>
             </CheckoutBlock>
             <CheckoutBlock title="3. Cabang Terdekat" action="Ubah cabang">
-              <div className="branch-checkout"><img alt="" src="https://images.unsplash.com/photo-1564661066126-98f46a9780d9?auto=format&fit=crop&w=800&q=80" /><div><h3>{branches[0].name}</h3><p>{branches[0].address}</p><span>{branches[0].distance} jarak dari lokasi Anda</span></div></div>
+              <div className="branch-checkout"><img alt="" src="/market-snap-favicon-transparent.png" /><div><h3>{store?.name ?? "Market Snap"}</h3><p>{store?.area ?? "Jakarta Selatan"}</p><span>{store?.distanceKm?.toFixed(1) ?? "0"} km jarak dari lokasi Anda</span></div></div>
             </CheckoutBlock>
             <CheckoutBlock title="4. Opsi Pengiriman">
-              <div className="delivery-row"><button className="active" type="button"><FiTruck /> Pengiriman Standar<br /><strong>Rp 10.000</strong></button><button type="button"><FiZap /> Pengiriman Express<br /><strong>Rp 18.000</strong></button><button type="button"><FiHome /> Ambil di Cabang<br /><strong>GRATIS</strong></button></div>
+              <div className="delivery-row"><button className="active" type="button"><FiTruck /> Pengiriman Standar<br /><strong>{rupiah(shipping)}</strong></button><button type="button"><FiZap /> Pengiriman Express<br /><strong>Rp 18.000</strong></button><button type="button"><FiHome /> Ambil di Cabang<br /><strong>GRATIS</strong></button></div>
             </CheckoutBlock>
             <CheckoutBlock title="5. Metode Pembayaran">
-              <div className="payment-row"><button className="active" type="button">E-Wallet</button><button type="button">Virtual Account</button><button type="button">COD</button></div>
-              <div className="voucher-success"><strong>Voucher berhasil!</strong><span>Diskon 20%</span></div>
+              <div className="payment-row"><button className="active" type="button">Transfer Manual</button><button type="button">Xendit</button><button type="button">COD</button></div>
+              <div className="voucher-success"><strong>Voucher berhasil!</strong><span>Diskon {rupiah(discount)}</span></div>
             </CheckoutBlock>
           </div>
           <aside className="checkout-summary">
             <article className="summary-panel">
-              <h2>Ringkasan Pesanan <small>3 item</small></h2>
-              {checkoutProducts.map((product) => <div className="mini-order" key={product.id}><img alt={product.name} src={product.image} /><span><strong>{product.name}</strong><small>{product.unit}</small><b>{rupiah(product.price)}</b></span><small>Qty: 1</small></div>)}
+              <h2>Ringkasan Pesanan <small>{items.length} item</small></h2>
+              {items.map((item) => <div className="mini-order" key={item.cartId ?? item.id}><img alt={item.name} src={item.image} /><span><strong>{item.name}</strong><small>{item.unit}</small><b>{rupiah(item.price)}</b></span><small>Qty: {item.quantity}</small></div>)}
               <p><span>Subtotal</span><strong>{rupiah(subtotal)}</strong></p>
-              <p className="green"><span>Diskon Voucher</span><strong>- Rp 15.000</strong></p>
-              <p><span>Biaya Pengiriman</span><strong>Rp 10.000</strong></p>
+              <p className="green"><span>Diskon Voucher</span><strong>- {rupiah(discount)}</strong></p>
+              <p><span>Biaya Pengiriman</span><strong>{rupiah(shipping)}</strong></p>
               <hr />
               <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
-              <button className="primary-snap wide" type="button"><FiLock /> Buat pesanan</button>
+              <button className="primary-snap wide" disabled={!items.length} onClick={submitOrder} type="button"><FiLock /> Buat pesanan</button>
             </article>
-            <article className="invoice-card"><h2>Preview Invoice</h2><strong>MARKET SNAP</strong><p>#INV/2025/05/22/14321</p><hr /><p>Total <b>{rupiah(total)}</b></p></article>
+            <article className="invoice-card"><h2>Preview Invoice</h2><strong>MARKET SNAP</strong><p>Invoice dibuat setelah order tersimpan</p><hr /><p>Total <b>{rupiah(total)}</b></p></article>
           </aside>
         </section>
       </main>

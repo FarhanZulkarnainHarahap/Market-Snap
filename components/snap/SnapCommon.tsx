@@ -12,7 +12,8 @@ import {
   FiShoppingCart,
   FiTruck
 } from "react-icons/fi";
-import { products, rupiah, type SnapProduct } from "@/lib/snap-data";
+import { rupiah } from "@/lib/format";
+import type { Product, Store } from "@/lib/types";
 
 type HeaderProps = {
   active?: "home" | "catalog" | "about" | "contact";
@@ -66,21 +67,23 @@ export function GroceryVisual({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function ProductCard({ product }: { product: SnapProduct }) {
+export function ProductCard({ product, storeId, disabled = false, onAdd }: { product: Product; storeId?: string; disabled?: boolean; onAdd?: (product: Product) => void }) {
+  const activeStoreId = storeId ?? Object.keys(product.stockByStore)[0] ?? "";
+  const stock = product.stockByStore[activeStoreId] ?? 0;
   return (
     <article className="snap-product-card">
       <Link className="product-picture" href={`/product/${product.id}`}>
         <img alt={product.name} src={product.image} />
-        {product.promo && <span className="promo-dot">Promo</span>}
+        {product.discount && <span className="promo-dot">{product.discount}</span>}
       </Link>
       <div className="snap-product-body">
         <Link href={`/product/${product.id}`}><h3>{product.name}</h3></Link>
         <p>{product.unit}</p>
         <strong>{rupiah(product.price)}</strong>
-        <small>Stok: {product.stock}</small>
+        <small>Stok: {stock}</small>
         <div className="product-card-bottom">
-          <span>Rating {product.rating} ({product.reviews})</span>
-          <button type="button"><FiPlus /> Keranjang</button>
+          <span>{product.badge ?? product.category}</span>
+          <button disabled={disabled || stock < 1} onClick={() => onAdd?.(product)} type="button"><FiPlus /> Keranjang</button>
         </div>
       </div>
     </article>
@@ -152,7 +155,7 @@ export function SnapShell({ children, footer = true }: { children: React.ReactNo
   );
 }
 
-export function RelatedProducts() {
+export function RelatedProducts({ products, store }: { products: Product[]; store?: Store }) {
   return (
     <section className="snap-section">
       <div className="snap-section-title inline">
@@ -160,7 +163,7 @@ export function RelatedProducts() {
         <Link href="/catalog">Lihat semua <FiArrowRight /></Link>
       </div>
       <div className="related-row">
-        {products.slice(1, 7).map((product) => <ProductCard key={product.id} product={product} />)}
+        {products.slice(0, 6).map((product) => <ProductCard key={product.id} product={product} storeId={store?.id} />)}
       </div>
     </section>
   );

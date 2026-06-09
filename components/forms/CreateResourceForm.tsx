@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { currentUserHeaders } from "../../lib/api";
+import { apiUrl } from "../../lib/api-url";
 import { Header } from "../Header";
 import { ManagementHeader } from "../dashboard/ManagementHeader";
 
@@ -26,8 +27,6 @@ type CreateResourceFormProps = {
   title: string;
 };
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4100/api";
-
 export function CreateResourceForm({ active, description, endpoint, fields, method = "POST", role, title }: CreateResourceFormProps) {
   const [message, setMessage] = useState("Lengkapi data dengan benar sebelum menyimpan.");
   const [submitting, setSubmitting] = useState(false);
@@ -37,7 +36,7 @@ export function CreateResourceForm({ active, description, endpoint, fields, meth
     setSubmitting(true);
     try {
       const body = formBody(new FormData(event.currentTarget));
-      const response = await fetch(`${apiBase}${endpoint}`, { method, headers: headers(role), body: JSON.stringify(body) });
+      const response = await fetch(apiUrl(endpoint), { method, headers: headers(role), body: JSON.stringify(body) });
       if (!response.ok) throw new Error(await responseMessage(response));
       event.currentTarget.reset();
       setMessage("Data berhasil disimpan.");

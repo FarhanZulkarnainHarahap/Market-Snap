@@ -179,7 +179,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 ### Checkout Payload
 
-`/dashboard/customer/cart` creates an order by sending this payload to `POST /api/orders`:
+`/dashboard/customer/cart` creates an order by sending this payload to `POST /orders`:
 
 ```json
 {
