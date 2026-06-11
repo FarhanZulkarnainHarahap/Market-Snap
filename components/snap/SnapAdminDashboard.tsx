@@ -50,7 +50,7 @@ export function SnapAdminDashboard() {
           <input placeholder="Search products, orders, customers..." />
           <div><FiBell /><span>Admin<small>Super Admin</small></span></div>
         </header>
-        <div className="admin-title"><div><h2>Dashboard</h2><p>Data dashboard dibaca dari API dan database Market Snap.</p></div><button type="button"><FiCalendar /> Data terbaru</button></div>
+        <div className="admin-title"><div><h2>Dashboard</h2><p>Data dashboard mengikuti aktivitas toko Market Snap terbaru.</p></div><button type="button"><FiCalendar /> Data terbaru</button></div>
         <section className="admin-metrics">
           <Metric title="Total Sales" value={rupiah(totalSales)} trend="18.6%" icon={<FiTrendingUp />} />
           <Metric title="Total Orders" value={orders || "Seed data"} trend="12.4%" icon={<FiShoppingCart />} />

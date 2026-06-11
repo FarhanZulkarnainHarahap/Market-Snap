@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FiChevronRight, FiSearch, FiSliders } from "react-icons/fi";
 import { addCartItem, fetchCart, fetchCategories, fetchProducts, fetchStores } from "@/lib/api";
 import type { Product, Store } from "@/lib/types";
-import { GroceryVisual, ProductCard, SnapFooter, SnapHeader, BenefitStrip } from "./SnapCommon";
+import { GroceryVisual, ProductCard, ProductGridSkeleton, SnapFooter, SnapHeader, BenefitStrip } from "./SnapCommon";
 
 type CatalogState = {
   products: Product[];
@@ -15,6 +15,7 @@ type CatalogState = {
   serviceable: boolean;
   cartCount: number;
   message: string;
+  loading: boolean;
 };
 
 const defaultState: CatalogState = {
@@ -23,7 +24,8 @@ const defaultState: CatalogState = {
   stores: [],
   serviceable: true,
   cartCount: 0,
-  message: "Memuat data dari database..."
+  message: "",
+  loading: true
 };
 
 export function SnapHomePage() {
@@ -42,7 +44,7 @@ export function SnapHomePage() {
           <div>
             <span className="eyebrow">Fresh from nearest branch</span>
             <h1>Belanja segar dari cabang yang paling dekat.</h1>
-            <p>Market Snap menampilkan stok aktual dari database cabang terdekat supaya belanja harian lebih cepat, transparan, dan praktis.</p>
+            <p>Market Snap menampilkan stok aktual dari cabang terdekat supaya belanja harian lebih cepat, transparan, dan praktis.</p>
             <div className="hero-buttons">
               <Link className="primary-snap" href="/catalog">Mulai belanja <FiChevronRight /></Link>
               <Link className="secondary-snap" href="/about">Tentang kami</Link>
@@ -58,10 +60,14 @@ export function SnapHomePage() {
             </div>
             <Link href="/catalog">Lihat catalog <FiChevronRight /></Link>
           </div>
-          {state.message && <p className="catalog-message">{state.message}</p>}
-          <div className="snap-product-grid">
-            {featured.map((product) => <ProductCard key={product.id} product={product} storeId={state.store?.id} />)}
-          </div>
+          {state.loading ? <ProductGridSkeleton count={8} /> : (
+            <>
+              {state.message && <p className="catalog-message">{state.message}</p>}
+              <div className="snap-product-grid">
+                {featured.map((product) => <ProductCard key={product.id} product={product} storeId={state.store?.id} />)}
+              </div>
+            </>
+          )}
         </section>
       </main>
       <BenefitStrip />
@@ -152,7 +158,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
             <label className="switch-row">Stok Tersedia <input checked={onlyStock} onChange={(event) => setOnlyStock(event.target.checked)} type="checkbox" /></label>
             <label className="switch-row">Produk Promo <input checked={onlyPromo} onChange={(event) => setOnlyPromo(event.target.checked)} type="checkbox" /></label>
             <div className="promo-panel">
-              <strong>Promo database aktif</strong>
+              <strong>Promo aktif</strong>
               <p>Diskon mengikuti cabang terpilih</p>
               <Link href="/catalog">Belanja Sekarang</Link>
             </div>
@@ -162,13 +168,17 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
               {["Semua Produk", "Promo", "Stok Tersedia"].map((chip) => <button className={chip === "Semua Produk" ? "active" : ""} key={chip} type="button">{chip}</button>)}
               <button className="clear-filter" onClick={() => { setCategory("Semua"); setOnlyPromo(false); setOnlyStock(false); setQuery(""); }} type="button"><FiSliders /> Hapus filter</button>
             </div>
-            {state.message && <p className="catalog-message">{state.message}</p>}
-            {!state.serviceable && <p className="catalog-message warning">Lokasi Anda di luar radius cabang terdekat. Silakan pilih alamat lain.</p>}
-            <div className="snap-product-grid">
-              {visibleProducts.map((product) => <ProductCard key={product.id} onAdd={addProduct} product={product} storeId={state.store?.id} />)}
-            </div>
+            {state.loading ? <ProductGridSkeleton count={12} /> : (
+              <>
+                {state.message && <p className="catalog-message">{state.message}</p>}
+                {!state.serviceable && <p className="catalog-message warning">Lokasi Anda di luar radius cabang terdekat. Silakan pilih alamat lain.</p>}
+                <div className="snap-product-grid">
+                  {visibleProducts.map((product) => <ProductCard key={product.id} onAdd={addProduct} product={product} storeId={state.store?.id} />)}
+                </div>
+              </>
+            )}
             <div className="pagination-row">
-              <span>Menampilkan {visibleProducts.length} produk dari database</span>
+              <span>Menampilkan {visibleProducts.length} produk</span>
               <div><button type="button">1</button><button type="button">2</button><button type="button">3</button></div>
               <select defaultValue="48"><option value="48">48 / halaman</option></select>
             </div>
@@ -203,10 +213,11 @@ async function loadCatalog(extra: Record<string, string>): Promise<CatalogState>
       store: catalog.store,
       serviceable: catalog.serviceable,
       cartCount: cart.summary.totalItems,
-      message: ""
+      message: "",
+      loading: false
     };
   } catch (error) {
-    return { ...defaultState, message: error instanceof Error ? error.message : "Data database belum dapat dimuat." };
+    return { ...defaultState, loading: false, message: error instanceof Error ? error.message : "Data belum dapat dimuat." };
   }
 }
 

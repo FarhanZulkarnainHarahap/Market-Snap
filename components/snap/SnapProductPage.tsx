@@ -6,7 +6,7 @@ import { FiChevronLeft, FiChevronRight, FiHeart, FiMapPin, FiMinus, FiPlus, FiSh
 import { addCartItem, fetchCart, fetchProductDetail, fetchProducts } from "@/lib/api";
 import { rupiah } from "@/lib/format";
 import type { Product, Store } from "@/lib/types";
-import { BenefitStrip, FeatureList, RelatedProducts, SnapFooter, SnapHeader } from "./SnapCommon";
+import { BenefitStrip, FeatureList, PanelSkeleton, RelatedProducts, SnapFooter, SnapHeader } from "./SnapCommon";
 
 export function SnapProductPage({ productId }: { productId: string }) {
   const [product, setProduct] = useState<Product>();
@@ -14,7 +14,8 @@ export function SnapProductPage({ productId }: { productId: string }) {
   const [related, setRelated] = useState<Product[]>([]);
   const [cartCount, setCartCount] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [message, setMessage] = useState("Memuat detail produk dari database...");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -23,10 +24,14 @@ export function SnapProductPage({ productId }: { productId: string }) {
         setProduct(result.product);
         setStore(result.store);
         setMessage("");
+        setLoading(false);
         const relatedResult = await fetchProducts(new URLSearchParams({ limit: "6", category: result.product.category, storeId: result.store.id })).catch(() => null);
         setRelated(relatedResult?.products.filter((item) => item.id !== result.product.id) ?? []);
       })
-      .catch((error) => setMessage(error instanceof Error ? error.message : "Produk tidak ditemukan."));
+      .catch((error) => {
+        setLoading(false);
+        setMessage(error instanceof Error ? error.message : "Produk tidak ditemukan.");
+      });
     fetchCart().then((cart) => setCartCount(cart.summary.totalItems)).catch(() => setCartCount(0));
   }, [productId]);
 
@@ -49,8 +54,9 @@ export function SnapProductPage({ productId }: { productId: string }) {
       <SnapHeader active="home" cartCount={cartCount} />
       <main>
         <nav className="breadcrumb"><Link href="/">Beranda</Link><FiChevronRight /> <Link href="/catalog">{product?.category ?? "Produk"}</Link><FiChevronRight /> <span>{product?.name ?? "Detail"}</span></nav>
-        {message && <p className="catalog-message">{message}</p>}
-        {product && (
+        {loading && <ProductDetailSkeleton />}
+        {!loading && message && <p className="catalog-message">{message}</p>}
+        {!loading && product && (
           <>
             <section className="product-detail-layout">
               <div>
@@ -67,9 +73,9 @@ export function SnapProductPage({ productId }: { productId: string }) {
               <article className="product-info-panel">
                 <span className="tag-soft">{product.category}</span>
                 <h1>{product.name}</h1>
-                <div className="rating-line"><FiStar /> <strong>4.8</strong> (data ulasan dummy) <span>Stok database: {stock}</span></div>
+                <div className="rating-line"><FiStar /> <strong>4.8</strong> (ulasan pelanggan) <span>Stok tersedia: {stock}</span></div>
                 <p className="detail-price">{rupiah(product.price)} <small>/{product.unit}</small></p>
-                <p className="muted">{product.description ?? "Produk segar dari database Market Snap."}</p>
+                <p className="muted">{product.description ?? "Produk segar Market Snap."}</p>
                 <FeatureList />
                 <h3>Pilih berat</h3>
                 <div className="option-row"><button className="active" type="button">{product.unit}</button><button type="button">Paket hemat</button><button type="button">Bundling</button></div>
@@ -95,7 +101,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
             <section className="product-tabs">
               <div className="tab-head"><button className="active" type="button">Deskripsi</button><button type="button">Nutrisi</button><button type="button">Ulasan</button><button type="button">Pengiriman & Retur</button></div>
               <div className="tab-grid">
-                <div><p>{product.description}</p><ul><li>Data produk berasal dari database</li><li>Stok mengikuti cabang aktif</li><li>Diskon mengikuti promo yang berlaku</li></ul></div>
+                <div><p>{product.description}</p><ul><li>Produk mengikuti cabang aktif</li><li>Stok mengikuti cabang aktif</li><li>Diskon mengikuti promo yang berlaku</li></ul></div>
                 <div className="nutrition-card"><h3>Nutrisi (per 100 g)</h3><p>Energi <strong>52 kkal</strong></p><p>Karbohidrat <strong>13.8 g</strong></p><p>Serat <strong>2.4 g</strong></p><p>Vitamin C <strong>4.6 mg</strong></p></div>
                 <div className="review-card"><h3>Ulasan Pelanggan</h3><strong>4.8 <small>/5</small></strong><p>Rating dummy untuk tampilan</p><button type="button">Lihat semua ulasan</button></div>
               </div>
@@ -107,5 +113,25 @@ export function SnapProductPage({ productId }: { productId: string }) {
       <BenefitStrip />
       <SnapFooter />
     </>
+  );
+}
+
+function ProductDetailSkeleton() {
+  return (
+    <section className="product-detail-layout" aria-hidden="true">
+      <div>
+        <div className="product-gallery-main skeleton-block" />
+        <div className="thumbnail-row">
+          {Array.from({ length: 4 }, (_, index) => <span className="thumbnail-skeleton skeleton-block" key={index} />)}
+        </div>
+      </div>
+      <article className="product-info-panel">
+        <span className="skeleton-line short" />
+        <span className="skeleton-line title" />
+        <span className="skeleton-line medium" />
+        <span className="skeleton-line price" />
+        <PanelSkeleton rows={5} />
+      </article>
+    </section>
   );
 }

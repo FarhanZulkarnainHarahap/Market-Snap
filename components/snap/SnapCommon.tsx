@@ -90,6 +90,35 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
   );
 }
 
+export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
+  return (
+    <div className="snap-product-grid" aria-hidden="true">
+      {Array.from({ length: count }, (_, index) => (
+        <article className="snap-product-card skeleton-card" key={index}>
+          <div className="product-picture skeleton-block" />
+          <div className="snap-product-body">
+            <span className="skeleton-line wide" />
+            <span className="skeleton-line short" />
+            <span className="skeleton-line medium" />
+            <div className="product-card-bottom">
+              <span className="skeleton-line short" />
+              <span className="skeleton-button" />
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+export function PanelSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="panel-skeleton" aria-hidden="true">
+      {Array.from({ length: rows }, (_, index) => <span className="skeleton-line wide" key={index} />)}
+    </div>
+  );
+}
+
 export function BenefitStrip() {
   const items = [
     { icon: FiShield, title: "100% Produk Segar", text: "Kualitas terjaga setiap hari" },
