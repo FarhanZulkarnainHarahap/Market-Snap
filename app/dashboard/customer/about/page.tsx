@@ -1,5 +1,5 @@
-import { DashboardFeaturePage } from "@/components/dashboard/DashboardFeaturePage";
+import { SnapAboutPage } from "@/components/snap/SnapInfoPages";
 
 export default function CustomerAboutPage() {
-  return <DashboardFeaturePage active="customer" description="Informasi layanan grocery, cabang, dan cara Market Snap memilih toko terdekat." eyebrow="Customer" resource="stores" role="customer" title="About Market Snap" />;
+  return <SnapAboutPage />;
 }

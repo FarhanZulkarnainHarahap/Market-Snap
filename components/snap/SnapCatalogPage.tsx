@@ -46,8 +46,8 @@ export function SnapHomePage() {
             <h1>Belanja segar dari cabang yang paling dekat.</h1>
             <p>Market Snap menampilkan stok aktual dari cabang terdekat supaya belanja harian lebih cepat, transparan, dan praktis.</p>
             <div className="hero-buttons">
-              <Link className="primary-snap" href="/catalog">Mulai belanja <FiChevronRight /></Link>
-              <Link className="secondary-snap" href="/about">Tentang kami</Link>
+              <Link className="primary-snap" href="/dashboard/customer/catalog">Mulai belanja <FiChevronRight /></Link>
+              <Link className="secondary-snap" href="/dashboard/customer/about">Tentang kami</Link>
             </div>
           </div>
           <GroceryVisual />
@@ -58,7 +58,7 @@ export function SnapHomePage() {
               <span className="eyebrow">Produk pilihan</span>
               <h2>Stok segar di {state.store?.name ?? "cabang utama"}</h2>
             </div>
-            <Link href="/catalog">Lihat catalog <FiChevronRight /></Link>
+            <Link href="/dashboard/customer/catalog">Lihat catalog <FiChevronRight /></Link>
           </div>
           {state.loading ? <ProductGridSkeleton count={8} /> : (
             <>
@@ -160,7 +160,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
             <div className="promo-panel">
               <strong>Promo aktif</strong>
               <p>Diskon mengikuti cabang terpilih</p>
-              <Link href="/catalog">Belanja Sekarang</Link>
+              <Link href="/dashboard/customer/catalog">Belanja Sekarang</Link>
             </div>
           </aside>
           <div>

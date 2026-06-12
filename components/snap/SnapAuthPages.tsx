@@ -21,7 +21,7 @@ export function SnapLoginPage() {
       const payload = await loginUser(String(form.get("email")), String(form.get("password")));
       setMessage("Login berhasil.");
       const role = payload.user.role;
-      router.push(role === "super_admin" || role === "admin" ? "/admin" : role === "store_admin" ? "/dashboard/adminStore" : "/catalog");
+      router.push(role === "super_admin" || role === "admin" ? "/dashboard/admin" : role === "store_admin" ? "/dashboard/admin-store" : "/dashboard/customer/catalog");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Login gagal.");
     } finally {
@@ -39,10 +39,10 @@ export function SnapLoginPage() {
           <form className="capture-form" onSubmit={submit}>
             <label>Email <span><FiMail /><input name="email" placeholder="customer@marketsnap.id" required type="email" /></span></label>
             <label>Password <span><FiLock /><input name="password" placeholder="password123" required type="password" /><FiEyeOff /></span></label>
-            <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/login">Lupa password?</Link></div>
+            <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/auth/login">Lupa password?</Link></div>
             <button className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> {busy ? "Masuk..." : "Masuk"}</button>
             <em>atau</em>
-            <Link className="secondary-snap wide" href="/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
+            <Link className="secondary-snap wide" href="/auth/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
           </form>
           <div className="login-benefits">
             <AuthMini icon={<FiShoppingBag />} title="Belanja mudah & cepat" text="Temukan kebutuhan harian dari cabang terdekat." />
@@ -79,7 +79,7 @@ export function SnapRegisterPage() {
         referralCode: String(form.get("referralCode") || "")
       });
       setMessage("Registrasi berhasil. Silakan login.");
-      router.push("/login");
+      router.push("/auth/login");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Registrasi gagal.");
     } finally {
@@ -104,7 +104,7 @@ export function SnapRegisterPage() {
             <label>Kode referral (opsional)<input name="referralCode" placeholder="Masukkan kode referral" /></label>
             <label className="agree-line"><input required type="checkbox" /> Saya setuju dengan Syarat & Ketentuan dan Kebijakan Privasi</label>
             <button className="primary-snap wide" disabled={busy} type="submit">{busy ? "Mendaftarkan..." : "Daftar"}</button>
-            <p className="center-copy">Sudah punya akun? <Link href="/login">Masuk di sini</Link></p>
+            <p className="center-copy">Sudah punya akun? <Link href="/auth/login">Masuk di sini</Link></p>
           </form>
         </section>
         <section className="register-info">

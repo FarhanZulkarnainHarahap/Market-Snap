@@ -53,7 +53,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
     <>
       <SnapHeader active="home" cartCount={cartCount} />
       <main>
-        <nav className="breadcrumb"><Link href="/">Beranda</Link><FiChevronRight /> <Link href="/catalog">{product?.category ?? "Produk"}</Link><FiChevronRight /> <span>{product?.name ?? "Detail"}</span></nav>
+        <nav className="breadcrumb"><Link href="/">Beranda</Link><FiChevronRight /> <Link href="/dashboard/customer/catalog">{product?.category ?? "Produk"}</Link><FiChevronRight /> <span>{product?.name ?? "Detail"}</span></nav>
         {loading && <ProductDetailSkeleton />}
         {!loading && message && <p className="catalog-message">{message}</p>}
         {!loading && product && (
@@ -94,7 +94,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
                 </div>
                 <div className="buy-actions">
                   <button className="secondary-snap" disabled={!stock} onClick={addProduct} type="button"><FiShoppingCart /> Tambah ke keranjang</button>
-                  <Link className="primary-snap" href="/checkout">Beli sekarang</Link>
+                  <Link className="primary-snap" href="/dashboard/customer/checkout">Beli sekarang</Link>
                 </div>
               </article>
             </section>

@@ -17,13 +17,13 @@ const links = {
     { href: "/dashboard/admin/inventory-history", label: "Reports" }
   ],
   adminStore: [
-    { href: "/dashboard/adminStore", label: "Overview" },
-    { href: "/dashboard/adminStore/manage-order", label: "Orders" },
-    { href: "/dashboard/adminStore/inventory-management", label: "Inventory" },
-    { href: "/dashboard/adminStore/product", label: "Products" },
-    { href: "/dashboard/adminStore/category", label: "Categories" },
-    { href: "/dashboard/adminStore/discount", label: "Discounts" },
-    { href: "/dashboard/adminStore/store", label: "Store" }
+    { href: "/dashboard/admin-store", label: "Overview" },
+    { href: "/dashboard/admin-store/manage-order", label: "Orders" },
+    { href: "/dashboard/admin-store/inventory-management", label: "Inventory" },
+    { href: "/dashboard/admin-store/product", label: "Products" },
+    { href: "/dashboard/admin-store/category", label: "Categories" },
+    { href: "/dashboard/admin-store/discount", label: "Discounts" },
+    { href: "/dashboard/admin-store/store", label: "Store" }
   ]
 };
 

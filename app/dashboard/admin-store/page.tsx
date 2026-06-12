@@ -10,9 +10,9 @@ export default function AdminStorePage() {
       role="adminStore"
       title="Operasional Cabang Kemang"
       actions={[
-        { label: "Inventory", href: "/dashboard/adminStore/inventory-management" },
-        { label: "Manage Order", href: "/dashboard/adminStore/manage-order" },
-        { label: "Discount", href: "/dashboard/adminStore/discount" }
+        { label: "Inventory", href: "/dashboard/admin-store/inventory-management" },
+        { label: "Manage Order", href: "/dashboard/admin-store/manage-order" },
+        { label: "Discount", href: "/dashboard/admin-store/discount" }
       ]}
     />
   );

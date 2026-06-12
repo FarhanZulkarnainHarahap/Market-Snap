@@ -60,7 +60,7 @@ export function SnapCartPage() {
         <section className="cart-layout">
           <div>
             <article className="cart-list">
-              <header><span><FiShoppingBag /> Cabang aktif</span><h2>{store?.name ?? items[0]?.storeId ?? "Market Snap"}</h2><Link className="outline-action" href="/catalog">Ubah cabang</Link></header>
+              <header><span><FiShoppingBag /> Cabang aktif</span><h2>{store?.name ?? items[0]?.storeId ?? "Market Snap"}</h2><Link className="outline-action" href="/dashboard/customer/catalog">Ubah cabang</Link></header>
               {loading && <CartRowsSkeleton />}
               {!loading && message && <p className="catalog-message">{message}</p>}
               {!loading && items.map((item) => (
@@ -111,7 +111,7 @@ function Summary({ subtotal, shipping, discount, total }: { subtotal: number; sh
       <hr />
       <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
       <div className="eta-card"><FiClock /><span><strong>Estimasi Tiba Hari ini, 18:00 - 20:00</strong><small>Pengantaran cepat di area cabang aktif</small></span></div>
-      <Link className="primary-snap wide" href="/checkout"><FiLock /> Checkout Sekarang</Link>
+      <Link className="primary-snap wide" href="/dashboard/customer/checkout"><FiLock /> Checkout Sekarang</Link>
     </article>
   );
 }

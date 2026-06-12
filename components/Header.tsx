@@ -13,9 +13,9 @@ type HeaderProps = {
 
 const publicLinks = [
   { key: "home", href: "/", icon: FiHome, label: "Home" },
-  { key: "catalog", href: "/catalog", icon: FiGrid, label: "Catalog" },
-  { key: "about", href: "/about", icon: FiInfo, label: "About" },
-  { key: "contact", href: "/contact", icon: FiMail, label: "Contact" }
+  { key: "catalog", href: "/dashboard/customer/catalog", icon: FiGrid, label: "Catalog" },
+  { key: "about", href: "/dashboard/customer/about", icon: FiInfo, label: "About" },
+  { key: "contact", href: "/dashboard/customer/contact-us", icon: FiMail, label: "Contact" }
 ];
 
 const customerLinks = [
@@ -39,12 +39,12 @@ export function Header({ cartCount = 0, active = "home", mode = "public" }: Head
           <Image src="/market-snap-favicon-transparent.png" alt="Market Snap" width={52} height={52} />
           <span>MARKET SNAP</span>
         </Link>
-        <form action="/catalog" className="header-search" role="search">
+        <form action="/dashboard/customer/catalog" className="header-search" role="search">
           <input aria-label="Cari produk grocery" name="search" placeholder="Cari sayur, buah, susu..." type="search" />
           <button aria-label="Cari produk" title="Cari produk" type="submit"><FiSearch /></button>
         </form>
         <div className="header-actions">
-          <Link className="ghost-button" href="/login"><FiLogIn /><span>Masuk</span></Link>
+          <Link className="ghost-button" href="/auth/login"><FiLogIn /><span>Masuk</span></Link>
           <Link className="cart-button" href="/dashboard/customer/cart" aria-label="Keranjang">
             <FiShoppingCart />
             <span>Cart</span>
@@ -70,7 +70,7 @@ export function Header({ cartCount = 0, active = "home", mode = "public" }: Head
               <span>{link.label}</span>
             </Link>
           ))}
-          <Link className="mobile-login" href="/login" onClick={() => setMenuOpen(false)}><FiUser /><span>Masuk</span></Link>
+          <Link className="mobile-login" href="/auth/login" onClick={() => setMenuOpen(false)}><FiUser /><span>Masuk</span></Link>
         </nav>
       </div>
     </header>

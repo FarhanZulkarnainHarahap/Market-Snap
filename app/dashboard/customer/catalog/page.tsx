@@ -1,5 +1,10 @@
-import { DashboardFeaturePage } from "@/components/dashboard/DashboardFeaturePage";
+import { SnapCatalogPage } from "@/components/snap/SnapCatalogPage";
 
-export default function CustomerCatalogPage() {
-  return <DashboardFeaturePage active="customer" description="Temukan grocery pilihan berdasarkan stok cabang terdekat dari lokasimu." eyebrow="Customer catalog" resource="products" role="customer" title="Product Catalog" />;
+type CatalogPageProps = {
+  searchParams: Promise<{ search?: string }>;
+};
+
+export default async function CustomerCatalogPage({ searchParams }: CatalogPageProps) {
+  const params = await searchParams;
+  return <SnapCatalogPage initialSearch={params.search ?? ""} />;
 }
