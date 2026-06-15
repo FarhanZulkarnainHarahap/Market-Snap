@@ -46,6 +46,7 @@ const nextConfig: NextConfig = {
           source: "/:path*",
           destination: "/dashboard/customer/:path*"
         }
+        
       ]
     };
   }
