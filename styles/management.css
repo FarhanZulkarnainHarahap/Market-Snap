@@ -16,7 +16,7 @@
 .management-bar {
   gap: 16px;
   justify-content: space-between;
-  padding: 12px 18px;
+  padding: 9px 16px;
 }
 
 .management-brand {
@@ -43,7 +43,7 @@
   border-radius: 8px;
   font-size: 13px;
   font-weight: 800;
-  padding: 9px 12px;
+  padding: 7px 11px;
 }
 
 .management-nav {
@@ -51,15 +51,15 @@
   color: #203329;
   gap: 4px;
   overflow-x: auto;
-  padding: 9px 18px;
+  padding: 7px 16px;
 }
 
 .management-nav a {
   border-radius: 6px;
   flex: 0 0 auto;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  padding: 8px 10px;
+  padding: 7px 9px;
 }
 
 .management-nav a:hover {

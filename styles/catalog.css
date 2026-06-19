@@ -186,3 +186,66 @@
   justify-content: space-between;
   margin-top: 14px;
 }
+
+/* Compact dashboard scale */
+.store-strip,
+.content-section,
+.admin-band,
+.dashboard-shell,
+.footer {
+  max-width: 1080px;
+  padding: 18px 16px;
+}
+
+.store-strip h2,
+.section-heading h2,
+.page-heading h1 {
+  font-size: clamp(24px, 4vw, 34px);
+}
+
+.page-heading p,
+.dashboard-heading p,
+.muted-copy {
+  font-size: 14px;
+}
+
+.status-pill {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+.catalog-toolbar input,
+.catalog-toolbar select,
+.form-grid input,
+.form-grid select,
+.form-card input,
+.form-card textarea,
+.cart-row input {
+  min-height: 40px;
+}
+
+.product-body,
+.promo-card,
+.admin-panel,
+.auth-panel,
+.form-card,
+.list-card,
+.summary-card,
+.metric-card {
+  padding: 14px;
+}
+
+.metric-card strong {
+  font-size: 26px;
+}
+
+.admin-workspace {
+  gap: 12px;
+}
+
+.admin-row,
+.address-row,
+.cart-row,
+.summary-card p {
+  padding: 10px 0;
+}

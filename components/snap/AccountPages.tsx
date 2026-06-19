@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   FiBell,
   FiChevronRight,
@@ -13,6 +16,9 @@ import {
   FiUser
 } from "react-icons/fi";
 import { SnapHeader } from "@/components/snap/SnapCommon";
+import { fetchVouchers } from "@/lib/api";
+import { rupiah } from "@/lib/format";
+import type { Voucher } from "@/lib/types";
 
 type AccountSection = "profile" | "address" | "orders" | "notifications" | "vouchers" | "payment" | "security" | "help";
 
@@ -201,25 +207,66 @@ export function NotificationsAccountContent() {
 }
 
 export function VouchersAccountContent() {
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    fetchVouchers()
+      .then((items) => {
+        setVouchers(items);
+        setMessage(items.length ? "" : "Belum ada voucher aktif saat ini.");
+      })
+      .catch((error) => setMessage(error instanceof Error ? error.message : "Voucher belum dapat dimuat."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="account-grid voucher-grid">
+        {Array.from({ length: 4 }, (_, index) => (
+          <article className="account-panel voucher-card voucher-skeleton" aria-hidden="true" key={index}>
+            <span className="skeleton-icon" />
+            <span className="skeleton-line short" />
+            <span className="skeleton-line wide" />
+            <span className="skeleton-line medium" />
+            <span className="skeleton-button" />
+          </article>
+        ))}
+      </section>
+    );
+  }
+
+  if (!vouchers.length) {
+    return <section className="account-panel empty-account-state"><FiTag /><h2>Voucher belum tersedia</h2><p>{message}</p></section>;
+  }
+
   return (
-    <section className="account-grid">
-      {[
-        ["SNAPWELCOME", "Diskon 20%", "Minimal belanja Rp 75.000", "Berlaku sampai 30 Juni"],
-        ["SNAPSHIP", "Gratis Ongkir", "Untuk pengiriman standar", "Khusus cabang terdekat"],
-        ["FRESH10", "Diskon produk segar", "Buah dan sayur pilihan", "Kuota terbatas"],
-        ["PAYDAY", "Cashback belanja", "Pembayaran e-wallet", "Aktif akhir pekan"]
-      ].map(([code, title, detail, meta]) => (
-        <article className="account-panel voucher-card" key={code}>
+    <section className="account-grid voucher-grid">
+      {vouchers.map((voucher) => (
+        <article className="account-panel voucher-card" key={voucher.id}>
           <FiTag />
-          <span>{code}</span>
-          <h2>{title}</h2>
-          <p>{detail}</p>
-          <small>{meta}</small>
+          <span>{voucher.code}</span>
+          <h2>{voucher.title}</h2>
+          <p>{voucherSummary(voucher)}</p>
+          <small>{voucherMeta(voucher)}</small>
           <button type="button">Pakai voucher</button>
         </article>
       ))}
     </section>
   );
+}
+
+function voucherSummary(voucher: Voucher) {
+  const value = voucher.type === "percentage" ? `${voucher.value}%` : rupiah(voucher.value);
+  const scope = voucher.scope === "shipping" ? "ongkir" : voucher.scope === "product" ? "produk pilihan" : "total belanja";
+  return `Potongan ${value} untuk ${scope}.`;
+}
+
+function voucherMeta(voucher: Voucher) {
+  const minSpend = voucher.minSpend ? `Minimal belanja ${rupiah(voucher.minSpend)}` : "Tanpa minimal belanja";
+  const maxDiscount = voucher.maxDiscount ? `maks. ${rupiah(voucher.maxDiscount)}` : "tanpa batas maksimum";
+  return `${minSpend}, ${maxDiscount}. Berlaku hingga ${new Date(voucher.expiresAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}`;
 }
 
 export function PaymentAccountContent() {

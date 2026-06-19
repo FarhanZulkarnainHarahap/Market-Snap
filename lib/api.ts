@@ -1,6 +1,6 @@
-import type { ApiAddress, ApiCartItem, ApiProduct, ApiStore, ApiUser, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
+import type { ApiAddress, ApiCartItem, ApiProduct, ApiStore, ApiUser, ApiVoucher, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
 import { apiUrl } from "./api-url";
-import type { Address, CartItem, Product, Store } from "./types";
+import type { Address, CartItem, Product, Store, Voucher } from "./types";
 
 export async function loginUser(email: string, password: string) {
   const response = await fetch(apiUrl("/auth/login"), {
@@ -116,6 +116,13 @@ export async function fetchAddresses(): Promise<Address[]> {
   return payload.data.map(mapAddress);
 }
 
+export async function fetchVouchers(): Promise<Voucher[]> {
+  const response = await fetch(apiUrl("/vouchers"), { cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat voucher"));
+  const payload = await response.json() as { data: ApiVoucher[] };
+  return payload.data.map(mapVoucher);
+}
+
 export async function addCartItem(productId: string, storeId: string, quantity = 1) {
   const response = await fetch(apiUrl("/cart"), {
     method: "POST",
@@ -215,6 +222,20 @@ function mapAddress(address: ApiAddress): Address {
     lat: address.latitude,
     lng: address.longitude,
     isPrimary: address.isPrimary
+  };
+}
+
+function mapVoucher(voucher: ApiVoucher): Voucher {
+  return {
+    id: voucher.id,
+    code: voucher.code,
+    title: voucher.title,
+    scope: String(voucher.scope).toLowerCase() as Voucher["scope"],
+    type: String(voucher.type).toLowerCase() as Voucher["type"],
+    value: voucher.value,
+    minSpend: voucher.minSpend ?? 0,
+    maxDiscount: voucher.maxDiscount ?? 0,
+    expiresAt: voucher.expiresAt
   };
 }
 

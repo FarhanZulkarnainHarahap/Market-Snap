@@ -58,6 +58,18 @@ export type ApiUser = {
   role: "user" | "admin" | "super_admin" | "store_admin" | "USER" | "ADMIN" | "SUPER_ADMIN" | "STORE_ADMIN";
 };
 
+export type ApiVoucher = {
+  id: string;
+  code: string;
+  title: string;
+  scope: "CART" | "SHIPPING" | "PRODUCT" | "cart" | "shipping" | "product";
+  type: "PERCENTAGE" | "NOMINAL" | "percentage" | "nominal";
+  value: number;
+  minSpend?: number | null;
+  maxDiscount?: number | null;
+  expiresAt: string;
+};
+
 export type LoginResponse = {
   token: string;
   user: ApiUser;

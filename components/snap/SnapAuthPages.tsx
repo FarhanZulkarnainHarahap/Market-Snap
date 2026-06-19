@@ -52,9 +52,9 @@ export function SnapLoginPage() {
 
   return (
     <>
-      <SnapHeader simple />
       <main className="auth-capture login-capture">
         <section className="auth-left">
+          <Link className="auth-brand" href="/">MARKET SNAP</Link>
           <h1>Masuk ke Market Snap</h1>
           <p>Masuk untuk melanjutkan belanja kebutuhan harian atau mengelola tokomu dengan mudah.</p>
           <form className="capture-form" onSubmit={submit}>

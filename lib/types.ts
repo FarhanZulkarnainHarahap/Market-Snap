@@ -40,6 +40,18 @@ export type Address = {
   isPrimary: boolean;
 };
 
+export type Voucher = {
+  id: string;
+  code: string;
+  title: string;
+  scope: "cart" | "shipping" | "product";
+  type: "percentage" | "nominal";
+  value: number;
+  minSpend: number;
+  maxDiscount: number;
+  expiresAt: string;
+};
+
 export type OrderStatus =
   | "Menunggu Pembayaran"
   | "Menunggu Konfirmasi Pembayaran"

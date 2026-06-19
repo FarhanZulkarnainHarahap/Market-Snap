@@ -163,9 +163,11 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
               <Link href="/catalog">Belanja Sekarang</Link>
             </div>
           </aside>
-          <div>
-            <div className="filter-chips">
-              {["Semua Produk", "Promo", "Stok Tersedia"].map((chip) => <button className={chip === "Semua Produk" ? "active" : ""} key={chip} type="button">{chip}</button>)}
+          <div className="catalog-results">
+            <div className="catalog-results-head">
+              <div className="filter-chips">
+                {["Semua Produk", "Promo", "Stok Tersedia"].map((chip) => <button className={chip === "Semua Produk" ? "active" : ""} key={chip} type="button">{chip}</button>)}
+              </div>
               <button className="clear-filter" onClick={() => { setCategory("Semua"); setOnlyPromo(false); setOnlyStock(false); setQuery(""); }} type="button"><FiSliders /> Hapus filter</button>
             </div>
             {state.loading ? <ProductGridSkeleton count={12} /> : (
