@@ -5,15 +5,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   FiArrowRight,
+  FiBell,
   FiClock,
+  FiChevronDown,
   FiHeadphones,
   FiHeart,
+  FiLogOut,
   FiLock,
   FiMapPin,
   FiPlus,
   FiUser,
   FiShield,
   FiShoppingCart,
+  FiShoppingBag,
   FiTruck
 } from "react-icons/fi";
 import { rupiah } from "@/lib/format";
@@ -41,6 +45,7 @@ const navItems = [
 export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: HeaderProps) {
   const [locationLabel, setLocationLabel] = useState(readCachedLocationLabel);
   const [session, setSession] = useState<HeaderSession>(readSession);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const storedSession = readSession();
@@ -57,6 +62,13 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
     refreshLocationLabel(setLocationLabel);
     return () => window.cancelAnimationFrame(frame);
   }, []);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const close = () => setProfileOpen(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [profileOpen]);
 
   const profileLabel = displayName(session.name);
 
@@ -80,7 +92,21 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
       <div className="snap-actions">
         <button className="location-chip" onClick={() => refreshLocationLabel(setLocationLabel)} title="Perbarui lokasi dari GPS" type="button"><FiMapPin /> {locationLabel}</button>
         {!simple && (session.isLoggedIn ? (
-          <Link className="profile-action" href="/dashboard/customer/profile"><FiUser /> <span>{profileLabel}</span></Link>
+          <div className="profile-menu-wrap">
+            <button
+              aria-expanded={profileOpen}
+              aria-haspopup="menu"
+              className="profile-action"
+              onClick={(event) => {
+                event.stopPropagation();
+                setProfileOpen((open) => !open);
+              }}
+              type="button"
+            >
+              <FiUser /> <span>{profileLabel}</span> <FiChevronDown />
+            </button>
+            {profileOpen && <ProfileMenu onLogout={() => logout(setSession, setProfileOpen)} />}
+          </div>
         ) : (
           <Link className="outline-action" href="/auth/login">Masuk</Link>
         ))}
@@ -88,6 +114,29 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
       </div>
     </header>
   );
+}
+
+function ProfileMenu({ onLogout }: { onLogout: () => void }) {
+  return (
+    <div className="profile-menu" onClick={(event) => event.stopPropagation()} role="menu">
+      <Link href="/dashboard/customer/profile" role="menuitem"><FiUser /> Profile</Link>
+      <Link href="/dashboard/customer/my-orders" role="menuitem"><FiBell /> Notification</Link>
+      <Link href="/dashboard/customer/my-orders" role="menuitem"><FiShoppingBag /> History</Link>
+      <button onClick={onLogout} role="menuitem" type="button"><FiLogOut /> Logout</button>
+    </div>
+  );
+}
+
+function logout(setSession: (session: HeaderSession) => void, setProfileOpen: (open: boolean) => void) {
+  window.localStorage.removeItem("market-snap-token");
+  window.localStorage.removeItem("market-snap-user-id");
+  window.localStorage.removeItem("market-snap-user-name");
+  window.localStorage.removeItem("market-snap-user-email");
+  window.localStorage.removeItem("market-snap-role");
+  document.cookie = "market-snap-role=; path=/; max-age=0; SameSite=Lax";
+  setSession({ isLoggedIn: false, name: "" });
+  setProfileOpen(false);
+  window.location.href = "/login";
 }
 
 function readSession(): HeaderSession {

@@ -127,6 +127,64 @@ body {
   white-space: nowrap;
 }
 
+.profile-menu-wrap {
+  position: relative;
+}
+
+.profile-menu {
+  background: #fff;
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  box-shadow: 0 18px 44px rgba(5, 36, 17, .16);
+  display: grid;
+  gap: 4px;
+  min-width: 210px;
+  padding: 8px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 80;
+}
+
+.profile-menu::before {
+  background: #fff;
+  border-left: 1px solid var(--snap-line);
+  border-top: 1px solid var(--snap-line);
+  content: "";
+  height: 12px;
+  position: absolute;
+  right: 22px;
+  top: -7px;
+  transform: rotate(45deg);
+  width: 12px;
+}
+
+.profile-menu a,
+.profile-menu button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #173321;
+  display: flex;
+  font-weight: 850;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.profile-menu a:hover,
+.profile-menu button:hover {
+  background: #eef8eb;
+  color: var(--snap-green);
+}
+
+.profile-menu button {
+  cursor: pointer;
+}
+
 .cart-action,
 .primary-snap {
   background: linear-gradient(135deg, #0c572b, #06401f);
