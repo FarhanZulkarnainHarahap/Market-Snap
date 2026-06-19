@@ -42,6 +42,15 @@ export type CartResponse = {
   summary: { totalItems: number; total: number };
 };
 
+export type ApiAddress = {
+  id: string;
+  label: string;
+  detail: string;
+  latitude: number;
+  longitude: number;
+  isPrimary: boolean;
+};
+
 export type ApiUser = {
   id: string;
   name: string;
@@ -62,6 +71,7 @@ export type RegisterResponse = {
 export type CreateOrderOptions = {
   courier?: string;
   destinationId?: string;
+  location?: { lat: number; lng: number };
   paymentMethod?: "manual_transfer" | "xendit";
 };
 

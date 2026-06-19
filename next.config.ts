@@ -1,6 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/customer",
+        destination: "/",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/:path*",
+        destination: "/:path*",
+        permanent: false
+      }
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [
@@ -46,7 +60,6 @@ const nextConfig: NextConfig = {
           source: "/:path*",
           destination: "/dashboard/customer/:path*"
         }
-        
       ]
     };
   }

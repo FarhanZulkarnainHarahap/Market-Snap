@@ -37,9 +37,9 @@ type HeaderSession = {
 
 const navItems = [
   { key: "home", href: "/", label: "Home" },
-  { key: "catalog", href: "/dashboard/customer/catalog", label: "Catalog" },
-  { key: "about", href: "/dashboard/customer/about", label: "About" },
-  { key: "contact", href: "/dashboard/customer/contact-us", label: "Contact" }
+  { key: "catalog", href: "/catalog", label: "Catalog" },
+  { key: "about", href: "/about", label: "About" },
+  { key: "contact", href: "/contact-us", label: "Contact" }
 ] as const;
 
 export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: HeaderProps) {
@@ -86,7 +86,7 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
       ) : (
         <nav className="snap-nav snap-simple-nav" aria-label="Navigasi utama">
           <Link href="/">Beranda</Link>
-          <Link href="/dashboard/customer/about">Tentang Kami</Link>
+          <Link href="/about">Tentang Kami</Link>
         </nav>
       )}
       <div className="snap-actions">
@@ -110,7 +110,7 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
         ) : (
           <Link className="outline-action" href="/auth/login">Masuk</Link>
         ))}
-        {!simple && <Link className="cart-action" href="/dashboard/customer/cart"><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
+        {!simple && <Link className="cart-action" href="/cart"><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
       </div>
     </header>
   );
@@ -119,9 +119,9 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
 function ProfileMenu({ onLogout }: { onLogout: () => void }) {
   return (
     <div className="profile-menu" onClick={(event) => event.stopPropagation()} role="menu">
-      <Link href="/dashboard/customer/profile" role="menuitem"><FiUser /> Profile</Link>
-      <Link href="/dashboard/customer/my-orders" role="menuitem"><FiBell /> Notification</Link>
-      <Link href="/dashboard/customer/my-orders" role="menuitem"><FiShoppingBag /> History</Link>
+      <Link href="/profile" role="menuitem"><FiUser /> Profile</Link>
+      <Link href="/my-orders" role="menuitem"><FiBell /> Notification</Link>
+      <Link href="/my-orders" role="menuitem"><FiShoppingBag /> History</Link>
       <button onClick={onLogout} role="menuitem" type="button"><FiLogOut /> Logout</button>
     </div>
   );
@@ -206,12 +206,12 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
   const stock = product.stockByStore[activeStoreId] ?? 0;
   return (
     <article className="snap-product-card">
-      <Link className="product-picture" href={`/dashboard/customer/product/${product.id}`}>
+      <Link className="product-picture" href={`/product/${product.id}`}>
         <img alt={product.name} src={product.image} />
         {product.discount && <span className="promo-dot">{product.discount}</span>}
       </Link>
       <div className="snap-product-body">
-        <Link href={`/dashboard/customer/product/${product.id}`}><h3>{product.name}</h3></Link>
+        <Link href={`/product/${product.id}`}><h3>{product.name}</h3></Link>
         <p>{product.unit}</p>
         <strong>{rupiah(product.price)}</strong>
         <small>Stok: {stock}</small>
@@ -290,9 +290,9 @@ export function SnapFooter() {
       </div>
       <div>
         <h3>Useful Link</h3>
-        <Link href="/dashboard/customer/catalog">Cara Belanja</Link>
-        <Link href="/dashboard/customer/about">Syarat & Ketentuan</Link>
-        <Link href="/dashboard/customer/contact-us">Pusat Bantuan</Link>
+        <Link href="/catalog">Cara Belanja</Link>
+        <Link href="/about">Syarat & Ketentuan</Link>
+        <Link href="/contact-us">Pusat Bantuan</Link>
       </div>
       <div>
         <h3>Download Our App</h3>
@@ -323,7 +323,7 @@ export function RelatedProducts({ products, store }: { products: Product[]; stor
     <section className="snap-section">
       <div className="snap-section-title inline">
         <h2>Produk Terkait</h2>
-        <Link href="/dashboard/customer/catalog">Lihat semua <FiArrowRight /></Link>
+        <Link href="/catalog">Lihat semua <FiArrowRight /></Link>
       </div>
       <div className="related-row">
         {products.slice(0, 6).map((product) => <ProductCard key={product.id} product={product} storeId={store?.id} />)}

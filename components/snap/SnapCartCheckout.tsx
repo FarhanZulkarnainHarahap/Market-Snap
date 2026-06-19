@@ -3,10 +3,22 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiClock, FiHome, FiLock, FiMapPin, FiMinus, FiPlus, FiShield, FiShoppingBag, FiTrash2, FiTruck, FiZap } from "react-icons/fi";
-import { clearCart, createOrderFromCart, deleteCartItem, fetchCart, fetchNearestStore, updateCartItem } from "@/lib/api";
+import { clearCart, createOrderFromCart, deleteCartItem, fetchAddresses, fetchCart, fetchNearestStore, updateCartItem } from "@/lib/api";
 import { rupiah } from "@/lib/format";
-import type { CartItem, Store } from "@/lib/types";
+import type { Address, CartItem, Store } from "@/lib/types";
 import { BenefitStrip, PanelSkeleton, SnapFooter, SnapHeader } from "./SnapCommon";
+
+const xenditPaymentMethods = [
+  { id: "va-bca", label: "BCA Virtual Account", detail: "Bayar dari m-BCA, ATM, atau internet banking" },
+  { id: "va-mandiri", label: "Mandiri Virtual Account", detail: "Livin, ATM, dan transfer bank" },
+  { id: "va-bni", label: "BNI Virtual Account", detail: "BNI Mobile, ATM, dan internet banking" },
+  { id: "va-bri", label: "BRI Virtual Account", detail: "BRImo, ATM, dan transfer bank" },
+  { id: "ewallet", label: "E-Wallet", detail: "OVO, DANA, LinkAja, dan ShopeePay" },
+  { id: "qris", label: "QRIS", detail: "Scan QR dari aplikasi pembayaran favorit" },
+  { id: "card", label: "Kartu Kredit / Debit", detail: "Visa, Mastercard, dan kartu debit online" },
+  { id: "retail", label: "Gerai Retail", detail: "Alfamart dan Indomaret" },
+  { id: "paylater", label: "PayLater", detail: "Cicilan dan bayar nanti lewat partner Xendit" }
+];
 
 export function SnapCartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -60,7 +72,7 @@ export function SnapCartPage() {
         <section className="cart-layout">
           <div>
             <article className="cart-list">
-              <header><span><FiShoppingBag /> Cabang aktif</span><h2>{store?.name ?? items[0]?.storeId ?? "Market Snap"}</h2><Link className="outline-action" href="/dashboard/customer/catalog">Ubah cabang</Link></header>
+              <header><span><FiShoppingBag /> Cabang aktif</span><h2>{store?.name ?? items[0]?.storeId ?? "Market Snap"}</h2><Link className="outline-action" href="/catalog">Ubah cabang</Link></header>
               {loading && <CartRowsSkeleton />}
               {!loading && message && <p className="catalog-message">{message}</p>}
               {!loading && items.map((item) => (
@@ -111,7 +123,7 @@ function Summary({ subtotal, shipping, discount, total }: { subtotal: number; sh
       <hr />
       <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
       <div className="eta-card"><FiClock /><span><strong>Estimasi Tiba Hari ini, 18:00 - 20:00</strong><small>Pengantaran cepat di area cabang aktif</small></span></div>
-      <Link className="primary-snap wide" href="/dashboard/customer/checkout"><FiLock /> Checkout Sekarang</Link>
+      <Link className="primary-snap wide" href="/checkout"><FiLock /> Checkout Sekarang</Link>
     </article>
   );
 }
@@ -119,18 +131,27 @@ function Summary({ subtotal, shipping, discount, total }: { subtotal: number; sh
 export function SnapCheckoutPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [store, setStore] = useState<Store>();
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [selectedPaymentId, setSelectedPaymentId] = useState(xenditPaymentMethods[0].id);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + (item.subtotal ?? item.price * item.quantity), 0), [items]);
   const shipping = items.length ? 10000 : 0;
   const discount = subtotal >= 50000 ? Math.min(20000, Math.round(subtotal * 0.2)) : 0;
   const total = Math.max(0, subtotal + shipping - discount);
+  const selectedAddress = useMemo(
+    () => addresses.find((address) => address.id === selectedAddressId) ?? addresses.find((address) => address.isPrimary) ?? addresses[0],
+    [addresses, selectedAddressId]
+  );
 
   useEffect(() => {
-    Promise.all([fetchCart(), fetchNearestStore().catch(() => null)])
-      .then(([cart, nearest]) => {
+    Promise.all([fetchCart(), fetchNearestStore().catch(() => null), fetchAddresses().catch(() => [])])
+      .then(([cart, nearest, addressList]) => {
         setItems(cart.items);
         setStore(nearest?.store);
+        setAddresses(addressList);
+        setSelectedAddressId(addressList.find((address) => address.isPrimary)?.id ?? addressList[0]?.id ?? "");
         setMessage(cart.items.length ? "" : "Cart kosong. Checkout membutuhkan produk.");
       })
       .catch((error) => setMessage(error instanceof Error ? error.message : "Silakan login untuk checkout."))
@@ -138,11 +159,23 @@ export function SnapCheckoutPage() {
   }, []);
 
   async function submitOrder() {
+    if (!selectedAddress) {
+      setMessage("Tambahkan alamat pengiriman dari profil sebelum membuat pesanan.");
+      return;
+    }
+
     try {
-      const result = await createOrderFromCart(items, total, { courier: "manual", paymentMethod: "manual_transfer" });
+      const result = await createOrderFromCart(items, total, {
+        courier: "standard",
+        location: { lat: selectedAddress.lat, lng: selectedAddress.lng },
+        paymentMethod: "xendit"
+      });
       await clearCart().catch(() => undefined);
       setItems([]);
-      setMessage(`Order ${result.data.id} berhasil dibuat dengan status ${result.data.status}.`);
+      setMessage(`Order ${result.data.id} berhasil dibuat. Mengarahkan ke pembayaran ${xenditPaymentMethods.find((method) => method.id === selectedPaymentId)?.label ?? "Xendit"}...`);
+      if (result.payment?.invoiceUrl) {
+        window.location.href = result.payment.invoiceUrl;
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Gagal membuat order.");
     }
@@ -162,7 +195,28 @@ export function SnapCheckoutPage() {
             <section className="checkout-page-grid">
               <div className="checkout-forms">
                 <CheckoutBlock title="1. Alamat Pengiriman" action="Ubah Alamat">
-                  <div className="address-card"><FiHome /><div><strong>Rumah <span>Utama</span></strong><p>Jl. Kemang Raya No. 72, Bangka, Mampang Prapatan, Jakarta Selatan</p><small>Alamat utama pelanggan</small></div></div>
+                  {addresses.length ? (
+                    <div className="address-picker">
+                      {addresses.map((address) => (
+                        <button className={address.id === selectedAddress?.id ? "address-card active" : "address-card"} key={address.id} onClick={() => setSelectedAddressId(address.id)} type="button">
+                          <FiHome />
+                          <div>
+                            <strong>{address.label} {address.isPrimary && <span>Utama</span>}</strong>
+                            <p>{address.detail}</p>
+                            <small>{address.isPrimary ? "Alamat utama pelanggan" : "Alamat tersimpan"}</small>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="address-empty">
+                      <FiHome />
+                      <div>
+                        <strong>Belum ada alamat tersimpan</strong>
+                        <p>Tambahkan alamat dari halaman profil agar checkout memakai lokasi database.</p>
+                      </div>
+                    </div>
+                  )}
                   <button className="dashed-add" type="button"><FiPlus /> Tambah alamat baru</button>
                 </CheckoutBlock>
                 <CheckoutBlock title="2. Jadwal Pengiriman">
@@ -176,7 +230,14 @@ export function SnapCheckoutPage() {
                   <div className="delivery-row"><button className="active" type="button"><FiTruck /> Pengiriman Standar<br /><strong>{rupiah(shipping)}</strong></button><button type="button"><FiZap /> Pengiriman Express<br /><strong>Rp 18.000</strong></button><button type="button"><FiHome /> Ambil di Cabang<br /><strong>GRATIS</strong></button></div>
                 </CheckoutBlock>
                 <CheckoutBlock title="5. Metode Pembayaran">
-                  <div className="payment-row"><button className="active" type="button">Transfer Manual</button><button type="button">Xendit</button><button type="button">COD</button></div>
+                  <div className="payment-row xendit-methods">
+                    {xenditPaymentMethods.map((method) => (
+                      <button className={method.id === selectedPaymentId ? "active" : ""} key={method.id} onClick={() => setSelectedPaymentId(method.id)} type="button">
+                        <strong>{method.label}</strong>
+                        <small>{method.detail}</small>
+                      </button>
+                    ))}
+                  </div>
                   <div className="voucher-success"><strong>Voucher berhasil!</strong><span>Diskon {rupiah(discount)}</span></div>
                 </CheckoutBlock>
               </div>
@@ -189,7 +250,7 @@ export function SnapCheckoutPage() {
                   <p><span>Biaya Pengiriman</span><strong>{rupiah(shipping)}</strong></p>
                   <hr />
                   <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
-                  <button className="primary-snap wide" disabled={!items.length} onClick={submitOrder} type="button"><FiLock /> Buat pesanan</button>
+                  <button className="primary-snap wide" disabled={!items.length || !selectedAddress} onClick={submitOrder} type="button"><FiLock /> Buat pesanan</button>
                 </article>
                 <article className="invoice-card"><h2>Preview Invoice</h2><strong>MARKET SNAP</strong><p>Invoice dibuat setelah order tersimpan</p><hr /><p>Total <b>{rupiah(total)}</b></p></article>
               </aside>

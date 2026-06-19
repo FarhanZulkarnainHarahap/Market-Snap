@@ -1,6 +1,6 @@
-import type { ApiCartItem, ApiProduct, ApiStore, ApiUser, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
+import type { ApiAddress, ApiCartItem, ApiProduct, ApiStore, ApiUser, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
 import { apiUrl } from "./api-url";
-import type { CartItem, Product, Store } from "./types";
+import type { Address, CartItem, Product, Store } from "./types";
 
 export async function loginUser(email: string, password: string) {
   const response = await fetch(apiUrl("/auth/login"), {
@@ -109,6 +109,13 @@ export async function fetchCart() {
   return { items: payload.data.map(mapCartItem), summary: payload.summary };
 }
 
+export async function fetchAddresses(): Promise<Address[]> {
+  const response = await fetch(apiUrl("/addresses"), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat alamat"));
+  const payload = await response.json() as { data: ApiAddress[] };
+  return payload.data.map(mapAddress);
+}
+
 export async function addCartItem(productId: string, storeId: string, quantity = 1) {
   const response = await fetch(apiUrl("/cart"), {
     method: "POST",
@@ -148,7 +155,7 @@ export async function createOrderFromCart(items: CartItem[], total: number, opti
     body: JSON.stringify({
       total,
       items: items.map((item) => ({ productId: item.productId ?? item.id, quantity: item.quantity, price: item.price })),
-      location: { lat: -6.2608, lng: 106.8107 },
+      location: options.location ?? { lat: -6.2608, lng: 106.8107 },
       courier: options.courier,
       destinationId: options.destinationId,
       paymentMethod: options.paymentMethod
@@ -197,6 +204,17 @@ function mapCartItem(item: ApiCartItem): CartItem {
     quantity: item.quantity,
     stock: item.stock,
     subtotal: item.subtotal
+  };
+}
+
+function mapAddress(address: ApiAddress): Address {
+  return {
+    id: address.id,
+    label: address.label,
+    detail: address.detail,
+    lat: address.latitude,
+    lng: address.longitude,
+    isPrimary: address.isPrimary
   };
 }
 

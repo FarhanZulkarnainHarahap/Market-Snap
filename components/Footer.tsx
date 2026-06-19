@@ -17,9 +17,9 @@ export function Footer() {
       </div>
       <div className="footer-links">
         <Link href="/">Home</Link>
-        <Link href="/dashboard/customer/catalog">Catalog</Link>
-        <Link href="/dashboard/customer/about">About</Link>
-        <Link href="/dashboard/customer/contact-us">Contact</Link>
+        <Link href="/catalog">Catalog</Link>
+        <Link href="/about">About</Link>
+        <Link href="/contact-us">Contact</Link>
       </div>
       <div className="footer-bottom">Copyright | The Market Snap | Developed by FARNAJO</div>
     </footer>

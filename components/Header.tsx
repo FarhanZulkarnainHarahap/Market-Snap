@@ -13,17 +13,17 @@ type HeaderProps = {
 
 const publicLinks = [
   { key: "home", href: "/", icon: FiHome, label: "Home" },
-  { key: "catalog", href: "/dashboard/customer/catalog", icon: FiGrid, label: "Catalog" },
-  { key: "about", href: "/dashboard/customer/about", icon: FiInfo, label: "About" },
-  { key: "contact", href: "/dashboard/customer/contact-us", icon: FiMail, label: "Contact" }
+  { key: "catalog", href: "/catalog", icon: FiGrid, label: "Catalog" },
+  { key: "about", href: "/about", icon: FiInfo, label: "About" },
+  { key: "contact", href: "/contact-us", icon: FiMail, label: "Contact" }
 ];
 
 const customerLinks = [
-  { key: "customer", href: "/dashboard/customer", icon: FiHome, label: "Overview" },
-  { key: "catalog", href: "/dashboard/customer/catalog", icon: FiGrid, label: "Catalog" },
-  { key: "orders", href: "/dashboard/customer/my-orders", icon: FiPackage, label: "My Orders" },
-  { key: "profile", href: "/dashboard/customer/profile/address", icon: FiMapPin, label: "Address" },
-  { key: "cart", href: "/dashboard/customer/cart", icon: FiShoppingCart, label: "Cart" }
+  { key: "customer", href: "/", icon: FiHome, label: "Overview" },
+  { key: "catalog", href: "/catalog", icon: FiGrid, label: "Catalog" },
+  { key: "orders", href: "/my-orders", icon: FiPackage, label: "My Orders" },
+  { key: "profile", href: "/profile/address", icon: FiMapPin, label: "Address" },
+  { key: "cart", href: "/cart", icon: FiShoppingCart, label: "Cart" }
 ];
 
 export function Header({ cartCount = 0, active = "home", mode = "public" }: HeaderProps) {
@@ -39,13 +39,13 @@ export function Header({ cartCount = 0, active = "home", mode = "public" }: Head
           <Image src="/market-snap-favicon-transparent.png" alt="Market Snap" width={52} height={52} />
           <span>MARKET SNAP</span>
         </Link>
-        <form action="/dashboard/customer/catalog" className="header-search" role="search">
+        <form action="/catalog" className="header-search" role="search">
           <input aria-label="Cari produk grocery" name="search" placeholder="Cari sayur, buah, susu..." type="search" />
           <button aria-label="Cari produk" title="Cari produk" type="submit"><FiSearch /></button>
         </form>
         <div className="header-actions">
           <Link className="ghost-button" href="/auth/login"><FiLogIn /><span>Masuk</span></Link>
-          <Link className="cart-button" href="/dashboard/customer/cart" aria-label="Keranjang">
+          <Link className="cart-button" href="/cart" aria-label="Keranjang">
             <FiShoppingCart />
             <span>Cart</span>
             <strong>{cartCount}</strong>

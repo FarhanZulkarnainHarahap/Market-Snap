@@ -31,6 +31,15 @@ export type CartItem = Product & {
   subtotal?: number;
 };
 
+export type Address = {
+  id: string;
+  label: string;
+  detail: string;
+  lat: number;
+  lng: number;
+  isPrimary: boolean;
+};
+
 export type OrderStatus =
   | "Menunggu Pembayaran"
   | "Menunggu Konfirmasi Pembayaran"
