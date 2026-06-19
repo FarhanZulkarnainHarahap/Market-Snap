@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Header } from "../Header";
 import { ManagementHeader } from "./ManagementHeader";
+import { SnapHeader } from "../snap/SnapCommon";
 import { fetchDashboardSnapshot, type DashboardRecord, type DashboardRole } from "../../lib/dashboard-api";
 import { rupiah } from "../../lib/format";
 
@@ -81,7 +81,14 @@ export function DashboardFeaturePage(props: FeaturePageProps) {
 
 function DashboardHeader({ active, role }: { active: string; role: DashboardRole }) {
   if (role === "admin" || role === "adminStore") return <ManagementHeader role={role} />;
-  return <Header active={active} mode="customer" />;
+  return <SnapHeader active={snapActive(active)} />;
+}
+
+function snapActive(active: string): "home" | "catalog" | "about" | "contact" {
+  if (active === "catalog") return "catalog";
+  if (active === "about") return "about";
+  if (active === "contact") return "contact";
+  return "home";
 }
 
 function Metric({ label, value }: { label: string; value: string | number }) {

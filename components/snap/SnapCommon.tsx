@@ -38,7 +38,7 @@ const navItems = [
   { key: "contact", href: "/dashboard/customer/contact-us", label: "Contact" }
 ] as const;
 
-export function SnapHeader({ active = "home", simple = false, cartCount = 3 }: HeaderProps) {
+export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: HeaderProps) {
   const [locationLabel, setLocationLabel] = useState(readCachedLocationLabel);
   const [session, setSession] = useState<HeaderSession>(readSession);
 

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { currentUserHeaders } from "../../lib/api";
 import { apiUrl } from "../../lib/api-url";
-import { Header } from "../Header";
 import { ManagementHeader } from "../dashboard/ManagementHeader";
+import { SnapHeader } from "../snap/SnapCommon";
 
 type Role = "customer" | "admin" | "adminStore" | "public";
 
@@ -68,7 +68,14 @@ export function CreateResourceForm({ active, description, endpoint, fields, meth
 
 function FormHeader({ active, role }: { active: string; role: Role }) {
   if (role === "admin" || role === "adminStore") return <ManagementHeader role={role} />;
-  return <Header active={active} mode={role === "customer" ? "customer" : "public"} />;
+  return <SnapHeader active={snapActive(active)} />;
+}
+
+function snapActive(active: string): "home" | "catalog" | "about" | "contact" {
+  if (active === "catalog") return "catalog";
+  if (active === "about") return "about";
+  if (active === "contact") return "contact";
+  return "home";
 }
 
 function FieldInput({ field }: { field: Field }) {

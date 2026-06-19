@@ -1,9 +1,9 @@
-import { Header } from "../../../../components/Header";
+import { SnapHeader } from "@/components/snap/SnapCommon";
 
 export default function ProfilePage() {
   return (
     <>
-      <Header active="profile" mode="customer" />
+      <SnapHeader active="home" />
       <main className="dashboard-shell">
         <section className="page-heading">
           <span className="mini-label">Profil & alamat</span>
