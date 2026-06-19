@@ -12,8 +12,10 @@ import {
   FiHeart,
   FiLock,
   FiLogOut,
+  FiMenu,
   FiMapPin,
   FiPlus,
+  FiSearch,
   FiUser,
   FiShield,
   FiShoppingCart,
@@ -111,7 +113,42 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
         ))}
         {!simple && <Link className="cart-action" href="/cart"><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
       </div>
+      {!simple && <MobileGroceryNav active={active} cartCount={cartCount} locationLabel={locationLabel} profileLabel={profileLabel} session={session} />}
     </header>
+  );
+}
+
+function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, session }: { active: HeaderProps["active"]; cartCount: number; locationLabel: string; profileLabel: string; session: HeaderSession }) {
+  const mobileItems = [
+    { key: "home", href: "/", label: "Home", icon: FiMenu },
+    { key: "catalog", href: "/catalog", label: "Catalog", icon: FiSearch },
+    { key: "about", href: "/about", label: "About", icon: FiShield },
+    { key: "contact", href: "/contact-us", label: "Contact", icon: FiHeadphones }
+  ] as const;
+
+  return (
+    <nav className="mobile-grocery-nav" aria-label="Navigasi mobile">
+      <span className="mobile-veg veg-left" aria-hidden="true">🥬</span>
+      <span className="mobile-veg veg-right" aria-hidden="true">🥕</span>
+      <div className="mobile-location"><FiMapPin /> {locationLabel}</div>
+      <div className="mobile-nav-track">
+        {mobileItems.map(({ key, href, label, icon: Icon }) => (
+          <Link className={active === key ? "active" : ""} href={href} key={key}>
+            <Icon />
+            <span>{label}</span>
+          </Link>
+        ))}
+        <Link className="mobile-cart-link" href="/cart">
+          <FiShoppingCart />
+          <span>Cart</span>
+          <strong>{cartCount}</strong>
+        </Link>
+        <Link className="mobile-profile-link" href={session.isLoggedIn ? "/account/profile" : "/login"}>
+          <FiUser />
+          <span>{session.isLoggedIn ? profileLabel : "Masuk"}</span>
+        </Link>
+      </div>
+    </nav>
   );
 }
 
