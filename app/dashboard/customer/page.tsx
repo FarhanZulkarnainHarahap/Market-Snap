@@ -154,7 +154,7 @@ export default function CustomerDashboardPage() {
         {/* PROMO */}
         <section className="snap-section">
           <div className="promo-banner">
-            <div>
+            <div className="promo-copy">
               <span className="eyebrow">
                 Promo Hari Ini
               </span>
@@ -169,6 +169,12 @@ export default function CustomerDashboardPage() {
                 promo menarik dari Market Snap.
               </p>
 
+              <div className="promo-perks">
+                <span>Diskon member 20%</span>
+                <span>Fresh stock pagi</span>
+                <span>Checkout aman</span>
+              </div>
+
               <Link
                 className="primary-snap"
                 href="/catalog"
@@ -178,7 +184,19 @@ export default function CustomerDashboardPage() {
               </Link>
             </div>
 
-            <GroceryVisual compact />
+            <div className="promo-visual-wrap">
+              <div className="promo-coupon-card">
+                <span>SNAPSHIP</span>
+                <strong>Free Delivery</strong>
+                <small>Untuk area cabang terdekat</small>
+              </div>
+              <GroceryVisual compact />
+              <div className="promo-progress" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
           </div>
         </section>
 

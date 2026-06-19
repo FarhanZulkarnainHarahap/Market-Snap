@@ -1,5 +1,13 @@
-import { DashboardFeaturePage } from "@/components/dashboard/DashboardFeaturePage";
+import { AccountLayout, OrdersAccountContent } from "@/components/snap/AccountPages";
 
 export default function CustomerOrdersPage() {
-  return <DashboardFeaturePage active="customer" description="Daftar order customer, status pembayaran, pengiriman, dan konfirmasi penerimaan." eyebrow="Customer orders" resource="orders" role="customer" title="My Orders" />;
+  return (
+    <AccountLayout
+      active="orders"
+      description="Pantau status pesanan, pembayaran, pengiriman, dan riwayat belanja dari satu halaman."
+      title="Riwayat pesananmu."
+    >
+      <OrdersAccountContent />
+    </AccountLayout>
+  );
 }

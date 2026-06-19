@@ -8,16 +8,18 @@ import {
   FiBell,
   FiClock,
   FiChevronDown,
+  FiCreditCard,
   FiHeadphones,
   FiHeart,
   FiLogOut,
   FiLock,
   FiMapPin,
+  FiPackage,
   FiPlus,
   FiUser,
   FiShield,
   FiShoppingCart,
-  FiShoppingBag,
+  FiTag,
   FiTruck
 } from "react-icons/fi";
 import { rupiah } from "@/lib/format";
@@ -117,11 +119,25 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
 }
 
 function ProfileMenu({ onLogout }: { onLogout: () => void }) {
+  const menuItems = [
+    { href: "/profile", icon: FiUser, label: "Profile", text: "Data personal" },
+    { href: "/profile/address", icon: FiMapPin, label: "Address", text: "Alamat pengiriman" },
+    { href: "/my-orders", icon: FiPackage, label: "My Orders", text: "Riwayat belanja" },
+    { href: "/profile/notifications", icon: FiBell, label: "Notifications", text: "Update pesanan" },
+    { href: "/profile/vouchers", icon: FiTag, label: "Vouchers", text: "Promo tersimpan" },
+    { href: "/profile/payment", icon: FiCreditCard, label: "Payment", text: "Metode pembayaran" },
+    { href: "/profile/security", icon: FiLock, label: "Security", text: "Password & akses" },
+    { href: "/profile/help-center", icon: FiHeadphones, label: "Help Center", text: "Bantuan pelanggan" }
+  ];
+
   return (
     <div className="profile-menu" onClick={(event) => event.stopPropagation()} role="menu">
-      <Link href="/profile" role="menuitem"><FiUser /> Profile</Link>
-      <Link href="/my-orders" role="menuitem"><FiBell /> Notification</Link>
-      <Link href="/my-orders" role="menuitem"><FiShoppingBag /> History</Link>
+      {menuItems.map(({ href, icon: Icon, label, text }) => (
+        <Link href={href} key={href} role="menuitem">
+          <Icon />
+          <span><strong>{label}</strong><small>{text}</small></span>
+        </Link>
+      ))}
       <button onClick={onLogout} role="menuitem" type="button"><FiLogOut /> Logout</button>
     </div>
   );
@@ -193,10 +209,24 @@ export function GroceryVisual({ compact = false }: { compact?: boolean }) {
   return (
     <div className={compact ? "grocery-visual compact" : "grocery-visual"}>
       <div className="visual-halo" />
-      <Image alt="Market Snap grocery bag" className="bag-image" height={520} priority src="/market-snap.png" width={520} />
-      <img alt="Tomat segar" className="floating tomato" src="/tomato.png" />
-      <img alt="Roti segar" className="floating bread" src="/bread.png" />
-      <img alt="Nanas segar" className="floating pineapple" src="/pineapple.png" />
+      <div className="grocery-stage">
+        <div className="freshness-card">
+          <FiShield />
+          <span><strong>Fresh Check</strong><small>Dipilih pagi ini</small></span>
+        </div>
+        <Image alt="Produk grocery Market Snap" className="product-stack-image" height={560} priority src="/product.png" width={560} />
+        <div className="brand-tote">
+          <span>MARKET SNAP</span>
+          <small>nearest branch</small>
+        </div>
+        <div className="delivery-chip">
+          <FiTruck />
+          <span>20-30 min</span>
+        </div>
+        <img alt="Tomat segar" className="floating tomato" src="/tomato.png" />
+        <img alt="Roti segar" className="floating bread" src="/bread.png" />
+        <img alt="Nanas segar" className="floating pineapple" src="/pineapple.png" />
+      </div>
     </div>
   );
 }
