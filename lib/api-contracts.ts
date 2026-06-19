@@ -46,7 +46,7 @@ export type ApiUser = {
   id: string;
   name: string;
   email: string;
-  role: "user" | "admin" | "super_admin" | "store_admin";
+  role: "user" | "admin" | "super_admin" | "store_admin" | "USER" | "ADMIN" | "SUPER_ADMIN" | "STORE_ADMIN";
 };
 
 export type LoginResponse = {

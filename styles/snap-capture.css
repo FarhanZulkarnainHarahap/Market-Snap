@@ -1439,6 +1439,75 @@ body {
   font-size: 22px;
 }
 
+.auth-modal-backdrop {
+  align-items: center;
+  background: rgba(3, 28, 13, .48);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 100;
+}
+
+.auth-modal {
+  background: #fff;
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(4, 31, 15, .22);
+  display: grid;
+  gap: 14px;
+  max-width: 420px;
+  padding: 32px;
+  position: relative;
+  text-align: center;
+  width: 100%;
+}
+
+.auth-modal-close {
+  align-items: center;
+  background: #f7faf6;
+  border: 1px solid var(--snap-line);
+  border-radius: 999px;
+  color: var(--snap-green);
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  width: 36px;
+}
+
+.auth-modal-icon {
+  align-items: center;
+  background: #eef8eb;
+  border-radius: 999px;
+  color: var(--snap-green);
+  display: inline-flex;
+  font-size: 36px;
+  height: 72px;
+  justify-content: center;
+  justify-self: center;
+  width: 72px;
+}
+
+.auth-modal.error .auth-modal-icon {
+  background: #fff1ed;
+  color: #d94a1e;
+}
+
+.auth-modal h2 {
+  color: var(--snap-green);
+  font-size: 26px;
+}
+
+.auth-modal p {
+  color: var(--snap-muted);
+  line-height: 1.7;
+  margin: 0;
+}
+
 .auth-image-panel,
 .register-info {
   background: linear-gradient(135deg, #f7fbf5, #edf7ec);

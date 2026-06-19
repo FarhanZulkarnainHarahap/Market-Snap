@@ -37,9 +37,12 @@ export function currentUserHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export function webRole(role: ApiUser["role"]) {
-  if (role === "super_admin" || role === "admin") return "admin";
-  if (role === "store_admin") return "adminStore";
+export type WebRole = "admin" | "adminStore" | "customer";
+
+export function webRole(role: ApiUser["role"]): WebRole {
+  const normalized = String(role).toLowerCase();
+  if (normalized === "super_admin" || normalized === "admin") return "admin";
+  if (normalized === "store_admin") return "adminStore";
   return "customer";
 }
 

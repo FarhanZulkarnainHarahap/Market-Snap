@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 const roleHome = {
-  customer: "/dashboard/customer",
-  admin: "/dashboard/admin",
-  adminStore: "/dashboard/adminStore"
+  customer: "/",
+  admin: "/admin",
+  adminStore: "/admin-store"
 } as const;
 
 type Role = keyof typeof roleHome;
@@ -14,7 +14,7 @@ export function proxy(request: NextRequest) {
 
   if (path === "/dashboard") return redirect(request, role ? roleHome[role] : "/login");
   if (path.startsWith("/dashboard/customer")) return guard(request, role, "customer");
-  if (path.startsWith("/dashboard/adminStore")) return guard(request, role, "adminStore");
+  if (path.startsWith("/dashboard/admin-store")) return guard(request, role, "adminStore");
   if (path.startsWith("/dashboard/admin")) return guard(request, role, "admin");
   return NextResponse.next();
 }
