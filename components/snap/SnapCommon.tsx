@@ -205,27 +205,55 @@ function labelFromCoordinates(lat: number, lng: number) {
   return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
 }
 
-export function GroceryVisual({ compact = false }: { compact?: boolean }) {
+type GroceryVisualVariant = "hero" | "promo" | "catalog" | "storefront";
+
+const groceryVisuals: Record<GroceryVisualVariant, { alt: string; height: number; src: string; width: number }> = {
+  hero: {
+    alt: "Tas belanja Market Snap berisi produk segar",
+    height: 900,
+    src: "/market-snap-hero-v2.png",
+    width: 1350
+  },
+  promo: {
+    alt: "Voucher promo Market Snap dengan perlengkapan pengiriman",
+    height: 720,
+    src: "/market-snap-promo-v2.png",
+    width: 1350
+  },
+  catalog: {
+    alt: "Kumpulan produk katalog Market Snap",
+    height: 675,
+    src: "/market-snap-catalog-v2.png",
+    width: 1350
+  },
+  storefront: {
+    alt: "Toko grocery Market Snap dengan pengiriman cepat",
+    height: 900,
+    src: "/market-snap-storefront-v2.png",
+    width: 1350
+  }
+};
+
+export function GroceryVisual({ compact = false, variant = "hero" }: { compact?: boolean; variant?: GroceryVisualVariant }) {
+  const visual = groceryVisuals[variant];
+
   return (
-    <div className={compact ? "grocery-visual compact" : "grocery-visual"}>
+    <div className={`grocery-visual variant-${variant}${compact ? " compact" : ""}`}>
       <div className="visual-halo" />
       <div className="grocery-stage">
-        <div className="freshness-card">
+        {variant === "hero" && <div className="freshness-card">
           <FiShield />
           <span><strong>Fresh Check</strong><small>Dipilih pagi ini</small></span>
-        </div>
-        <Image alt="Produk grocery Market Snap" className="product-stack-image" height={560} priority src="/product.png" width={560} />
-        <div className="brand-tote">
+        </div>}
+        <Image alt={visual.alt} className="product-stack-image" height={visual.height} priority src={visual.src} width={visual.width} />
+        {variant === "hero" && <div className="brand-tote">
           <span>MARKET SNAP</span>
           <small>nearest branch</small>
-        </div>
-        <div className="delivery-chip">
+        </div>}
+        {variant !== "catalog" && <div className="delivery-chip">
           <FiTruck />
-          <span>20-30 min</span>
-        </div>
-        <img alt="Tomat segar" className="floating tomato" src="/tomato.png" />
-        <img alt="Roti segar" className="floating bread" src="/bread.png" />
-        <img alt="Nanas segar" className="floating pineapple" src="/pineapple.png" />
+          <span>{variant === "storefront" ? "Cabang aktif" : "20-30 min"}</span>
+        </div>}
       </div>
     </div>
   );

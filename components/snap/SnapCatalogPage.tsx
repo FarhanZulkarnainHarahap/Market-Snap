@@ -50,7 +50,7 @@ export function SnapHomePage() {
               <Link className="secondary-snap" href="/about">Tentang kami</Link>
             </div>
           </div>
-          <GroceryVisual />
+          <GroceryVisual variant="hero" />
         </section>
         <section className="snap-section">
           <div className="snap-section-title inline">
@@ -122,7 +122,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
             <h1>Fresh Catalog</h1>
             <p>Belanja grocery dari cabang terdekat</p>
           </div>
-          <GroceryVisual compact />
+          <GroceryVisual compact variant="catalog" />
         </section>
         <section className="catalog-search-card" aria-label="Filter katalog">
           <label className="search-box">

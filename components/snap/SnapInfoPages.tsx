@@ -13,7 +13,7 @@ export function SnapAboutPage() {
             <p>Market Snap menghubungkan Anda dengan inventori aktual dari cabang terdekat. Produk segar, siap diambil atau dikirim cepat langsung dari toko kami.</p>
             <div className="feature-row"><span>Segar setiap hari</span><span>Dari cabang terdekat</span><span>Cepat & terpercaya</span></div>
           </div>
-          <GroceryVisual compact />
+          <GroceryVisual compact variant="storefront" />
         </section>
         <section className="about-cards-grid">
           {[
@@ -49,7 +49,7 @@ export function SnapContactPage() {
       <main>
         <section className="info-hero">
           <div><h1>Kami siap membantu kebutuhan belanjamu.</h1><p>Punya pertanyaan, butuh bantuan, atau ingin bekerja sama? Tim Market Snap selalu siap membantu dengan cepat dan ramah.</p></div>
-          <GroceryVisual compact />
+          <GroceryVisual compact variant="storefront" />
         </section>
         <section className="contact-capture-grid">
           <aside className="contact-list-panel">

@@ -351,10 +351,10 @@ body {
   animation: grocery-float 5.4s ease-in-out infinite;
   height: auto;
   justify-self: center;
-  max-width: min(500px, 88vw);
+  max-width: min(660px, 92vw);
   object-fit: contain;
   position: relative;
-  width: 78%;
+  width: 92%;
   z-index: 4;
 }
 
@@ -459,7 +459,36 @@ body {
 }
 
 .grocery-visual.compact .product-stack-image {
-  max-width: 360px;
+  max-width: 500px;
+}
+
+.grocery-visual.variant-promo .product-stack-image,
+.grocery-visual.variant-catalog .product-stack-image {
+  max-width: min(620px, 96vw);
+  width: 96%;
+}
+
+.grocery-visual.variant-storefront .product-stack-image {
+  max-width: min(610px, 92vw);
+}
+
+.grocery-visual.variant-catalog .visual-halo {
+  bottom: 18%;
+  height: 52%;
+  right: 1%;
+  width: 92%;
+}
+
+.grocery-visual.variant-promo .visual-halo {
+  background:
+    linear-gradient(135deg, rgba(255, 248, 232, .94), rgba(234, 247, 231, .86)),
+    repeating-linear-gradient(90deg, rgba(255, 122, 0, .07) 0 1px, transparent 1px 32px);
+}
+
+.grocery-visual.variant-storefront .visual-halo {
+  bottom: 6%;
+  height: 76%;
+  width: 86%;
 }
 
 .grocery-visual.compact .freshness-card {

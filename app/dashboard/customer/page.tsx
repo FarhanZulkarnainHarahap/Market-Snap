@@ -112,7 +112,7 @@ export default function CustomerDashboardPage() {
             </div>
           </div>
 
-          <GroceryVisual />
+          <GroceryVisual variant="hero" />
         </section>
 
         {/* POPULAR PRODUCTS */}
@@ -185,12 +185,7 @@ export default function CustomerDashboardPage() {
             </div>
 
             <div className="promo-visual-wrap">
-              <div className="promo-coupon-card">
-                <span>SNAPSHIP</span>
-                <strong>Free Delivery</strong>
-                <small>Untuk area cabang terdekat</small>
-              </div>
-              <GroceryVisual compact />
+              <GroceryVisual compact variant="promo" />
               <div className="promo-progress" aria-hidden="true">
                 <span />
                 <span />

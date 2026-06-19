@@ -71,7 +71,7 @@ export function SnapLoginPage() {
             <AuthMini icon={<FiTag />} title="Promo terbaik setiap hari" text="Dapatkan penawaran spesial untuk belanja lebih hemat." />
           </div>
         </section>
-        <section className="auth-image-panel"><GroceryVisual /></section>
+        <section className="auth-image-panel"><GroceryVisual variant="storefront" /></section>
       </main>
       {modal && <AuthStatusModal modal={modal} onClose={closeModal} />}
     </>
@@ -135,7 +135,7 @@ export function SnapRegisterPage() {
           <AuthMini icon={<FiTag />} title="Promo pengguna baru" text="Dapatkan penawaran spesial dan diskon menarik setiap hari." />
           <AuthMini icon={<FiShoppingBag />} title="Checkout lebih cepat" text="Proses belanja praktis dengan pembayaran aman." />
           <AuthMini icon={<FiTruck />} title="Lacak pesanan" text="Pantau pesanan Anda secara real-time hingga sampai ke rumah." />
-          <GroceryVisual compact />
+          <GroceryVisual compact variant="promo" />
         </section>
       </main>
       <BenefitStrip />
