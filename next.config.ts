@@ -12,6 +12,21 @@ const nextConfig: NextConfig = {
         source: "/dashboard/customer/:path*",
         destination: "/:path*",
         permanent: false
+      },
+      {
+        source: "/profile",
+        destination: "/account/profile",
+        permanent: false
+      },
+      {
+        source: "/profile/:path*",
+        destination: "/account/:path*",
+        permanent: false
+      },
+      {
+        source: "/my-orders",
+        destination: "/account/orders",
+        permanent: false
       }
     ];
   },
@@ -31,6 +46,42 @@ const nextConfig: NextConfig = {
         {
           source: "/register",
           destination: "/auth/register"
+        },
+        {
+          source: "/account",
+          destination: "/dashboard/customer/profile"
+        },
+        {
+          source: "/account/profile",
+          destination: "/dashboard/customer/profile"
+        },
+        {
+          source: "/account/address",
+          destination: "/dashboard/customer/profile/address"
+        },
+        {
+          source: "/account/orders",
+          destination: "/dashboard/customer/my-orders"
+        },
+        {
+          source: "/account/notifications",
+          destination: "/dashboard/customer/profile/notifications"
+        },
+        {
+          source: "/account/vouchers",
+          destination: "/dashboard/customer/profile/vouchers"
+        },
+        {
+          source: "/account/payment",
+          destination: "/dashboard/customer/profile/payment"
+        },
+        {
+          source: "/account/security",
+          destination: "/dashboard/customer/profile/security"
+        },
+        {
+          source: "/account/help-center",
+          destination: "/dashboard/customer/profile/help-center"
         },
         {
           source: "/admin",

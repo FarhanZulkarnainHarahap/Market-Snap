@@ -8,18 +8,15 @@ import {
   FiBell,
   FiClock,
   FiChevronDown,
-  FiCreditCard,
   FiHeadphones,
   FiHeart,
-  FiLogOut,
   FiLock,
+  FiLogOut,
   FiMapPin,
-  FiPackage,
   FiPlus,
   FiUser,
   FiShield,
   FiShoppingCart,
-  FiTag,
   FiTruck
 } from "react-icons/fi";
 import { rupiah } from "@/lib/format";
@@ -120,14 +117,8 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
 
 function ProfileMenu({ onLogout }: { onLogout: () => void }) {
   const menuItems = [
-    { href: "/profile", icon: FiUser, label: "Profile", text: "Data personal" },
-    { href: "/profile/address", icon: FiMapPin, label: "Address", text: "Alamat pengiriman" },
-    { href: "/my-orders", icon: FiPackage, label: "My Orders", text: "Riwayat belanja" },
-    { href: "/profile/notifications", icon: FiBell, label: "Notifications", text: "Update pesanan" },
-    { href: "/profile/vouchers", icon: FiTag, label: "Vouchers", text: "Promo tersimpan" },
-    { href: "/profile/payment", icon: FiCreditCard, label: "Payment", text: "Metode pembayaran" },
-    { href: "/profile/security", icon: FiLock, label: "Security", text: "Password & akses" },
-    { href: "/profile/help-center", icon: FiHeadphones, label: "Help Center", text: "Bantuan pelanggan" }
+    { href: "/account/profile", icon: FiUser, label: "Account", text: "Profile, alamat, pesanan" },
+    { href: "/account/notifications", icon: FiBell, label: "Notification", text: "Update pesanan & promo" }
   ];
 
   return (

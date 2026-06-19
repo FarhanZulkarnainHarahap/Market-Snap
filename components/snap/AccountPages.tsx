@@ -23,14 +23,14 @@ import type { Voucher } from "@/lib/types";
 type AccountSection = "profile" | "address" | "orders" | "notifications" | "vouchers" | "payment" | "security" | "help";
 
 const accountMenus: Array<{ key: AccountSection; href: string; label: string; text: string; icon: typeof FiUser }> = [
-  { key: "profile", href: "/profile", label: "Profile", text: "Data personal", icon: FiUser },
-  { key: "address", href: "/profile/address", label: "Address", text: "Alamat pengiriman", icon: FiMapPin },
-  { key: "orders", href: "/my-orders", label: "My Orders", text: "Riwayat belanja", icon: FiPackage },
-  { key: "notifications", href: "/profile/notifications", label: "Notifications", text: "Update pesanan", icon: FiBell },
-  { key: "vouchers", href: "/profile/vouchers", label: "Vouchers", text: "Promo tersimpan", icon: FiTag },
-  { key: "payment", href: "/profile/payment", label: "Payment", text: "Metode pembayaran", icon: FiCreditCard },
-  { key: "security", href: "/profile/security", label: "Security", text: "Password & akses", icon: FiLock },
-  { key: "help", href: "/profile/help-center", label: "Help Center", text: "Bantuan pelanggan", icon: FiHeadphones }
+  { key: "profile", href: "/account/profile", label: "Profile", text: "Data personal", icon: FiUser },
+  { key: "address", href: "/account/address", label: "Address", text: "Alamat pengiriman", icon: FiMapPin },
+  { key: "orders", href: "/account/orders", label: "My Orders", text: "Riwayat belanja", icon: FiPackage },
+  { key: "notifications", href: "/account/notifications", label: "Notifications", text: "Update pesanan", icon: FiBell },
+  { key: "vouchers", href: "/account/vouchers", label: "Vouchers", text: "Promo tersimpan", icon: FiTag },
+  { key: "payment", href: "/account/payment", label: "Payment", text: "Metode pembayaran", icon: FiCreditCard },
+  { key: "security", href: "/account/security", label: "Security", text: "Password & akses", icon: FiLock },
+  { key: "help", href: "/account/help-center", label: "Help Center", text: "Bantuan pelanggan", icon: FiHeadphones }
 ];
 
 export function AccountLayout({ active, children, title, description }: { active: AccountSection; children: React.ReactNode; title: string; description: string }) {

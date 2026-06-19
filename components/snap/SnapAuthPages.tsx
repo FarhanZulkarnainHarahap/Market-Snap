@@ -3,15 +3,25 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { FiAlertCircle, FiCheckCircle, FiEyeOff, FiLock, FiLogIn, FiMail, FiShoppingBag, FiTag, FiTruck, FiUser, FiUserPlus, FiX } from "react-icons/fi";
+import { FiAlertCircle, FiArrowLeft, FiCheck, FiCheckCircle, FiEyeOff, FiLock, FiLogIn, FiMail, FiShoppingBag, FiTag, FiTruck, FiUser, FiUserPlus, FiX } from "react-icons/fi";
 import { loginUser, registerUser, webRole } from "@/lib/api";
-import { BenefitStrip, GroceryVisual, SnapFooter, SnapHeader } from "./SnapCommon";
+import { GroceryVisual } from "./SnapCommon";
 
 type AuthModal = {
   variant: "success" | "error";
   title: string;
   message: string;
   redirectTo?: string;
+};
+
+type RegisterStep = 1 | 2 | 3;
+
+type RegisterForm = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  referralCode: string;
 };
 
 export function SnapLoginPage() {
@@ -63,7 +73,7 @@ export function SnapLoginPage() {
             <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/auth/login">Lupa password?</Link></div>
             <button aria-busy={busy} className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> Masuk</button>
             <em>atau</em>
-            <Link className="secondary-snap wide" href="/auth/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
+            <Link className="secondary-snap wide" href="/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
           </form>
           <div className="login-benefits">
             <AuthMini icon={<FiShoppingBag />} title="Belanja mudah & cepat" text="Temukan kebutuhan harian dari cabang terdekat." />
@@ -80,53 +90,117 @@ export function SnapLoginPage() {
 
 export function SnapRegisterPage() {
   const router = useRouter();
-  const [message, setMessage] = useState("Daftar gratis dan mulai belanja kebutuhan harian dengan mudah.");
+  const [step, setStep] = useState<RegisterStep>(1);
+  const [formState, setFormState] = useState<RegisterForm>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    referralCode: ""
+  });
+  const [error, setError] = useState("");
+  const [modal, setModal] = useState<AuthModal | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const password = String(form.get("password"));
-    const confirm = String(form.get("confirmPassword"));
-    if (password !== confirm) {
-      setMessage("Konfirmasi password tidak sama.");
+    setError("");
+
+    if (step === 1) {
+      if (!formState.name.trim() || !formState.email.trim()) {
+        setError("Nama lengkap dan email wajib diisi.");
+        return;
+      }
+      setStep(2);
       return;
     }
+
+    if (step === 2) {
+      if (formState.password.length < 6) {
+        setError("Password minimal 6 karakter.");
+        return;
+      }
+      if (formState.password !== formState.confirmPassword) {
+        setError("Konfirmasi password tidak sama.");
+        return;
+      }
+      setStep(3);
+      return;
+    }
+
     setBusy(true);
     try {
       await registerUser({
-        name: String(form.get("name")),
-        email: String(form.get("email")),
-        password,
-        referralCode: String(form.get("referralCode") || "")
+        name: formState.name.trim(),
+        email: formState.email.trim(),
+        password: formState.password,
+        referralCode: formState.referralCode.trim()
       });
-      setMessage("Registrasi berhasil. Silakan login.");
-      router.push("/auth/login");
+      setModal({
+        variant: "success",
+        title: "Registrasi berhasil",
+        message: "Akun Market Snap sudah dibuat. Silakan masuk untuk mulai belanja.",
+        redirectTo: "/login"
+      });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Registrasi gagal.");
+      setModal({
+        variant: "error",
+        title: "Registrasi gagal",
+        message: error instanceof Error ? error.message : "Registrasi gagal. Coba lagi sebentar."
+      });
     } finally {
       setBusy(false);
     }
   }
 
+  function updateField(field: keyof RegisterForm) {
+    return (event: React.ChangeEvent<HTMLInputElement>) => {
+      setFormState((current) => ({ ...current, [field]: event.target.value }));
+    };
+  }
+
+  function closeModal() {
+    const redirectTo = modal?.redirectTo;
+    setModal(null);
+    if (redirectTo) router.push(redirectTo);
+  }
+
   return (
     <>
-      <SnapHeader simple={false} active="home" />
       <main className="auth-capture register-capture">
         <section className="register-card">
+          <Link className="auth-brand" href="/">MARKET SNAP</Link>
+          <span className="auth-step-pill">Langkah {step} dari 3</span>
           <FiUserPlus className="auth-big-icon" />
           <h1>Buat akun Market Snap</h1>
-          <p>{message}</p>
+          <p>{registerStepCopy(step)}</p>
+          <div className="auth-stepper" aria-label="Progress registrasi">
+            {[1, 2, 3].map((item) => (
+              <span className={item <= step ? "active" : ""} key={item}>{item < step ? <FiCheck /> : item}</span>
+            ))}
+          </div>
           <form className="capture-form compact" onSubmit={submit}>
-            <label>Nama lengkap<input name="name" placeholder="Masukkan nama lengkap Anda" required /></label>
-            <label>Email<input name="email" placeholder="Masukkan email Anda" required type="email" /></label>
-            <label>Nomor HP<input name="phone" placeholder="Contoh: 0812-3456-7890" /></label>
-            <label>Password<input name="password" placeholder="Buat password" required type="password" /></label>
-            <label>Konfirmasi Password<input name="confirmPassword" placeholder="Ulangi password" required type="password" /></label>
-            <label>Kode referral (opsional)<input name="referralCode" placeholder="Masukkan kode referral" /></label>
-            <label className="agree-line"><input required type="checkbox" /> Saya setuju dengan Syarat & Ketentuan dan Kebijakan Privasi</label>
-            <button className="primary-snap wide" disabled={busy} type="submit">{busy ? "Mendaftarkan..." : "Daftar"}</button>
-            <p className="center-copy">Sudah punya akun? <Link href="/auth/login">Masuk di sini</Link></p>
+            {step === 1 && (
+              <>
+                <label>Nama lengkap<input autoComplete="name" onChange={updateField("name")} placeholder="Masukkan nama lengkap Anda" required value={formState.name} /></label>
+                <label>Email<input autoComplete="email" onChange={updateField("email")} placeholder="Masukkan email Anda" required type="email" value={formState.email} /></label>
+              </>
+            )}
+            {step === 2 && (
+              <>
+                <label>Password<input autoComplete="new-password" onChange={updateField("password")} placeholder="Buat password" required type="password" value={formState.password} /></label>
+                <label>Konfirmasi Password<input autoComplete="new-password" onChange={updateField("confirmPassword")} placeholder="Ulangi password" required type="password" value={formState.confirmPassword} /></label>
+              </>
+            )}
+            {step === 3 && (
+              <label>Kode referral <small>Opsional, boleh dikosongkan</small><input onChange={updateField("referralCode")} placeholder="Masukkan kode referral jika ada" value={formState.referralCode} /></label>
+            )}
+            {error && <p className="auth-step-error">{error}</p>}
+            <div className="auth-step-actions">
+              {step > 1 && <button className="secondary-snap" onClick={() => setStep((current) => (current - 1) as RegisterStep)} type="button"><FiArrowLeft /> Kembali</button>}
+              <button className="primary-snap wide" disabled={busy} type="submit">{busy ? "Mendaftarkan..." : step === 3 ? "Daftar" : "OK"}</button>
+            </div>
+            <p className="center-copy">Sudah punya akun? <Link href="/login">Masuk di sini</Link></p>
           </form>
         </section>
         <section className="register-info">
@@ -138,10 +212,15 @@ export function SnapRegisterPage() {
           <GroceryVisual compact variant="promo" />
         </section>
       </main>
-      <BenefitStrip />
-      <SnapFooter />
+      {modal && <AuthStatusModal modal={modal} onClose={closeModal} />}
     </>
   );
+}
+
+function registerStepCopy(step: RegisterStep) {
+  if (step === 1) return "Masukkan nama lengkap dan email aktif untuk membuat akun.";
+  if (step === 2) return "Buat password akun lalu konfirmasi password yang sama.";
+  return "Tambahkan kode referral jika ada. Bagian ini bisa dikosongkan.";
 }
 
 function AuthMini({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
