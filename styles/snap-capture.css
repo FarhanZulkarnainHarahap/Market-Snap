@@ -73,6 +73,7 @@ body {
 
 .location-chip,
 .outline-action,
+.profile-action,
 .cart-action,
 .secondary-snap,
 .primary-snap,
@@ -97,6 +98,7 @@ body {
 
 .location-chip,
 .outline-action,
+.profile-action,
 .secondary-snap {
   background: #fff;
   border: 1px solid #cfd9d0;
@@ -106,12 +108,23 @@ body {
 
 .location-chip,
 .outline-action,
+.profile-action,
 .cart-action {
   align-items: center;
   display: inline-flex;
   gap: 8px;
   min-height: 46px;
   padding: 0 18px;
+}
+
+.profile-action {
+  max-width: 180px;
+}
+
+.profile-action span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cart-action,

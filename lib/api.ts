@@ -24,11 +24,20 @@ export async function registerUser(payload: { name: string; email: string; passw
   return response.json() as Promise<RegisterResponse>;
 }
 
+export async function fetchCurrentUser() {
+  const response = await fetch(apiUrl("/auth/me"), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Profil belum dapat dimuat"));
+  const payload = await response.json() as { data: ApiUser };
+  return payload.data;
+}
+
 export function saveSession(payload: LoginResponse) {
   const role = webRole(payload.user.role);
   document.cookie = `market-snap-role=${role}; path=/; max-age=86400; SameSite=Lax`;
   window.localStorage.setItem("market-snap-token", payload.token);
   window.localStorage.setItem("market-snap-user-id", payload.user.id);
+  window.localStorage.setItem("market-snap-user-name", payload.user.name);
+  window.localStorage.setItem("market-snap-user-email", payload.user.email);
   window.localStorage.setItem("market-snap-role", role);
 }
 

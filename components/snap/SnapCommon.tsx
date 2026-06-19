@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   FiArrowRight,
   FiClock,
@@ -8,17 +11,24 @@ import {
   FiLock,
   FiMapPin,
   FiPlus,
+  FiUser,
   FiShield,
   FiShoppingCart,
   FiTruck
 } from "react-icons/fi";
 import { rupiah } from "@/lib/format";
+import { fetchCurrentUser } from "@/lib/api";
 import type { Product, Store } from "@/lib/types";
 
 type HeaderProps = {
   active?: "home" | "catalog" | "about" | "contact";
   simple?: boolean;
   cartCount?: number;
+};
+
+type HeaderSession = {
+  isLoggedIn: boolean;
+  name: string;
 };
 
 const navItems = [
@@ -29,6 +39,27 @@ const navItems = [
 ] as const;
 
 export function SnapHeader({ active = "home", simple = false, cartCount = 3 }: HeaderProps) {
+  const [locationLabel, setLocationLabel] = useState(readCachedLocationLabel);
+  const [session, setSession] = useState<HeaderSession>(readSession);
+
+  useEffect(() => {
+    const storedSession = readSession();
+    const frame = window.requestAnimationFrame(() => setSession(storedSession));
+    if (storedSession.isLoggedIn && !storedSession.name) {
+      fetchCurrentUser()
+        .then((user) => {
+          window.localStorage.setItem("market-snap-user-name", user.name);
+          window.localStorage.setItem("market-snap-user-email", user.email);
+          setSession({ isLoggedIn: true, name: user.name || user.email });
+        })
+        .catch(() => undefined);
+    }
+    refreshLocationLabel(setLocationLabel);
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const profileLabel = displayName(session.name);
+
   return (
     <header className="snap-header">
       <Link className="snap-brand" href="/">MARKET SNAP</Link>
@@ -47,12 +78,66 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 3 }: H
         </nav>
       )}
       <div className="snap-actions">
-        <button className="location-chip" type="button"><FiMapPin /> Jakarta Selatan</button>
-        {!simple && <Link className="outline-action" href="/auth/login">Masuk</Link>}
+        <button className="location-chip" onClick={() => refreshLocationLabel(setLocationLabel)} title="Perbarui lokasi dari GPS" type="button"><FiMapPin /> {locationLabel}</button>
+        {!simple && (session.isLoggedIn ? (
+          <Link className="profile-action" href="/dashboard/customer/profile"><FiUser /> <span>{profileLabel}</span></Link>
+        ) : (
+          <Link className="outline-action" href="/auth/login">Masuk</Link>
+        ))}
         {!simple && <Link className="cart-action" href="/dashboard/customer/cart"><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
       </div>
     </header>
   );
+}
+
+function readSession(): HeaderSession {
+  if (typeof window === "undefined") return { isLoggedIn: false, name: "" };
+  const token = window.localStorage.getItem("market-snap-token");
+  return {
+    isLoggedIn: Boolean(token),
+    name: window.localStorage.getItem("market-snap-user-name") || window.localStorage.getItem("market-snap-user-email") || ""
+  };
+}
+
+function readCachedLocationLabel() {
+  if (typeof window === "undefined") return "Mendeteksi lokasi";
+  return window.localStorage.getItem("market-snap-location-label") || "Mendeteksi lokasi";
+}
+
+function displayName(name: string) {
+  if (!name) return "Profil";
+  const firstName = name.split(/\s+/)[0];
+  return firstName.length > 16 ? `${firstName.slice(0, 14)}...` : firstName;
+}
+
+function refreshLocationLabel(setLocationLabel: (label: string) => void) {
+  if (typeof navigator === "undefined" || !navigator.geolocation) {
+    setLocationLabel("Lokasi tidak tersedia");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const label = labelFromCoordinates(position.coords.latitude, position.coords.longitude);
+      window.localStorage.setItem("market-snap-location-label", label);
+      window.localStorage.setItem("market-snap-location-lat", String(position.coords.latitude));
+      window.localStorage.setItem("market-snap-location-lng", String(position.coords.longitude));
+      window.localStorage.setItem("market-snap-location-updated-at", String(Date.now()));
+      setLocationLabel(label);
+    },
+    () => {
+      if (!window.localStorage.getItem("market-snap-location-label")) setLocationLabel("Aktifkan lokasi");
+    },
+    { enableHighAccuracy: true, maximumAge: 60_000, timeout: 5000 }
+  );
+}
+
+function labelFromCoordinates(lat: number, lng: number) {
+  if (lat >= 3.35 && lat <= 3.9 && lng >= 98.45 && lng <= 99.05) return "Medan";
+  if (lat >= -6.45 && lat <= -5.95 && lng >= 106.6 && lng <= 107.05) return "Jakarta Selatan";
+  if (lat >= -6.45 && lat <= -6.1 && lng >= 106.55 && lng <= 106.85) return "Tangerang Selatan";
+  if (lat >= -6.45 && lat <= -6.05 && lng >= 106.9 && lng <= 107.15) return "Bekasi";
+  return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
 }
 
 export function GroceryVisual({ compact = false }: { compact?: boolean }) {
