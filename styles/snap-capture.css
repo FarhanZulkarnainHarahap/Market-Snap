@@ -1449,6 +1449,34 @@ body {
   padding: 0 12px;
 }
 
+.voucher-box > div {
+  display: grid;
+  gap: 10px;
+}
+
+.voucher-box p {
+  color: var(--snap-muted);
+  font-weight: 800;
+  margin: 0;
+}
+
+.voucher-apply-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.voucher-box select {
+  background: #fff;
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  color: #1b281f;
+  font-weight: 800;
+  min-height: 48px;
+  padding: 0 12px;
+  width: 100%;
+}
+
 .summary-panel,
 .nearest-card,
 .trust-card,
@@ -4330,5 +4358,98 @@ body {
     min-height: 29px;
     max-width: min(180px, calc(100% - 96px));
     top: -13px;
+  }
+}
+
+/* Keep product showcases in four columns */
+.snap-section .snap-product-grid,
+.catalog-results .snap-product-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 760px) {
+  .snap-section .snap-product-grid,
+  .catalog-results .snap-product-grid {
+    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .snap-section .snap-product-card,
+  .catalog-results .snap-product-card {
+    min-width: 0;
+  }
+
+  .snap-section .product-picture,
+  .catalog-results .product-picture {
+    aspect-ratio: 1;
+  }
+
+  .snap-section .product-picture img,
+  .catalog-results .product-picture img {
+    height: 78%;
+    max-width: 84%;
+  }
+
+  .snap-section .snap-product-body,
+  .catalog-results .snap-product-body {
+    gap: 2px;
+    padding: 7px;
+  }
+
+  .snap-section .snap-product-body h3,
+  .catalog-results .snap-product-body h3 {
+    font-size: 11px;
+    line-height: 1.2;
+    min-height: 28px;
+  }
+
+  .snap-section .snap-product-body p,
+  .snap-section .snap-product-body small,
+  .catalog-results .snap-product-body p,
+  .catalog-results .snap-product-body small {
+    font-size: 10px;
+  }
+
+  .snap-section .snap-product-body strong,
+  .catalog-results .snap-product-body strong {
+    font-size: 12px;
+  }
+
+  .snap-section .product-card-bottom,
+  .catalog-results .product-card-bottom {
+    gap: 4px;
+    grid-template-columns: 1fr;
+  }
+
+  .snap-section .product-card-bottom span,
+  .catalog-results .product-card-bottom span {
+    display: none;
+  }
+
+  .snap-section .product-card-bottom button,
+  .catalog-results .product-card-bottom button {
+    font-size: 0;
+    min-height: 28px;
+    padding: 0;
+  }
+
+  .snap-section .product-card-bottom button svg,
+  .catalog-results .product-card-bottom button svg {
+    font-size: 15px;
+  }
+
+  .snap-section .promo-dot,
+  .catalog-results .promo-dot {
+    font-size: 10px;
+    padding: 4px 7px;
+    right: 6px;
+    top: 6px;
+  }
+}
+
+@media (max-width: 430px) {
+  .snap-section .snap-product-grid,
+  .catalog-results .snap-product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

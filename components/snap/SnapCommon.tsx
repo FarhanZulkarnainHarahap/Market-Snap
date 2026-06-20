@@ -10,14 +10,15 @@ import {
   FiChevronDown,
   FiHeadphones,
   FiHeart,
+  FiHome,
   FiLock,
   FiLogOut,
   FiMapPin,
   FiPackage,
   FiPlus,
-  FiSearch,
   FiUser,
   FiShield,
+  FiShoppingBag,
   FiShoppingCart,
   FiTruck
 } from "react-icons/fi";
@@ -35,6 +36,8 @@ type HeaderSession = {
   isLoggedIn: boolean;
   name: string;
 };
+
+const DEFAULT_LOCATION_LABEL = "Market Snap Center";
 
 const navItems = [
   { key: "home", href: "/", label: "Home" },
@@ -126,11 +129,11 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
       <div className="mobile-location"><FiMapPin /> {locationLabel}</div>
       <div className="mobile-nav-track">
         <Link className={active === "home" ? "active" : ""} href="/">
-          <FiShield />
+          <FiHome />
           <span>Home</span>
         </Link>
         <Link className={active === "catalog" ? "active" : ""} href="/catalog">
-          <FiSearch />
+          <FiShoppingBag />
           <span>Catalog</span>
         </Link>
         <Link href="/account/orders">
@@ -196,8 +199,8 @@ function readSession(): HeaderSession {
 }
 
 function readCachedLocationLabel() {
-  if (typeof window === "undefined") return "Mendeteksi lokasi";
-  return window.localStorage.getItem("market-snap-location-label") || "Mendeteksi lokasi";
+  if (typeof window === "undefined") return DEFAULT_LOCATION_LABEL;
+  return DEFAULT_LOCATION_LABEL;
 }
 
 function displayName(name: string) {
@@ -208,7 +211,8 @@ function displayName(name: string) {
 
 function refreshLocationLabel(setLocationLabel: (label: string) => void) {
   if (typeof navigator === "undefined" || !navigator.geolocation) {
-    setLocationLabel("Lokasi tidak tersedia");
+    clearCachedLocation();
+    setLocationLabel(DEFAULT_LOCATION_LABEL);
     return;
   }
 
@@ -222,10 +226,19 @@ function refreshLocationLabel(setLocationLabel: (label: string) => void) {
       setLocationLabel(label);
     },
     () => {
-      if (!window.localStorage.getItem("market-snap-location-label")) setLocationLabel("Aktifkan lokasi");
+      clearCachedLocation();
+      setLocationLabel(DEFAULT_LOCATION_LABEL);
     },
     { enableHighAccuracy: true, maximumAge: 60_000, timeout: 5000 }
   );
+}
+
+function clearCachedLocation() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem("market-snap-location-label");
+  window.localStorage.removeItem("market-snap-location-lat");
+  window.localStorage.removeItem("market-snap-location-lng");
+  window.localStorage.removeItem("market-snap-location-updated-at");
 }
 
 function labelFromCoordinates(lat: number, lng: number) {

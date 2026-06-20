@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FiClock, FiHome, FiLock, FiMapPin, FiMinus, FiPlus, FiShield, FiShoppingBag, FiTrash2, FiTruck, FiZap } from "react-icons/fi";
-import { clearCart, createOrderFromCart, deleteCartItem, fetchAddresses, fetchCart, fetchNearestStore, updateCartItem } from "@/lib/api";
+import { FiClock, FiHome, FiLock, FiMinus, FiPlus, FiTrash2, FiTruck, FiZap } from "react-icons/fi";
+import { clearCart, createOrderFromCart, deleteCartItem, fetchAddresses, fetchCart, fetchNearestStore, fetchVouchers, updateCartItem } from "@/lib/api";
 import { rupiah } from "@/lib/format";
-import type { Address, CartItem, Store } from "@/lib/types";
+import type { Address, CartItem, Store, Voucher } from "@/lib/types";
 import { BenefitStrip, PanelSkeleton, SnapFooter, SnapHeader } from "./SnapCommon";
 
 const xenditPaymentMethods = [
@@ -23,6 +23,8 @@ const xenditPaymentMethods = [
 export function SnapCartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [store, setStore] = useState<Store>();
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const [voucherCode, setVoucherCode] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + (item.subtotal ?? item.price * item.quantity), 0), [items]);
@@ -32,9 +34,14 @@ export function SnapCartPage() {
 
   const loadCart = useCallback(async () => {
     try {
-      const [cart, nearest] = await Promise.all([fetchCart(), fetchNearestStore().catch(() => null)]);
+      const [cart, nearest, voucherList] = await Promise.all([
+        fetchCart(),
+        fetchNearestStore().catch(() => null),
+        fetchVouchers().catch(() => [])
+      ]);
       setItems(cart.items);
       setStore(nearest?.store);
+      setVouchers(voucherList);
       setMessage(cart.items.length ? "" : "Keranjang masih kosong. Tambahkan produk dari katalog.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Silakan login untuk melihat keranjang.");
@@ -72,7 +79,6 @@ export function SnapCartPage() {
         <section className="cart-layout">
           <div>
             <article className="cart-list">
-              <header><span><FiShoppingBag /> Cabang aktif</span><h2>{store?.name ?? items[0]?.storeId ?? "Market Snap"}</h2><Link className="outline-action" href="/catalog">Ubah cabang</Link></header>
               {loading && <CartRowsSkeleton />}
               {!loading && message && <p className="catalog-message">{message}</p>}
               {!loading && items.map((item) => (
@@ -86,24 +92,32 @@ export function SnapCartPage() {
               ))}
             </article>
             <article className="voucher-box">
-              <div><h3>Punya kode voucher?</h3><div><input defaultValue="SNAPWELCOME" placeholder="Masukkan kode voucher" /><button type="button">Terapkan</button></div></div>
-              <div><p>Voucher tersedia untukmu</p><button type="button">SNAPWELCOME<br /><small>Diskon 20%</small></button><button type="button">SNAPSHIP<br /><small>Gratis Ongkir</small></button></div>
+              <div>
+                <h3>Punya kode voucher?</h3>
+                <div className="voucher-apply-row">
+                  <input onChange={(event) => setVoucherCode(event.target.value)} placeholder="Masukkan kode voucher" value={voucherCode} />
+                  <button type="button">Terapkan</button>
+                </div>
+              </div>
+              <div>
+                <p>Voucher tersedia untukmu</p>
+                <select
+                  aria-label="Pilih voucher tersedia"
+                  onChange={(event) => setVoucherCode(event.target.value)}
+                  value={vouchers.some((voucher) => voucher.code === voucherCode) ? voucherCode : ""}
+                >
+                  <option value="">Pilih voucher tersedia</option>
+                  {vouchers.map((voucher) => (
+                    <option key={voucher.id} value={voucher.code}>
+                      {voucher.code} - {voucher.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </article>
           </div>
           <aside className="cart-side">
             {loading ? <article className="summary-panel"><PanelSkeleton rows={6} /></article> : <Summary discount={discount} shipping={shipping} subtotal={subtotal} total={total} />}
-            <article className="nearest-card">
-              <img alt="" src="/market-snap-favicon-transparent.png" />
-              <h3>Cabang Terdekat</h3>
-              <strong>{store?.name ?? "Market Snap Kemang"}</strong>
-              <p>{store?.area ?? "Jakarta Selatan"}</p>
-              <span>Radius layanan {store?.radiusKm ?? 0} km</span>
-              <button type="button"><FiMapPin /> Lihat di Peta</button>
-            </article>
-            <article className="trust-card">
-              <h3>Belanja Aman & Terpercaya</h3>
-              {["100% Produk Segar", "Pembayaran Terlindungi", "Pengantaran Cepat", "Layanan 24/7"].map((item) => <p key={item}><FiShield /> {item}</p>)}
-            </article>
           </aside>
         </section>
       </main>
