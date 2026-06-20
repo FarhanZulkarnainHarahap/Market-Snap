@@ -68,7 +68,7 @@ export function SnapLoginPage() {
           <h1>Masuk ke Market Snap</h1>
           <p>Masuk untuk melanjutkan belanja kebutuhan harian atau mengelola tokomu dengan mudah.</p>
           <form className="capture-form" onSubmit={submit}>
-            <label>Email <span><FiMail /><input name="email" placeholder="customer@marketsnap.id" required type="email" /></span></label>
+            <label>Email <span><FiMail /><input name="email" placeholder="your@email.com" required type="email" /></span></label>
             <label>Password <span><FiLock /><input name="password" placeholder="password123" required type="password" /><FiEyeOff /></span></label>
             <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/auth/login">Lupa password?</Link></div>
             <button aria-busy={busy} className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> Masuk</button>
