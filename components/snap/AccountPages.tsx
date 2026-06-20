@@ -34,9 +34,11 @@ const accountMenus: Array<{ key: AccountSection; href: string; label: string; te
 ];
 
 export function AccountLayout({ active, children, title, description }: { active: AccountSection; children: React.ReactNode; title: string; description: string }) {
+  const headerActive = active === "orders" ? "orders" : active === "notifications" ? "notifications" : "profile";
+
   return (
     <>
-      <SnapHeader active="home" />
+      <SnapHeader active={headerActive} />
       <main className="account-page">
         <section className="account-hero">
           <div>

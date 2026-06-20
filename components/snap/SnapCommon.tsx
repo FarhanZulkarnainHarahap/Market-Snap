@@ -27,7 +27,7 @@ import { fetchCurrentUser } from "@/lib/api";
 import type { Product, Store } from "@/lib/types";
 
 type HeaderProps = {
-  active?: "home" | "catalog" | "about" | "contact";
+  active?: "home" | "catalog" | "about" | "contact" | "orders" | "cart" | "notifications" | "profile";
   simple?: boolean;
   cartCount?: number;
 };
@@ -136,20 +136,20 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
           <FiShoppingBag />
           <span>Catalog</span>
         </Link>
-        <Link href="/account/orders">
+        <Link className={active === "orders" ? "active" : ""} href="/account/orders">
           <FiPackage />
           <span>Orders</span>
         </Link>
-        <Link className="mobile-cart-link" href="/cart">
+        <Link className={active === "cart" ? "mobile-cart-link active" : "mobile-cart-link"} href="/cart">
           <FiShoppingCart />
           <span>Cart</span>
           <strong>{cartCount}</strong>
         </Link>
-        <Link href="/account/notifications">
+        <Link className={active === "notifications" ? "active" : ""} href="/notifications">
           <FiBell />
           <span>Notif</span>
         </Link>
-        <Link className="mobile-profile-link" href={session.isLoggedIn ? "/account/profile" : "/login"}>
+        <Link className={active === "profile" ? "mobile-profile-link active" : "mobile-profile-link"} href={session.isLoggedIn ? "/account/profile" : "/login"}>
           <FiUser />
           <span>{session.isLoggedIn ? profileLabel : "Masuk"}</span>
         </Link>
@@ -161,7 +161,7 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
 function ProfileMenu({ onLogout }: { onLogout: () => void }) {
   const menuItems = [
     { href: "/account/profile", icon: FiUser, label: "Account", text: "Profile, alamat, pesanan" },
-    { href: "/account/notifications", icon: FiBell, label: "Notification", text: "Update pesanan & promo" }
+    { href: "/notifications", icon: FiBell, label: "Notification", text: "Update pesanan & promo" }
   ];
 
   return (

@@ -55,7 +55,18 @@ export function SnapCartPage() {
   }, [loadCart]);
 
   async function updateQuantity(item: CartItem, quantity: number) {
-    if (!item.cartId) return;
+    if (!item.cartId) {
+      setMessage("Item keranjang belum memiliki ID yang valid. Muat ulang keranjang lalu coba lagi.");
+      return;
+    }
+    const previousItems = items;
+    setItems((current) => {
+      if (quantity < 1) return current.filter((cartItem) => (cartItem.cartId ?? cartItem.id) !== (item.cartId ?? item.id));
+      return current.map((cartItem) => {
+        if ((cartItem.cartId ?? cartItem.id) !== (item.cartId ?? item.id)) return cartItem;
+        return { ...cartItem, quantity, subtotal: cartItem.price * quantity };
+      });
+    });
     try {
       if (quantity < 1) {
         await deleteCartItem(item.cartId);
@@ -64,13 +75,14 @@ export function SnapCartPage() {
       }
       await loadCart();
     } catch (error) {
+      setItems(previousItems);
       setMessage(error instanceof Error ? error.message : "Gagal memperbarui cart.");
     }
   }
 
   return (
     <>
-      <SnapHeader active="home" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} />
+      <SnapHeader active="cart" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} />
       <main>
         <section className="snap-page-title">
           <h1>Keranjang Belanja</h1>
@@ -197,7 +209,7 @@ export function SnapCheckoutPage() {
 
   return (
     <>
-      <SnapHeader active="home" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} />
+      <SnapHeader active="cart" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} />
       <main>
         <section className="checkout-title-row">
           <div><h1>Checkout</h1><p>Lengkapi informasi di bawah untuk menyelesaikan pesanan Anda.</p></div>

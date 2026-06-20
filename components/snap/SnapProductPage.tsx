@@ -51,7 +51,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
 
   return (
     <>
-      <SnapHeader active="home" cartCount={cartCount} />
+      <SnapHeader active="catalog" cartCount={cartCount} />
       <main>
         <nav className="breadcrumb"><Link href="/">Beranda</Link><FiChevronRight /> <Link href="/catalog">{product?.category ?? "Produk"}</Link><FiChevronRight /> <span>{product?.name ?? "Detail"}</span></nav>
         {loading && <ProductDetailSkeleton />}

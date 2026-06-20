@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FiChevronRight, FiSearch, FiSliders } from "react-icons/fi";
 import { addCartItem, fetchCart, fetchCategories, fetchProducts, fetchStores } from "@/lib/api";
+import { rupiah } from "@/lib/format";
 import type { Product, Store } from "@/lib/types";
 import { GroceryVisual, ProductCard, ProductGridSkeleton, SnapFooter, SnapHeader, BenefitStrip } from "./SnapCommon";
 
@@ -84,6 +85,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
   const [storeId, setStoreId] = useState("");
   const [onlyStock, setOnlyStock] = useState(true);
   const [onlyPromo, setOnlyPromo] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(100000);
 
   useEffect(() => {
     const params: Record<string, string> = { limit: "48", sort };
@@ -98,9 +100,10 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
       const stock = state.store ? product.stockByStore[state.store.id] ?? 0 : 0;
       if (onlyStock && stock < 1) return false;
       if (onlyPromo && !product.discount) return false;
+      if (product.price > maxPrice) return false;
       return true;
     });
-  }, [onlyPromo, onlyStock, state.products, state.store]);
+  }, [maxPrice, onlyPromo, onlyStock, state.products, state.store]);
 
   async function addProduct(product: Product) {
     if (!state.store) return;
@@ -153,8 +156,18 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
             ))}
             <hr />
             <h3>Rentang Harga</h3>
-            <div className="range-line"><span /><span /></div>
-            <div className="price-pills"><span>Rp 0</span><span>Rp 100.000+</span></div>
+            <div className="price-slider">
+              <input
+                aria-label="Harga maksimum"
+                max="100000"
+                min="0"
+                onChange={(event) => setMaxPrice(Number(event.target.value))}
+                step="5000"
+                type="range"
+                value={maxPrice}
+              />
+              <div className="price-pills"><span>Rp 0</span><span>{maxPrice >= 100000 ? "Rp 100.000+" : rupiah(maxPrice)}</span></div>
+            </div>
             <label className="switch-row">Stok Tersedia <input checked={onlyStock} onChange={(event) => setOnlyStock(event.target.checked)} type="checkbox" /></label>
             <label className="switch-row">Produk Promo <input checked={onlyPromo} onChange={(event) => setOnlyPromo(event.target.checked)} type="checkbox" /></label>
             <div className="promo-panel">
@@ -168,7 +181,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
               <div className="filter-chips">
                 {["Semua Produk", "Promo", "Stok Tersedia"].map((chip) => <button className={chip === "Semua Produk" ? "active" : ""} key={chip} type="button">{chip}</button>)}
               </div>
-              <button className="clear-filter" onClick={() => { setCategory("Semua"); setOnlyPromo(false); setOnlyStock(false); setQuery(""); }} type="button"><FiSliders /> Hapus filter</button>
+              <button className="clear-filter" onClick={() => { setCategory("Semua"); setOnlyPromo(false); setOnlyStock(false); setMaxPrice(100000); setQuery(""); }} type="button"><FiSliders /> Hapus filter</button>
             </div>
             {state.loading ? <ProductGridSkeleton count={12} /> : (
               <>
