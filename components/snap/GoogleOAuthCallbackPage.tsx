@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 import { fetchCurrentUser, saveSession, webRole } from "@/lib/api";
 
 export function GoogleOAuthCallbackPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const token = searchParams.get("token");
-  const immediateError = searchParams.get("error") || (!token ? "Token login Google tidak ditemukan." : "");
+  const provider = pathname.includes("/facebook/") ? "Facebook" : "Google";
+  const immediateError = searchParams.get("error") || (!token ? `Token login ${provider} tidak ditemukan.` : "");
 
   useEffect(() => {
     if (immediateError || !token) return;
@@ -25,9 +27,9 @@ export function GoogleOAuthCallbackPage() {
       })
       .catch((fetchError) => {
         window.localStorage.removeItem("market-snap-token");
-        setError(fetchError instanceof Error ? fetchError.message : "Login Google gagal.");
+        setError(fetchError instanceof Error ? fetchError.message : `Login ${provider} gagal.`);
       });
-  }, [immediateError, router, token]);
+  }, [immediateError, provider, router, token]);
 
   const shownError = immediateError || error;
 
@@ -35,8 +37,8 @@ export function GoogleOAuthCallbackPage() {
     <main className="oauth-callback-page">
       <section>
         {shownError ? <FiAlertCircle /> : <FiCheckCircle />}
-        <h1>{shownError ? "Login Google gagal" : "Login Google"}</h1>
-        <p>{shownError || "Menyelesaikan login Google..."}</p>
+        <h1>{shownError ? `Login ${provider} gagal` : `Login ${provider}`}</h1>
+        <p>{shownError || `Menyelesaikan login ${provider}...`}</p>
         {shownError && <Link className="primary-snap wide" href="/login">Kembali ke login</Link>}
       </section>
     </main>

@@ -18,6 +18,10 @@ export function googleAuthUrl() {
   return apiUrl("/auth/google");
 }
 
+export function facebookAuthUrl() {
+  return apiUrl("/auth/facebook");
+}
+
 export async function registerUser(payload: { name: string; email: string; password: string; referralCode?: string }) {
   const response = await fetch(apiUrl("/auth/register"), {
     method: "POST",

@@ -4143,6 +4143,11 @@ body {
   width: 20px;
 }
 
+.facebook-auth-button {
+  border-color: #c9ddff;
+  color: #0d3b86;
+}
+
 .auth-oauth-block {
   display: grid;
   gap: 10px;

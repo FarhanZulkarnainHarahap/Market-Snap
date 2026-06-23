@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FiAlertCircle, FiArrowLeft, FiCheck, FiCheckCircle, FiEyeOff, FiLock, FiLogIn, FiMail, FiShoppingBag, FiTag, FiTruck, FiUser, FiUserPlus, FiX } from "react-icons/fi";
-import { googleAuthUrl, loginUser, registerUser, webRole } from "@/lib/api";
+import { facebookAuthUrl, googleAuthUrl, loginUser, registerUser, webRole } from "@/lib/api";
 import { GroceryVisual } from "./SnapCommon";
 
 type AuthModal = {
@@ -74,6 +74,7 @@ export function SnapLoginPage() {
             <button aria-busy={busy} className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> Masuk</button>
             <em>atau</em>
             <Link className="google-auth-button" href={googleAuthUrl()}><GoogleIcon /> Masuk dengan Google</Link>
+            <Link className="google-auth-button facebook-auth-button" href={facebookAuthUrl()}><FacebookIcon /> Masuk dengan Facebook</Link>
             <Link className="secondary-snap wide" href="/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
           </form>
           <div className="login-benefits">
@@ -204,6 +205,7 @@ export function SnapRegisterPage() {
             <div className="auth-oauth-block">
               <em>atau</em>
               <Link className="google-auth-button" href={googleAuthUrl()}><GoogleIcon /> Daftar dengan Google</Link>
+              <Link className="google-auth-button facebook-auth-button" href={facebookAuthUrl()}><FacebookIcon /> Daftar dengan Facebook</Link>
             </div>
             <p className="center-copy">Sudah punya akun? <Link href="/login">Masuk di sini</Link></p>
           </form>
@@ -239,6 +241,14 @@ function GoogleIcon() {
       <path d="M12 22c2.7 0 4.96-.89 6.61-2.42l-3.22-2.51c-.9.6-2.04.95-3.39.95-2.6 0-4.8-1.76-5.59-4.12H3.08v2.59A9.98 9.98 0 0 0 12 22Z" fill="#34a853" />
       <path d="M6.41 13.9A6 6 0 0 1 6.1 12c0-.66.11-1.3.31-1.9V7.51H3.08A9.98 9.98 0 0 0 2 12c0 1.61.39 3.13 1.08 4.49l3.33-2.59Z" fill="#fbbc05" />
       <path d="M12 5.98c1.47 0 2.78.5 3.82 1.5l2.86-2.86C16.95 3.01 14.69 2 12 2a9.98 9.98 0 0 0-8.92 5.51l3.33 2.59C7.2 7.74 9.4 5.98 12 5.98Z" fill="#ea4335" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5.01 3.66 9.17 8.44 9.92v-7.02H7.9v-2.9h2.54V9.85c0-2.52 1.49-3.91 3.77-3.91 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.23 0-1.62.77-1.62 1.56v1.88h2.76l-.44 2.9h-2.32V22C18.34 21.23 22 17.07 22 12.06Z" fill="#1877f2" />
     </svg>
   );
 }
