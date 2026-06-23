@@ -39,7 +39,7 @@ export async function fetchCurrentUser() {
   return payload.data;
 }
 
-export async function updateCurrentUser(payload: { avatarUrl?: string; email?: string; name?: string }) {
+export async function updateCurrentUser(payload: { avatarUrl?: string; email?: string; name?: string; phone?: string }) {
   const response = await fetch(apiUrl("/users/me"), {
     method: "PATCH",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
@@ -83,6 +83,26 @@ export async function confirmPasswordReset(token: string, password: string) {
   });
   if (!response.ok) throw new Error(await responseMessage(response, "Password belum dapat diperbarui"));
   return response.json() as Promise<{ message: string }>;
+}
+
+export async function requestEmailVerification(email: string) {
+  const response = await fetch(apiUrl("/auth/verification/request"), {
+    method: "POST",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Verifikasi belum dapat dikirim"));
+  return response.json() as Promise<{ message: string }>;
+}
+
+export async function confirmEmailVerification(token: string) {
+  const response = await fetch(apiUrl("/auth/verification/confirm"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Verifikasi belum dapat diproses"));
+  return response.json() as Promise<{ data: ApiUser; message: string }>;
 }
 
 export function saveSession(payload: LoginResponse) {

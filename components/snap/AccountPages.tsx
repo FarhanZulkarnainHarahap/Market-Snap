@@ -22,7 +22,7 @@ import {
   FiX
 } from "react-icons/fi";
 import { SnapHeader } from "@/components/snap/SnapCommon";
-import { createAddress, fetchAddresses, fetchCurrentUser, fetchOrders, fetchVouchers, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
+import { createAddress, fetchAddresses, fetchCurrentUser, fetchOrders, fetchVouchers, requestEmailVerification, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
 import { rupiah } from "@/lib/format";
 import type { Address, OrderSummary, Voucher } from "@/lib/types";
 import type { ApiUser } from "@/lib/api-contracts";
@@ -32,6 +32,7 @@ type AccountSection = "profile" | "address" | "orders" | "notifications" | "vouc
 type ProfileForm = {
   email: string;
   name: string;
+  phone: string;
 };
 
 type AddressForm = {
@@ -54,7 +55,7 @@ const accountMenus: Array<{ key: AccountSection; href: string; label: string; te
 
 export function AccountLayout({ active, children, title, description }: { active: AccountSection; children: React.ReactNode; title: string; description: string }) {
   const headerActive = active === "orders" ? "orders" : active === "notifications" ? "notifications" : "profile";
-  const { user } = useAccountUser();
+  const { loading, user } = useAccountUser();
 
   return (
     <>
@@ -68,14 +69,14 @@ export function AccountLayout({ active, children, title, description }: { active
           </div>
           <div className="account-summary">
             <span><FiShield /> Akun aktif</span>
-            <strong>{user?.name ?? "Customer"}</strong>
-            <small>{user?.role ? roleLabel(user.role) : "Customer Market Snap"}</small>
+            {loading ? <span className="skeleton-line short" /> : <strong>{user?.name ?? "Customer"}</strong>}
+            {loading ? <span className="skeleton-line medium" /> : <small>{user?.role ? roleLabel(user.role) : "Customer Market Snap"}</small>}
           </div>
         </section>
 
         <section className="account-layout">
           <aside className="account-sidebar" aria-label="Menu akun">
-            <UserCard user={user} />
+            <UserCard loading={loading} user={user} />
             <nav>
               {accountMenus.map(({ key, href, label, text, icon: Icon }) => (
                 <Link className={active === key ? "active" : ""} href={href} key={key}>
@@ -95,12 +96,15 @@ export function AccountLayout({ active, children, title, description }: { active
 }
 
 export function ProfileAccountContent() {
-  const { reloadUser, user } = useAccountUser();
+  const { loading, reloadUser, user } = useAccountUser();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState("");
-  const [form, setForm] = useState<ProfileForm>({ email: "", name: "" });
+  const [verifyEmail, setVerifyEmail] = useState("");
+  const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [verifySubmitting, setVerifySubmitting] = useState(false);
+  const [form, setForm] = useState<ProfileForm>({ email: "", name: "", phone: "" });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -110,7 +114,7 @@ export function ProfileAccountContent() {
 
   function toggleEdit() {
     if (!editing) {
-      setForm({ email: user?.email ?? "", name: user?.name ?? "" });
+      setForm({ email: user?.email ?? "", name: user?.name ?? "", phone: user?.phone ?? "" });
       setMessage("");
     }
     setEditing((current) => !current);
@@ -122,13 +126,34 @@ export function ProfileAccountContent() {
     try {
       await updateCurrentUser({
         email: form.email.trim(),
-        name: form.name.trim()
+        name: form.name.trim(),
+        phone: form.phone.trim() || undefined
       });
       await reloadUser();
       setEditing(false);
       setMessage("Profil berhasil diperbarui.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Profil belum dapat disimpan.");
+    }
+  }
+
+  function openVerificationModal() {
+    setVerifyEmail(user?.email ?? "");
+    setMessage("");
+    setVerifyModalOpen(true);
+  }
+
+  async function submitVerification(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setVerifySubmitting(true);
+    setMessage("");
+    try {
+      const response = await requestEmailVerification(verifyEmail.trim());
+      setMessage(response.message);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Link verifikasi belum dapat dikirim.");
+    } finally {
+      setVerifySubmitting(false);
     }
   }
 
@@ -148,7 +173,7 @@ export function ProfileAccountContent() {
 
   const primaryAddress = addresses.find((address) => address.isPrimary) ?? addresses[0];
   const recentOrders = orders.slice(0, 3);
-  const profileForm = editing ? form : { email: user?.email ?? "", name: user?.name ?? "" };
+  const profileForm = editing ? form : { email: user?.email ?? "", name: user?.name ?? "", phone: user?.phone ?? "" };
 
   return (
     <>
@@ -160,20 +185,25 @@ export function ProfileAccountContent() {
           </div>
           <button onClick={toggleEdit} type="button"><FiEdit2 /> {editing ? "Batal" : "Edit profil"}</button>
         </div>
-        <div className="profile-overview">
-          <ProfileAvatar editable={Boolean(user?.canEditAvatar)} onEdit={() => fileInputRef.current?.click()} user={user} size="large" />
-          <input accept="image/jpeg,image/png,image/gif" className="visually-hidden" onChange={handleAvatarChange} ref={fileInputRef} type="file" />
-          <div>
-            <h3>{user?.name ?? "Customer"}</h3>
-            <p>{user?.email ?? "Memuat email..."}</p>
-            <span>{memberSince(user?.createdAt)}</span>
+        {loading ? <AccountProfileSkeleton /> : (
+          <div className="profile-overview">
+            <ProfileAvatar editable={Boolean(user?.canEditAvatar)} onEdit={() => fileInputRef.current?.click()} user={user} size="large" />
+            <input accept="image/jpeg,image/png,image/gif" className="visually-hidden" onChange={handleAvatarChange} ref={fileInputRef} type="file" />
+            <div>
+              <h3>{user?.name ?? "Customer"}</h3>
+              <p>{user?.email ?? "Email belum tersedia"}</p>
+              <span>{memberSince(user?.createdAt)}</span>
+            </div>
+            <span className={user?.verified ? "verified-pill" : "verified-pill pending"}>{user?.verified ? "Terverifikasi" : "Belum terverifikasi"}</span>
           </div>
-        </div>
+        )}
         <form className="account-form" onSubmit={submit}>
           <label>Nama lengkap<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} value={profileForm.name} /></label>
           <label>Email<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} type="email" value={profileForm.email} /></label>
+          <label>Nomor handphone<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} placeholder="0812-3456-7890" value={profileForm.phone} /></label>
           {editing && <button className="primary-snap" type="submit"><FiCheck /> Simpan perubahan</button>}
         </form>
+        {!loading && !user?.verified && <button className="secondary-snap account-verify-button" onClick={openVerificationModal} type="button"><FiMail /> Verifikasi akun</button>}
         {message && <p className="account-message">{message}</p>}
       </section>
 
@@ -185,6 +215,20 @@ export function ProfileAccountContent() {
           <OrderList orders={recentOrders} compact />
         </QuickPanel>
       </section>
+      {verifyModalOpen && (
+        <div className="account-modal-backdrop">
+          <section aria-modal="true" className="account-modal" role="dialog">
+            <button aria-label="Tutup" className="account-modal-close" onClick={() => setVerifyModalOpen(false)} type="button"><FiX /></button>
+            <span className="account-modal-icon"><FiMail /></span>
+            <h2>Verifikasi akun</h2>
+            <p>Masukkan email akun Anda. Kami akan mengirim tautan verifikasi agar belanja bisa langsung digunakan.</p>
+            <form className="account-form single" onSubmit={submitVerification}>
+              <label>Email<input onChange={(event) => setVerifyEmail(event.target.value)} placeholder="nama@email.com" required type="email" value={verifyEmail} /></label>
+              <button className="primary-snap" disabled={verifySubmitting} type="submit">{verifySubmitting ? "Mengirim..." : "Kirim verifikasi"}</button>
+            </form>
+          </section>
+        </div>
+      )}
     </>
   );
 }
@@ -474,13 +518,34 @@ export function HelpAccountContent() {
   );
 }
 
-function UserCard({ user }: { user?: ApiUser | null }) {
+function UserCard({ loading = false, user }: { loading?: boolean; user?: ApiUser | null }) {
+  if (loading) {
+    return (
+      <div className="account-user-card">
+        <span className="skeleton-avatar" />
+        <div><span className="skeleton-line short" /><span className="skeleton-line medium" /></div>
+      </div>
+    );
+  }
   return (
     <div className="account-user-card">
       <ProfileAvatar user={user} />
       <div>
         <strong>{user?.name ?? "Customer"}</strong>
         <small>{user?.email ?? "Memuat profil..."}</small>
+      </div>
+    </div>
+  );
+}
+
+function AccountProfileSkeleton() {
+  return (
+    <div className="profile-overview" aria-hidden="true">
+      <span className="skeleton-avatar large" />
+      <div className="profile-skeleton-copy">
+        <span className="skeleton-line medium" />
+        <span className="skeleton-line wide" />
+        <span className="skeleton-line short" />
       </div>
     </div>
   );
@@ -568,10 +633,12 @@ function HelpCard({ text, title }: { text: string; title: string }) {
 
 function useAccountUser() {
   const [user, setUser] = useState<ApiUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   async function reloadUser() {
     const data = await fetchCurrentUser();
     setUser(data);
+    setLoading(false);
     return data;
   }
 
@@ -583,13 +650,16 @@ function useAccountUser() {
       })
       .catch(() => {
         if (active) setUser(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
     return () => {
       active = false;
     };
   }, []);
 
-  return { reloadUser, user };
+  return { loading, reloadUser, user };
 }
 
 function updateAddressField(field: keyof AddressForm, setForm: React.Dispatch<React.SetStateAction<AddressForm>>) {
