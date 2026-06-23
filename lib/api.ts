@@ -14,6 +14,10 @@ export async function loginUser(email: string, password: string) {
   return payload;
 }
 
+export function googleAuthUrl() {
+  return apiUrl("/auth/google");
+}
+
 export async function registerUser(payload: { name: string; email: string; password: string; referralCode?: string }) {
   const response = await fetch(apiUrl("/auth/register"), {
     method: "POST",

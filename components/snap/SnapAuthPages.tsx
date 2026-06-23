@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FiAlertCircle, FiArrowLeft, FiCheck, FiCheckCircle, FiEyeOff, FiLock, FiLogIn, FiMail, FiShoppingBag, FiTag, FiTruck, FiUser, FiUserPlus, FiX } from "react-icons/fi";
-import { loginUser, registerUser, webRole } from "@/lib/api";
+import { googleAuthUrl, loginUser, registerUser, webRole } from "@/lib/api";
 import { GroceryVisual } from "./SnapCommon";
 
 type AuthModal = {
@@ -73,6 +73,7 @@ export function SnapLoginPage() {
             <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/auth/login">Lupa password?</Link></div>
             <button aria-busy={busy} className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> Masuk</button>
             <em>atau</em>
+            <Link className="google-auth-button" href={googleAuthUrl()}><GoogleIcon /> Masuk dengan Google</Link>
             <Link className="secondary-snap wide" href="/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
           </form>
           <div className="login-benefits">
@@ -200,6 +201,10 @@ export function SnapRegisterPage() {
               {step > 1 && <button className="secondary-snap" onClick={() => setStep((current) => (current - 1) as RegisterStep)} type="button"><FiArrowLeft /> Kembali</button>}
               <button className="primary-snap wide" disabled={busy} type="submit">{busy ? "Mendaftarkan..." : step === 3 ? "Daftar" : "OK"}</button>
             </div>
+            <div className="auth-oauth-block">
+              <em>atau</em>
+              <Link className="google-auth-button" href={googleAuthUrl()}><GoogleIcon /> Daftar dengan Google</Link>
+            </div>
             <p className="center-copy">Sudah punya akun? <Link href="/login">Masuk di sini</Link></p>
           </form>
         </section>
@@ -225,6 +230,17 @@ function registerStepCopy(step: RegisterStep) {
 
 function AuthMini({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return <article className="auth-mini"><span>{icon}</span><div><h3>{title}</h3><p>{text}</p></div></article>;
+}
+
+function GoogleIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M21.6 12.23c0-.74-.07-1.45-.19-2.14H12v4.05h5.38a4.6 4.6 0 0 1-1.99 3.02v2.51h3.22c1.89-1.74 2.99-4.3 2.99-7.44Z" fill="#4285f4" />
+      <path d="M12 22c2.7 0 4.96-.89 6.61-2.42l-3.22-2.51c-.9.6-2.04.95-3.39.95-2.6 0-4.8-1.76-5.59-4.12H3.08v2.59A9.98 9.98 0 0 0 12 22Z" fill="#34a853" />
+      <path d="M6.41 13.9A6 6 0 0 1 6.1 12c0-.66.11-1.3.31-1.9V7.51H3.08A9.98 9.98 0 0 0 2 12c0 1.61.39 3.13 1.08 4.49l3.33-2.59Z" fill="#fbbc05" />
+      <path d="M12 5.98c1.47 0 2.78.5 3.82 1.5l2.86-2.86C16.95 3.01 14.69 2 12 2a9.98 9.98 0 0 0-8.92 5.51l3.33 2.59C7.2 7.74 9.4 5.98 12 5.98Z" fill="#ea4335" />
+    </svg>
+  );
 }
 
 function AuthStatusModal({ modal, onClose }: { modal: AuthModal; onClose: () => void }) {
