@@ -2166,17 +2166,24 @@ body {
 }
 
 .account-section-title button,
+.account-panel-action,
 .account-form button {
   border-radius: 8px;
 }
 
-.account-section-title button {
+.account-section-title button,
+.account-panel-action {
+  align-items: center;
   background: #fff;
   border: 1px solid #cfd9d0;
   color: var(--snap-green);
+  display: inline-flex;
+  gap: 8px;
   font-weight: 900;
+  justify-content: center;
   min-height: 40px;
   padding: 0 14px;
+  text-decoration: none;
 }
 
 .profile-overview {
@@ -2190,9 +2197,21 @@ body {
 }
 
 .profile-avatar {
+  overflow: hidden;
   font-size: 28px;
   height: 64px;
   width: 64px;
+}
+
+.profile-avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.profile-avatar.large {
+  height: 72px;
+  width: 72px;
 }
 
 .account-form {
@@ -2214,6 +2233,23 @@ body {
   padding: 0 14px;
 }
 
+.account-form input:disabled {
+  background: #f7fbf5;
+  color: #1f3427;
+}
+
+.account-check {
+  align-items: center;
+  display: flex !important;
+  flex-direction: row;
+  gap: 10px !important;
+}
+
+.account-check input {
+  min-height: auto;
+  width: auto;
+}
+
 .account-form button {
   justify-self: start;
 }
@@ -2231,7 +2267,7 @@ body {
   border-radius: 8px;
   display: grid;
   gap: 12px;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 40px 1fr auto;
   padding: 14px;
 }
 
@@ -2251,6 +2287,25 @@ body {
   font-size: 11px;
   margin-left: 6px;
   padding: 2px 8px;
+}
+
+.icon-action {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #cfd9d0;
+  border-radius: 8px;
+  color: var(--snap-green);
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  width: 36px;
+}
+
+.account-message,
+.empty-copy {
+  color: var(--snap-muted);
+  font-weight: 800;
+  margin: 0;
 }
 
 .account-list,
@@ -2291,6 +2346,65 @@ body {
 .rich-list p {
   align-items: center;
   gap: 14px;
+}
+
+.order-card-list {
+  display: grid;
+  gap: 12px;
+}
+
+.order-card {
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.order-card-head,
+.order-item-row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.order-card-head span {
+  color: #348525;
+  font-weight: 900;
+}
+
+.order-card-head strong {
+  color: var(--snap-green);
+}
+
+.order-items {
+  display: grid;
+  gap: 10px;
+}
+
+.order-item-row {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.order-item-row img {
+  aspect-ratio: 1;
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  height: 52px;
+  object-fit: cover;
+  width: 52px;
+}
+
+.order-item-row span {
+  display: grid;
+  gap: 3px;
+}
+
+.order-item-row small,
+.order-more {
+  color: var(--snap-muted);
+  font-weight: 800;
 }
 
 .rich-list p span {

@@ -55,7 +55,26 @@ export type ApiUser = {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string;
+  createdAt?: string;
   role: "user" | "admin" | "super_admin" | "store_admin" | "USER" | "ADMIN" | "SUPER_ADMIN" | "STORE_ADMIN";
+};
+
+export type ApiOrderItem = {
+  id: string;
+  productId: string;
+  quantity: number;
+  price: number;
+  product?: ApiProduct & { images?: { url: string }[] };
+};
+
+export type ApiOrder = {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: number;
+  createdAt: string;
+  items?: ApiOrderItem[];
 };
 
 export type ApiVoucher = {

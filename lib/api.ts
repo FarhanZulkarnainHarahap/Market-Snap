@@ -1,6 +1,6 @@
-import type { ApiAddress, ApiCartItem, ApiProduct, ApiStore, ApiUser, ApiVoucher, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
+import type { ApiAddress, ApiCartItem, ApiOrder, ApiProduct, ApiStore, ApiUser, ApiVoucher, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
 import { apiUrl } from "./api-url";
-import type { Address, CartItem, Product, Store, Voucher } from "./types";
+import type { Address, CartItem, OrderSummary, Product, Store, Voucher } from "./types";
 
 export async function loginUser(email: string, password: string) {
   const response = await fetch(apiUrl("/auth/login"), {
@@ -37,6 +37,18 @@ export async function fetchCurrentUser() {
   if (!response.ok) throw new Error(await responseMessage(response, "Profil belum dapat dimuat"));
   const payload = await response.json() as { data: ApiUser };
   return payload.data;
+}
+
+export async function updateCurrentUser(payload: { avatarUrl?: string; email?: string; name?: string }) {
+  const response = await fetch(apiUrl("/users/me"), {
+    method: "PATCH",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal menyimpan profil"));
+  const data = await response.json() as { data: ApiUser };
+  saveSession({ token: currentToken(), user: data.data });
+  return data.data;
 }
 
 export function saveSession(payload: LoginResponse) {
@@ -122,6 +134,35 @@ export async function fetchAddresses(): Promise<Address[]> {
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat alamat"));
   const payload = await response.json() as { data: ApiAddress[] };
   return payload.data.map(mapAddress);
+}
+
+export async function createAddress(payload: { detail: string; isPrimary?: boolean; label: string; lat: number; lng: number }) {
+  const response = await fetch(apiUrl("/addresses"), {
+    method: "POST",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal menyimpan alamat"));
+  const data = await response.json() as { data: ApiAddress };
+  return mapAddress(data.data);
+}
+
+export async function updateAddress(addressId: string, payload: { detail?: string; isPrimary?: boolean; label?: string; lat?: number; lng?: number }) {
+  const response = await fetch(apiUrl(`/addresses/${addressId}`), {
+    method: "PATCH",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal mengubah alamat"));
+  const data = await response.json() as { data: ApiAddress };
+  return mapAddress(data.data);
+}
+
+export async function fetchOrders(): Promise<OrderSummary[]> {
+  const response = await fetch(apiUrl("/orders"), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat pesanan"));
+  const payload = await response.json() as { data: ApiOrder[] };
+  return payload.data.map(mapOrder);
 }
 
 export async function fetchVouchers(): Promise<Voucher[]> {
@@ -230,6 +271,27 @@ function mapAddress(address: ApiAddress): Address {
     lat: address.latitude,
     lng: address.longitude,
     isPrimary: address.isPrimary
+  };
+}
+
+function mapOrder(order: ApiOrder): OrderSummary {
+  return {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    total: order.total,
+    createdAt: order.createdAt,
+    items: (order.items ?? []).map((item) => {
+      const product = item.product;
+      return {
+        id: item.id,
+        image: product?.images?.[0]?.url ?? product?.image ?? "/product.png",
+        name: product?.name ?? "Produk",
+        price: item.price,
+        productId: item.productId,
+        quantity: item.quantity
+      };
+    })
   };
 }
 

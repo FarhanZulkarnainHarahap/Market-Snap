@@ -40,6 +40,24 @@ export type Address = {
   isPrimary: boolean;
 };
 
+export type OrderItemSummary = {
+  id: string;
+  image: string;
+  name: string;
+  price: number;
+  productId: string;
+  quantity: number;
+};
+
+export type OrderSummary = {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: number;
+  createdAt: string;
+  items: OrderItemSummary[];
+};
+
 export type Voucher = {
   id: string;
   code: string;
