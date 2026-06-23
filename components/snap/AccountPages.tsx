@@ -2,24 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FiBell,
+  FiCamera,
   FiCheck,
   FiChevronRight,
   FiEdit2,
   FiHeadphones,
   FiHome,
   FiLock,
+  FiMail,
   FiMapPin,
   FiPackage,
   FiPlus,
   FiShield,
   FiTag,
-  FiUser
+  FiUser,
+  FiX
 } from "react-icons/fi";
 import { SnapHeader } from "@/components/snap/SnapCommon";
-import { createAddress, fetchAddresses, fetchCurrentUser, fetchOrders, fetchVouchers, updateAddress, updateCurrentUser } from "@/lib/api";
+import { createAddress, fetchAddresses, fetchCurrentUser, fetchOrders, fetchVouchers, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
 import { rupiah } from "@/lib/format";
 import type { Address, OrderSummary, Voucher } from "@/lib/types";
 import type { ApiUser } from "@/lib/api-contracts";
@@ -27,7 +30,6 @@ import type { ApiUser } from "@/lib/api-contracts";
 type AccountSection = "profile" | "address" | "orders" | "notifications" | "vouchers" | "security" | "help";
 
 type ProfileForm = {
-  avatarUrl: string;
   email: string;
   name: string;
 };
@@ -98,7 +100,8 @@ export function ProfileAccountContent() {
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState("");
-  const [form, setForm] = useState<ProfileForm>({ avatarUrl: "", email: "", name: "" });
+  const [form, setForm] = useState<ProfileForm>({ email: "", name: "" });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchAddresses().then(setAddresses).catch(() => setAddresses([]));
@@ -107,7 +110,7 @@ export function ProfileAccountContent() {
 
   function toggleEdit() {
     if (!editing) {
-      setForm({ avatarUrl: user?.avatarUrl ?? "", email: user?.email ?? "", name: user?.name ?? "" });
+      setForm({ email: user?.email ?? "", name: user?.name ?? "" });
       setMessage("");
     }
     setEditing((current) => !current);
@@ -118,7 +121,6 @@ export function ProfileAccountContent() {
     setMessage("");
     try {
       await updateCurrentUser({
-        avatarUrl: form.avatarUrl.trim() || undefined,
         email: form.email.trim(),
         name: form.name.trim()
       });
@@ -130,9 +132,23 @@ export function ProfileAccountContent() {
     }
   }
 
+  async function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setMessage("");
+    try {
+      await uploadProfileAvatar(file);
+      await reloadUser();
+      setMessage("Foto profil berhasil diperbarui.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Foto profil belum dapat diperbarui.");
+    }
+  }
+
   const primaryAddress = addresses.find((address) => address.isPrimary) ?? addresses[0];
   const recentOrders = orders.slice(0, 3);
-  const profileForm = editing ? form : { avatarUrl: user?.avatarUrl ?? "", email: user?.email ?? "", name: user?.name ?? "" };
+  const profileForm = editing ? form : { email: user?.email ?? "", name: user?.name ?? "" };
 
   return (
     <>
@@ -145,7 +161,8 @@ export function ProfileAccountContent() {
           <button onClick={toggleEdit} type="button"><FiEdit2 /> {editing ? "Batal" : "Edit profil"}</button>
         </div>
         <div className="profile-overview">
-          <ProfileAvatar user={user} size="large" />
+          <ProfileAvatar editable={Boolean(user?.canEditAvatar)} onEdit={() => fileInputRef.current?.click()} user={user} size="large" />
+          <input accept="image/jpeg,image/png,image/gif" className="visually-hidden" onChange={handleAvatarChange} ref={fileInputRef} type="file" />
           <div>
             <h3>{user?.name ?? "Customer"}</h3>
             <p>{user?.email ?? "Memuat email..."}</p>
@@ -155,7 +172,6 @@ export function ProfileAccountContent() {
         <form className="account-form" onSubmit={submit}>
           <label>Nama lengkap<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} value={profileForm.name} /></label>
           <label>Email<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} type="email" value={profileForm.email} /></label>
-          <label>Foto profil URL<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, avatarUrl: event.target.value }))} placeholder="https://..." value={profileForm.avatarUrl} /></label>
           {editing && <button className="primary-snap" type="submit"><FiCheck /> Simpan perubahan</button>}
         </form>
         {message && <p className="account-message">{message}</p>}
@@ -372,6 +388,32 @@ export function PaymentAccountContent() {
 }
 
 export function SecurityAccountContent() {
+  const { user } = useAccountUser();
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  function openModal() {
+    setEmail(user?.email ?? "");
+    setMessage("");
+    setModalOpen(true);
+  }
+
+  async function submitReset(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setMessage("");
+    try {
+      const response = await requestPasswordReset(email.trim());
+      setMessage(response.message);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Permintaan belum dapat dikirim.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <>
       <section className="account-panel security-panel">
@@ -380,7 +422,7 @@ export function SecurityAccountContent() {
             <span className="eyebrow">Security</span>
             <h2>Password & akses</h2>
           </div>
-          <button type="button">Ubah password</button>
+          <button onClick={openModal} type="button">Ubah password</button>
         </div>
         <p><FiLock /> Password dan sesi login dikelola aman melalui akun Market Snap.</p>
         <p><FiShield /> Sesi login aktif di perangkat ini.</p>
@@ -391,6 +433,21 @@ export function SecurityAccountContent() {
           <p><span>Chrome</span><strong>Aktif</strong></p>
         </div>
       </QuickPanel>
+      {modalOpen && (
+        <div className="account-modal-backdrop">
+          <section aria-modal="true" className="account-modal" role="dialog">
+            <button aria-label="Tutup" className="account-modal-close" onClick={() => setModalOpen(false)} type="button"><FiX /></button>
+            <span className="account-modal-icon"><FiMail /></span>
+            <h2>Ubah password</h2>
+            <p>Masukkan email akun Market Snap Anda. Kami akan mengirim tautan untuk membuat password baru.</p>
+            <form className="account-form single" onSubmit={submitReset}>
+              <label>Email<input onChange={(event) => setEmail(event.target.value)} placeholder="nama@email.com" required type="email" value={email} /></label>
+              <button className="primary-snap" disabled={submitting} type="submit">{submitting ? "Mengirim..." : "Kirim tautan"}</button>
+            </form>
+            {message && <p className="account-message">{message}</p>}
+          </section>
+        </div>
+      )}
     </>
   );
 }
@@ -429,15 +486,22 @@ function UserCard({ user }: { user?: ApiUser | null }) {
   );
 }
 
-function ProfileAvatar({ size = "normal", user }: { size?: "large" | "normal"; user?: ApiUser | null }) {
+function ProfileAvatar({ editable = false, onEdit, size = "normal", user }: { editable?: boolean; onEdit?: () => void; size?: "large" | "normal"; user?: ApiUser | null }) {
+  const className = size === "large" ? "profile-avatar large" : "profile-avatar";
+  const content = user?.avatarUrl ? (
+    <Image alt={user.name} height={size === "large" ? 64 : 48} src={user.avatarUrl} unoptimized width={size === "large" ? 64 : 48} />
+  ) : (
+    <FiUser />
+  );
   if (user?.avatarUrl) {
     return (
-      <span className={size === "large" ? "profile-avatar large" : "profile-avatar"}>
-        <Image alt={user.name} height={size === "large" ? 64 : 48} src={user.avatarUrl} unoptimized width={size === "large" ? 64 : 48} />
+      <span className={className}>
+        {content}
+        {editable && <button aria-label="Ubah foto profil" className="profile-avatar-edit" onClick={onEdit} type="button"><FiCamera /></button>}
       </span>
     );
   }
-  return <span className={size === "large" ? "profile-avatar large" : "profile-avatar"}><FiUser /></span>;
+  return <span className={className}>{content}{editable && <button aria-label="Ubah foto profil" className="profile-avatar-edit" onClick={onEdit} type="button"><FiCamera /></button>}</span>;
 }
 
 function QuickPanel({ action, actionHref, children, title }: { action?: string; actionHref?: string; children: React.ReactNode; title: string }) {

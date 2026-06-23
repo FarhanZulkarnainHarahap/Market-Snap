@@ -51,6 +51,40 @@ export async function updateCurrentUser(payload: { avatarUrl?: string; email?: s
   return data.data;
 }
 
+export async function uploadProfileAvatar(file: File) {
+  const form = new FormData();
+  form.append("avatar", file);
+  const response = await fetch(apiUrl("/auth/avatar"), {
+    method: "POST",
+    headers: currentUserHeaders(),
+    body: form
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Foto profil belum dapat diperbarui"));
+  const data = await response.json() as { data: ApiUser };
+  saveSession({ token: currentToken(), user: data.data });
+  return data.data;
+}
+
+export async function requestPasswordReset(email: string) {
+  const response = await fetch(apiUrl("/auth/password-reset/request"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Permintaan belum dapat dikirim"));
+  return response.json() as Promise<{ message: string }>;
+}
+
+export async function confirmPasswordReset(token: string, password: string) {
+  const response = await fetch(apiUrl("/auth/password-reset/confirm"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password, token })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Password belum dapat diperbarui"));
+  return response.json() as Promise<{ message: string }>;
+}
+
 export function saveSession(payload: LoginResponse) {
   const role = webRole(payload.user.role);
   document.cookie = `market-snap-role=${role}; path=/; max-age=86400; SameSite=Lax`;
