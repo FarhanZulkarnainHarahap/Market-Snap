@@ -36,6 +36,10 @@ const nextConfig: NextConfig = {
         {
           source: "/",
           destination: "/dashboard/customer"
+        },
+        {
+          source: "/authjs/:path*",
+          destination: "https://apimarket-snap.vercel.app/authjs/:path*"
         }
       ],
       afterFiles: [
