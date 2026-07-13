@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FiClock, FiHome, FiLock, FiMinus, FiPlus, FiTrash2, FiTruck, FiZap } from "react-icons/fi";
+import { FiAlertCircle, FiCheckCircle, FiClock, FiHome, FiLock, FiMinus, FiPlus, FiRefreshCcw, FiShoppingCart, FiTag, FiTrash2, FiTruck, FiZap } from "react-icons/fi";
 import { clearCart, createOrderFromCart, deleteCartItem, fetchAddresses, fetchCart, fetchNearestStore, fetchVouchers, updateCartItem } from "@/lib/api";
 import { rupiah } from "@/lib/format";
 import type { Address, CartItem, Store, Voucher } from "@/lib/types";
@@ -21,33 +21,60 @@ const xenditPaymentMethods = [
   { id: "paylater", label: "PayLater", detail: "Cicilan dan bayar nanti lewat partner Xendit" }
 ];
 
+type CartStatus = "loading" | "success" | "empty" | "error" | "auth" | "verification";
+
 export function SnapCartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [store, setStore] = useState<Store>();
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [voucherCode, setVoucherCode] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
-  const subtotal = useMemo(() => items.reduce((sum, item) => sum + (item.subtotal ?? item.price * item.quantity), 0), [items]);
-  const discount = subtotal >= 50000 ? Math.min(20000, Math.round(subtotal * 0.2)) : 0;
-  const shipping = items.length ? 10000 : 0;
+  const [status, setStatus] = useState<CartStatus>("loading");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const selectedItems = useMemo(() => items.filter((item) => selectedIds.has(cartItemKey(item))), [items, selectedIds]);
+  const subtotal = useMemo(() => selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0), [selectedItems]);
+  const discount = selectedItems.length && subtotal >= 50000 ? Math.min(20000, Math.round(subtotal * 0.2)) : 0;
+  const shipping = selectedItems.length ? 10000 : 0;
   const total = Math.max(0, subtotal + shipping - discount);
+  const allSelected = items.length > 0 && selectedIds.size === items.length;
+  const isSuccess = status === "success";
 
   const loadCart = useCallback(async () => {
+    setStatus((current) => current === "success" ? "success" : "loading");
+    setMessage("");
     try {
-      const [cart, nearest, voucherList] = await Promise.all([
+      const [cart, nearest] = await Promise.all([
         fetchCart(),
-        fetchNearestStore().catch(() => null),
-        fetchVouchers().catch(() => [])
+        fetchNearestStore().catch(() => null)
       ]);
       setItems(cart.items);
-      setStore(nearest?.store);
-      setVouchers(voucherList);
-      setMessage(cart.items.length ? "" : "Keranjang masih kosong. Tambahkan produk dari katalog.");
+      setStore(cart.store ?? nearest?.store);
+      setSelectedIds(new Set(cart.items.map(cartItemKey)));
+      if (!cart.items.length) {
+        setVouchers([]);
+        setStatus("empty");
+        setMessage("Keranjang masih kosong. Tambahkan produk segar dari katalog.");
+        return;
+      }
+      setStatus("success");
+      setVouchers(await fetchVouchers().catch(() => []));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Silakan login untuk melihat keranjang.");
-    } finally {
-      setLoading(false);
+      const code = error instanceof Error ? error.message : "";
+      setItems([]);
+      setSelectedIds(new Set());
+      setVouchers([]);
+      if (code === "AUTH_REQUIRED") {
+        setStatus("auth");
+        setMessage("Masuk ke akun Market Snap untuk melihat keranjang belanja.");
+        return;
+      }
+      if (code === "VERIFICATION_REQUIRED") {
+        setStatus("verification");
+        setMessage("Verifikasi email terlebih dahulu agar keranjang dan checkout bisa digunakan.");
+        return;
+      }
+      setStatus("error");
+      setMessage(code || "Gagal memuat cart. Coba muat ulang halaman.");
     }
   }, []);
 
@@ -60,19 +87,20 @@ export function SnapCartPage() {
       setMessage("Item keranjang belum memiliki ID yang valid. Muat ulang keranjang lalu coba lagi.");
       return;
     }
+    const normalizedQuantity = Math.min(Math.max(1, quantity), item.stock ?? quantity);
     const previousItems = items;
     setItems((current) => {
       if (quantity < 1) return current.filter((cartItem) => (cartItem.cartId ?? cartItem.id) !== (item.cartId ?? item.id));
       return current.map((cartItem) => {
         if ((cartItem.cartId ?? cartItem.id) !== (item.cartId ?? item.id)) return cartItem;
-        return { ...cartItem, quantity, subtotal: cartItem.price * quantity };
+        return { ...cartItem, quantity: normalizedQuantity, subtotal: cartItem.price * normalizedQuantity };
       });
     });
     try {
       if (quantity < 1) {
         await deleteCartItem(item.cartId);
       } else {
-        await updateCartItem(item.cartId, quantity);
+        await updateCartItem(item.cartId, normalizedQuantity);
       }
       await loadCart();
     } catch (error) {
@@ -81,57 +109,115 @@ export function SnapCartPage() {
     }
   }
 
+  function removeItem(item: CartItem) {
+    const confirmed = window.confirm(`Hapus ${item.name} dari keranjang?`);
+    if (confirmed) void updateQuantity(item, 0);
+  }
+
+  function toggleItem(item: CartItem) {
+    const key = cartItemKey(item);
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelectedIds(allSelected ? new Set() : new Set(items.map(cartItemKey)));
+  }
+
   return (
     <>
       <SnapHeader active="cart" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} />
-      <main>
+      <main className="cart-page-shell">
         <section className="snap-page-title">
+          <span className="cart-breadcrumb">Market Snap / Keranjang</span>
           <h1>Keranjang Belanja</h1>
           <p>Review produk pilihanmu sebelum checkout. Belanja segar, cepat, dan aman.</p>
         </section>
         <section className="cart-layout">
           <div>
             <article className="cart-list">
-              {loading && <CartRowsSkeleton />}
-              {!loading && message && <p className="catalog-message">{message}</p>}
-              {!loading && items.map((item) => (
-                <div className="cart-item-row" key={item.cartId ?? item.id}>
-                  <Image alt={item.name} height={72} src={item.image} width={72} />
-                  <div><h3>{item.name}</h3><p>{item.unit}</p><strong>Stok: {item.stock ?? "-"}</strong><span>{store?.name ?? item.storeId}</span></div>
-                  <div className="qty-stepper"><button onClick={() => updateQuantity(item, item.quantity - 1)} type="button"><FiMinus /></button><span>{item.quantity}</span><button onClick={() => updateQuantity(item, item.quantity + 1)} type="button"><FiPlus /></button></div>
-                  <b>{rupiah(item.subtotal ?? item.price * item.quantity)}</b>
-                  <button className="trash-button" onClick={() => updateQuantity(item, 0)} type="button"><FiTrash2 /></button>
-                </div>
-              ))}
+              {status === "loading" && <CartRowsSkeleton />}
+              {status === "auth" && <CartState icon={<FiLock />} message={message} primaryHref="/auth/login" primaryLabel="Login" secondaryHref="/auth/register" secondaryLabel="Daftar" title="Login dulu untuk melihat cart" />}
+              {status === "verification" && <CartState icon={<FiAlertCircle />} message={message} primaryHref="/auth/login" primaryLabel="Buka akun saya" secondaryHref="/catalog" secondaryLabel="Kembali belanja" title="Email belum diverifikasi" />}
+              {status === "error" && <CartState action={loadCart} icon={<FiRefreshCcw />} message={message} primaryLabel="Muat ulang cart" secondaryHref="/catalog" secondaryLabel="Lihat katalog" title="Cart belum bisa dimuat" />}
+              {status === "empty" && <CartState icon={<FiShoppingCart />} image="/market-snap-catalog-v2.png" message={message} primaryHref="/catalog" primaryLabel="Mulai belanja" secondaryHref="/" secondaryLabel="Ke beranda" title="Keranjang masih kosong" />}
+              {isSuccess && (
+                <>
+                  <div className="cart-store-card">
+                    <div><FiCheckCircle /><span><strong>{store?.name ?? "Market Snap Center"}</strong><small>{store?.area ?? "Cabang aktif"} - estimasi {store?.eta ?? "20-30 min"}</small></span></div>
+                    <button onClick={loadCart} type="button"><FiRefreshCcw /> Sinkronkan</button>
+                  </div>
+                  <div className="cart-select-row">
+                    <label><input checked={allSelected} onChange={toggleAll} type="checkbox" /> Pilih semua produk</label>
+                    <span>{selectedItems.length} dari {items.length} item dipilih</span>
+                  </div>
+                  {items.map((item) => {
+                    const checked = selectedIds.has(cartItemKey(item));
+                    const stock = item.stock ?? 0;
+                    return (
+                      <div className={checked ? "cart-item-row selected" : "cart-item-row"} key={cartItemKey(item)}>
+                        <label className="cart-item-check" aria-label={`Pilih ${item.name}`}>
+                          <input checked={checked} onChange={() => toggleItem(item)} type="checkbox" />
+                        </label>
+                        <Image alt={item.name} height={82} src={item.image} width={82} />
+                        <div className="cart-item-meta">
+                          <h3>{item.name}</h3>
+                          <p>{item.category} - {item.unit}</p>
+                          <strong className={stock < 1 ? "is-danger" : ""}>{stock < 1 ? "Stok habis" : `Stok: ${stock}`}</strong>
+                          <span>{store?.name ?? item.storeId ?? "Market Snap"}</span>
+                        </div>
+                        <div className="cart-item-actions">
+                          <div className="qty-stepper">
+                            <button aria-label={`Kurangi ${item.name}`} disabled={item.quantity <= 1} onClick={() => updateQuantity(item, item.quantity - 1)} type="button"><FiMinus /></button>
+                            <span>{item.quantity}</span>
+                            <button aria-label={`Tambah ${item.name}`} disabled={stock > 0 && item.quantity >= stock} onClick={() => updateQuantity(item, item.quantity + 1)} type="button"><FiPlus /></button>
+                          </div>
+                          <b>{rupiah(item.price * item.quantity)}</b>
+                          <button aria-label={`Hapus ${item.name}`} className="trash-button" onClick={() => removeItem(item)} type="button"><FiTrash2 /></button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </article>
-            <article className="voucher-box">
-              <div>
-                <h3>Punya kode voucher?</h3>
-                <div className="voucher-apply-row">
-                  <input onChange={(event) => setVoucherCode(event.target.value)} placeholder="Masukkan kode voucher" value={voucherCode} />
-                  <button type="button">Terapkan</button>
+            {isSuccess && (
+              <article className="voucher-box">
+                <div>
+                  <h3><FiTag /> Punya kode voucher?</h3>
+                  <div className="voucher-apply-row">
+                    <input onChange={(event) => setVoucherCode(event.target.value)} placeholder="Masukkan kode voucher" value={voucherCode} />
+                    <button disabled={!selectedItems.length} type="button">Terapkan</button>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p>Voucher tersedia untukmu</p>
-                <select
-                  aria-label="Pilih voucher tersedia"
-                  onChange={(event) => setVoucherCode(event.target.value)}
-                  value={vouchers.some((voucher) => voucher.code === voucherCode) ? voucherCode : ""}
-                >
-                  <option value="">Pilih voucher tersedia</option>
-                  {vouchers.map((voucher) => (
-                    <option key={voucher.id} value={voucher.code}>
-                      {voucher.code} - {voucher.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </article>
+                <div>
+                  <p>Voucher tersedia untukmu</p>
+                  <select
+                    aria-label="Pilih voucher tersedia"
+                    disabled={!selectedItems.length}
+                    onChange={(event) => setVoucherCode(event.target.value)}
+                    value={vouchers.some((voucher) => voucher.code === voucherCode) ? voucherCode : ""}
+                  >
+                    <option value="">Pilih voucher tersedia</option>
+                    {vouchers.map((voucher) => (
+                      <option key={voucher.id} value={voucher.code}>
+                        {voucher.code} - {voucher.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </article>
+            )}
           </div>
-          <aside className="cart-side">
-            {loading ? <article className="summary-panel"><PanelSkeleton rows={6} /></article> : <Summary discount={discount} shipping={shipping} subtotal={subtotal} total={total} />}
-          </aside>
+          {isSuccess && (
+            <aside className="cart-side">
+              <Summary disabled={!selectedItems.length} discount={discount} itemCount={selectedItems.length} shipping={shipping} store={store} subtotal={subtotal} total={total} />
+            </aside>
+          )}
         </section>
       </main>
       <BenefitStrip />
@@ -140,19 +226,42 @@ export function SnapCartPage() {
   );
 }
 
-function Summary({ subtotal, shipping, discount, total }: { subtotal: number; shipping: number; discount: number; total: number }) {
+function CartState({ action, icon, image, message, primaryHref, primaryLabel, secondaryHref, secondaryLabel, title }: { action?: () => void; icon: React.ReactNode; image?: string; message: string; primaryHref?: string; primaryLabel: string; secondaryHref?: string; secondaryLabel: string; title: string }) {
+  const primary = action ? <button onClick={action} type="button">{primaryLabel}</button> : <Link href={primaryHref ?? "/catalog"}>{primaryLabel}</Link>;
+  return (
+    <div className="cart-state-card">
+      {image ? <Image alt="" height={150} src={image} width={210} /> : <i>{icon}</i>}
+      <div>
+        <h2>{title}</h2>
+        <p>{message}</p>
+        <div className="cart-state-actions">
+          {primary}
+          {secondaryHref && <Link className="secondary" href={secondaryHref}>{secondaryLabel}</Link>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Summary({ disabled, discount, itemCount, shipping, store, subtotal, total }: { disabled: boolean; discount: number; itemCount: number; shipping: number; store?: Store; subtotal: number; total: number }) {
   return (
     <article className="summary-panel">
       <h2>Ringkasan Belanja</h2>
+      <p><span>Item dipilih</span><strong>{itemCount}</strong></p>
       <p><span>Subtotal</span><strong>{rupiah(subtotal)}</strong></p>
       <p><span>Estimasi Ongkir</span><strong>{rupiah(shipping)}</strong></p>
       <p className="green"><span>Diskon Voucher</span><strong>- {rupiah(discount)}</strong></p>
       <hr />
       <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
-      <div className="eta-card"><FiClock /><span><strong>Estimasi Tiba Hari ini, 18:00 - 20:00</strong><small>Pengantaran cepat di area cabang aktif</small></span></div>
-      <Link className="primary-snap wide" href="/checkout"><FiLock /> Checkout Sekarang</Link>
+      <div className="eta-card"><FiClock /><span><strong>{store ? `Estimasi tiba ${store.eta}` : "Pilih alamat saat checkout"}</strong><small>{store?.name ?? "Cabang akan ditentukan dari lokasi pengiriman"}</small></span></div>
+      {disabled && <p className="summary-warning">Pilih minimal satu produk untuk melanjutkan checkout.</p>}
+      <Link aria-disabled={disabled} className={disabled ? "primary-snap wide disabled" : "primary-snap wide"} href={disabled ? "#" : "/checkout"}><FiLock /> Checkout Sekarang</Link>
     </article>
   );
+}
+
+function cartItemKey(item: CartItem) {
+  return item.cartId ?? item.id;
 }
 
 export function SnapCheckoutPage() {

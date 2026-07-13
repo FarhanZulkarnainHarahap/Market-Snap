@@ -1,5 +1,5 @@
-import { SnapAdminDashboard } from "@/components/snap/SnapAdminDashboard";
+import { SuperAdminOverviewPage } from "@/components/dashboard/SuperAdminOverviewPage";
 
 export default function SuperAdminPage() {
-  return <SnapAdminDashboard />;
+  return <SuperAdminOverviewPage />;
 }

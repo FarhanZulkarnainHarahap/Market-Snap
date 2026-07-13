@@ -775,3 +775,236 @@ body:has(.management-header.is-collapsed) {
     justify-content: center;
   }
 }
+
+.management-overview {
+  display: grid;
+  gap: 22px;
+}
+
+.management-dashboard-hero {
+  align-items: stretch;
+  background:
+    linear-gradient(135deg, rgba(232, 246, 229, .94), rgba(255, 255, 255, .98)),
+    #ffffff;
+  border: 1px solid #dfeade;
+  border-radius: 8px;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 380px);
+  overflow: hidden;
+  padding: clamp(22px, 3vw, 38px);
+  position: relative;
+}
+
+.management-dashboard-hero h1 {
+  color: #073f21;
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 1;
+  margin: 10px 0 10px;
+}
+
+.management-dashboard-hero p {
+  color: #52645a;
+  font-size: 17px;
+  line-height: 1.65;
+  max-width: 720px;
+}
+
+.management-dashboard-hero img {
+  align-self: end;
+  height: auto;
+  justify-self: end;
+  object-fit: contain;
+  width: min(100%, 420px);
+}
+
+.management-dashboard-filters {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.management-dashboard-filters input,
+.management-dashboard-filters select,
+.management-dashboard-filters button {
+  background: #ffffff;
+  border: 1px solid #d7e6d8;
+  border-radius: 8px;
+  color: #173321;
+  font-weight: 850;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.management-dashboard-filters button {
+  align-items: center;
+  background: #064220;
+  color: #ffffff;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.management-dashboard-filters small {
+  background: #edf8ea;
+  border: 1px solid #cce8cc;
+  border-radius: 999px;
+  color: #0d642f;
+  font-weight: 900;
+  padding: 10px 13px;
+}
+
+.overview-metrics {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.management-overview-grid {
+  align-items: stretch;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, .7fr);
+}
+
+.management-chart-card.admin-panel,
+.management-insight-card.admin-panel {
+  background: #ffffff;
+}
+
+.management-chart-card header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.management-chart-card header span,
+.management-insight-card > span {
+  color: #27830f;
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.management-chart-card header h2 {
+  color: #0b3d21;
+  font-size: 22px;
+}
+
+.management-chart-frame {
+  height: clamp(320px, 36vw, 420px);
+  min-width: 0;
+}
+
+.management-chart-skeleton {
+  animation: snapPulse 1.2s ease-in-out infinite alternate;
+  background: linear-gradient(90deg, #eef7ed, #f8fcf8, #eef7ed);
+  border-radius: 8px;
+  height: 100%;
+  min-height: 260px;
+}
+
+@keyframes snapPulse {
+  from {
+    opacity: .62;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.management-mini-list {
+  border-top: 1px solid #e1e9e1;
+  display: grid;
+}
+
+.management-mini-list p {
+  align-items: center;
+  border-bottom: 1px solid #e9f0e9;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  margin: 0;
+  padding: 12px 0;
+}
+
+.management-mini-list b,
+.management-mini-list strong {
+  color: #0b3d21;
+}
+
+.management-mini-list b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.management-mini-list span {
+  background: #e8f6df;
+  border-radius: 999px;
+  color: #28741f;
+  font-size: 12px;
+  font-weight: 950;
+  padding: 7px 10px;
+}
+
+.management-quick-actions {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.management-quick-actions a {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #dfe8df;
+  border-radius: 8px;
+  color: #0b3d21;
+  display: flex;
+  font-weight: 950;
+  gap: 10px;
+  min-height: 62px;
+  padding: 0 16px;
+}
+
+.management-quick-actions svg {
+  color: #1a7b32;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1280px) {
+  .overview-metrics,
+  .management-quick-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .management-dashboard-hero,
+  .management-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .management-dashboard-hero img {
+    justify-self: center;
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 620px) {
+  .overview-metrics,
+  .management-quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .management-dashboard-hero {
+    padding: 18px;
+  }
+
+  .management-dashboard-filters input,
+  .management-dashboard-filters select,
+  .management-dashboard-filters button {
+    width: 100%;
+  }
+}

@@ -16,6 +16,7 @@ export type ApiProduct = {
   unit: string;
   description?: string;
   image: string;
+  primaryImage?: { url: string; alt?: string };
   discount: string | null;
   organic: boolean;
   stock: number;
@@ -33,13 +34,28 @@ export type ApiCartItem = {
   storeId: string;
   quantity: number;
   product?: ApiProduct;
+  inventory?: { availableStock: number; status: "IN_STOCK" | "OUT_OF_STOCK" | string };
+  store?: { id: string; name: string; address?: string; city?: string; isOpen?: boolean };
   stock: number;
+  unitPrice?: number;
   subtotal: number;
 };
 
+export type ApiCartData = {
+  id: string | null;
+  store: { id: string; name: string; address?: string; city?: string; isOpen?: boolean } | null;
+  items: ApiCartItem[];
+  itemCount: number;
+  subtotal: number;
+  discount: number;
+  estimatedShipping: number;
+  total: number;
+};
+
 export type CartResponse = {
-  data: ApiCartItem[];
-  summary: { totalItems: number; total: number };
+  success?: boolean;
+  data: ApiCartItem[] | ApiCartData;
+  summary?: { totalItems: number; total: number };
 };
 
 export type ApiAddress = {

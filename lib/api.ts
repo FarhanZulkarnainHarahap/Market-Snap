@@ -194,9 +194,33 @@ export async function fetchProductDetail(productId: string, params: URLSearchPar
 
 export async function fetchCart() {
   const response = await apiFetch(apiUrl("/cart"), { headers: currentUserHeaders(), cache: "no-store" });
-  if (!response.ok) throw new Error("Gagal memuat cart");
+  if (response.status === 401) throw new Error("AUTH_REQUIRED");
+  if (response.status === 403) throw new Error("VERIFICATION_REQUIRED");
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat cart"));
   const payload = await response.json() as CartResponse;
-  return { items: payload.data.map(mapCartItem), summary: payload.summary };
+  if (Array.isArray(payload.data)) {
+    return {
+      discount: 0,
+      estimatedShipping: payload.data.length ? 10000 : 0,
+      itemCount: payload.summary?.totalItems ?? payload.data.reduce((sum, item) => sum + item.quantity, 0),
+      items: payload.data.map(mapCartItem),
+      store: null,
+      subtotal: payload.summary?.total ?? payload.data.reduce((sum, item) => sum + item.subtotal, 0),
+      summary: payload.summary ?? { totalItems: 0, total: 0 },
+      total: payload.summary?.total ?? 0
+    };
+  }
+  const data = payload.data;
+  return {
+    discount: data.discount,
+    estimatedShipping: data.estimatedShipping,
+    itemCount: data.itemCount,
+    items: data.items.map(mapCartItem),
+    store: data.store ? mapCartStore(data.store) : null,
+    subtotal: data.subtotal,
+    summary: { totalItems: data.itemCount, total: data.total },
+    total: data.total
+  };
 }
 
 export async function fetchAddresses(): Promise<Address[]> {
@@ -243,7 +267,7 @@ export async function fetchVouchers(): Promise<Voucher[]> {
 }
 
 export async function addCartItem(productId: string, storeId: string, quantity = 1) {
-  const response = await apiFetch(apiUrl("/cart"), {
+  const response = await apiFetch(apiUrl("/cart/items"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ productId, storeId, quantity })
@@ -254,7 +278,7 @@ export async function addCartItem(productId: string, storeId: string, quantity =
 }
 
 export async function updateCartItem(cartId: string, quantity: number) {
-  const response = await apiFetch(apiUrl(`/cart/${cartId}`), {
+  const response = await apiFetch(apiUrl(`/cart/items/${cartId}`), {
     method: "PATCH",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ quantity })
@@ -265,7 +289,7 @@ export async function updateCartItem(cartId: string, quantity: number) {
 }
 
 export async function deleteCartItem(cartId: string) {
-  const response = await apiFetch(apiUrl(`/cart/${cartId}`), { method: "DELETE", headers: currentUserHeaders() });
+  const response = await apiFetch(apiUrl(`/cart/items/${cartId}`), { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal hapus cart"));
 }
 
@@ -322,14 +346,26 @@ function mapProduct(product: ApiProduct, storeId: string): Product {
 function mapCartItem(item: ApiCartItem): CartItem {
   const product = item.product ?? fallbackProduct(item.productId);
   return {
-    ...mapProduct({ ...product, stock: item.stock }, item.storeId),
+    ...mapProduct({ ...product, image: product.primaryImage?.url ?? product.image, stock: item.inventory?.availableStock ?? item.stock }, item.storeId),
     id: item.id,
     cartId: item.id,
     productId: item.productId,
     storeId: item.storeId,
     quantity: item.quantity,
-    stock: item.stock,
+    stock: item.inventory?.availableStock ?? item.stock,
     subtotal: item.subtotal
+  };
+}
+
+function mapCartStore(store: { address?: string; city?: string; id: string; isOpen?: boolean; name: string }): Store {
+  return {
+    id: store.id,
+    name: store.name,
+    area: store.address ?? store.city ?? "Market Snap",
+    lat: 0,
+    lng: 0,
+    radiusKm: 0,
+    eta: store.isOpen === false ? "Store tutup" : "20-30 min"
   };
 }
 
