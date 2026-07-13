@@ -18,15 +18,16 @@ export type DashboardSnapshot = {
 
 export async function fetchDashboardSnapshot(_role: DashboardRole): Promise<DashboardSnapshot> {
   void _role;
+  const base = _role === "adminStore" ? "/store-admin" : "/super-admin";
   const [products, categories, stores, orders, users, discounts, addresses, reports] = await Promise.all([
-    fetchData("/products?limit=12"),
-    fetchData("/categories"),
-    fetchData("/admin/stores"),
-    fetchData("/orders"),
-    fetchData("/admin/users"),
-    fetchData("/admin/discounts"),
+    fetchData(`${base}/products?limit=12`),
+    fetchData(`${base}/categories`),
+    fetchData(_role === "adminStore" ? "/stores" : `${base}/stores`),
+    fetchData(`${base}/orders`),
+    fetchData(_role === "adminStore" ? "/users/me" : `${base}/users`),
+    fetchData(`${base}/discounts`),
     fetchData("/addresses"),
-    fetchData("/admin/reports/sales")
+    fetchData(`${base}/reports`)
   ]);
 
   return {

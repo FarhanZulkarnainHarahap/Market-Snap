@@ -36,7 +36,7 @@ export function SnapLoginPage() {
     try {
       const payload = await loginUser(String(form.get("email")), String(form.get("password")));
       const role = webRole(payload.user.role);
-      const redirectTo = role === "admin" ? "/admin" : role === "adminStore" ? "/admin-store" : "/";
+      const redirectTo = role === "admin" ? "/super-admin" : role === "adminStore" ? "/store-admin" : "/";
       setModal({
         variant: "success",
         title: "Login berhasil",

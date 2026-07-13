@@ -29,6 +29,26 @@ const nextConfig: NextConfig = {
         source: "/my-orders",
         destination: "/account/orders",
         permanent: false
+      },
+      {
+        source: "/admin",
+        destination: "/super-admin",
+        permanent: false
+      },
+      {
+        source: "/admin/:path*",
+        destination: "/super-admin",
+        permanent: false
+      },
+      {
+        source: "/admin-store",
+        destination: "/store-admin",
+        permanent: false
+      },
+      {
+        source: "/admin-store/:path*",
+        destination: "/store-admin",
+        permanent: false
       }
     ];
   },
@@ -88,30 +108,6 @@ const nextConfig: NextConfig = {
         {
           source: "/account/help-center",
           destination: "/dashboard/customer/profile/help-center"
-        },
-        {
-          source: "/admin",
-          destination: "/dashboard/admin"
-        },
-        {
-          source: "/admin/:path*",
-          destination: "/dashboard/admin/:path*"
-        },
-        {
-          source: "/admin-store",
-          destination: "/dashboard/admin-store"
-        },
-        {
-          source: "/admin-store/:path*",
-          destination: "/dashboard/admin-store/:path*"
-        },
-        {
-          source: "/adminStore",
-          destination: "/dashboard/admin-store"
-        },
-        {
-          source: "/adminStore/:path*",
-          destination: "/dashboard/admin-store/:path*"
         },
         {
           source: "/:path*",

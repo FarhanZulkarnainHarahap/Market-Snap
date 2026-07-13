@@ -122,7 +122,7 @@ function formatValue(value: DashboardRecord[string]) {
 }
 
 function roleLabel(role: DashboardRole) {
-  return role === "adminStore" ? "Admin Store" : role === "admin" ? "Admin" : "Customer";
+  return role === "adminStore" ? "Store Admin" : role === "admin" ? "Super Admin" : "Customer";
 }
 
 function resourceLabel(resource: FeatureResource) {

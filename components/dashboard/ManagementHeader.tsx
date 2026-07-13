@@ -9,22 +9,22 @@ type ManagementHeaderProps = {
 
 const links = {
   admin: [
-    { href: "/dashboard/admin", label: "Overview" },
-    { href: "/dashboard/admin/store", label: "Stores" },
-    { href: "/dashboard/admin/product", label: "Products" },
-    { href: "/dashboard/admin/category", label: "Categories" },
-    { href: "/dashboard/admin/user", label: "Users" },
-    { href: "/dashboard/admin/user-store", label: "Store Admins" },
-    { href: "/dashboard/admin/inventory-history", label: "Reports" }
+    { href: "/super-admin", label: "Dashboard" },
+    { href: "/super-admin/stores", label: "Stores" },
+    { href: "/super-admin/products", label: "Products" },
+    { href: "/super-admin/categories", label: "Categories" },
+    { href: "/super-admin/users", label: "Users" },
+    { href: "/super-admin/store-admins", label: "Store Admins" },
+    { href: "/super-admin/reports", label: "Reports" }
   ],
   adminStore: [
-    { href: "/dashboard/admin-store", label: "Overview" },
-    { href: "/dashboard/admin-store/manage-order", label: "Orders" },
-    { href: "/dashboard/admin-store/inventory-management", label: "Inventory" },
-    { href: "/dashboard/admin-store/product", label: "Products" },
-    { href: "/dashboard/admin-store/category", label: "Categories" },
-    { href: "/dashboard/admin-store/discount", label: "Discounts" },
-    { href: "/dashboard/admin-store/store", label: "Store" }
+    { href: "/store-admin", label: "Dashboard" },
+    { href: "/store-admin/products", label: "Products" },
+    { href: "/store-admin/categories", label: "Categories" },
+    { href: "/store-admin/inventory", label: "Inventory" },
+    { href: "/store-admin/discounts", label: "Discounts" },
+    { href: "/store-admin/orders", label: "Orders" },
+    { href: "/store-admin/reports", label: "Reports" }
   ]
 };
 

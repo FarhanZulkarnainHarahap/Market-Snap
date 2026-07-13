@@ -9,15 +9,15 @@ import { readStaleCache, writeStaleCache } from "@/lib/stale-cache";
 import type { Product } from "@/lib/types";
 
 const nav = [
-  ["Dashboard", "/dashboard/admin", FiGrid],
-  ["Products", "/dashboard/admin/product", FiPackage],
-  ["Inventory", "/dashboard/admin/inventory-history", FiBox],
-  ["Orders", "/dashboard/admin-store/manage-order", FiShoppingCart],
-  ["Branches", "/dashboard/admin/store", FiHome],
-  ["Vouchers", "/dashboard/admin-store/discount", FiPieChart],
-  ["Customers", "/dashboard/admin/user", FiUsers],
-  ["Reports", "/dashboard/admin/inventory-history", FiTrendingUp],
-  ["Settings", "/dashboard/admin/user-store", FiSettings]
+  ["Dashboard", "/super-admin", FiGrid],
+  ["Products", "/super-admin/products", FiPackage],
+  ["Inventory", "/super-admin/inventory", FiBox],
+  ["Orders", "/super-admin/orders", FiShoppingCart],
+  ["Branches", "/super-admin/stores", FiHome],
+  ["Vouchers", "/super-admin/discounts", FiPieChart],
+  ["Customers", "/super-admin/users", FiUsers],
+  ["Reports", "/super-admin/reports", FiTrendingUp],
+  ["Settings", "/super-admin/settings", FiSettings]
 ] as const;
 
 export function SnapAdminDashboard() {

@@ -21,7 +21,7 @@ export function GoogleOAuthCallbackPage() {
       .then((user) => {
         saveSession({ token: "", user });
         const role = webRole(user.role);
-        router.replace(role === "admin" ? "/admin" : role === "adminStore" ? "/admin-store" : "/");
+        router.replace(role === "admin" ? "/super-admin" : role === "adminStore" ? "/store-admin" : "/");
       })
       .catch((fetchError) => {
         setError(fetchError instanceof Error ? fetchError.message : `Login ${provider} gagal.`);
