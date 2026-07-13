@@ -608,7 +608,7 @@ function OrderList({ compact = false, orders }: { compact?: boolean; orders: Ord
           <div className="order-items">
             {order.items.slice(0, compact ? 2 : 4).map((item) => (
               <div className="order-item-row" key={item.id}>
-                <img alt={item.name} src={item.image} />
+                <Image alt={item.name} height={48} src={item.image} width={48} />
                 <span><b>{item.name}</b><small>Qty: {item.quantity}</small></span>
               </div>
             ))}
@@ -680,7 +680,7 @@ function memberSince(date?: string) {
 
 function roleLabel(role: ApiUser["role"]) {
   const normalized = String(role).toLowerCase();
-  if (normalized === "admin" || normalized === "super_admin") return "Admin Market Snap";
+  if (normalized === "super_admin") return "Super Admin Market Snap";
   if (normalized === "store_admin") return "Admin Store Market Snap";
   return "Customer Market Snap";
 }

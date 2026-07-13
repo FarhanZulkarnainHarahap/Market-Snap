@@ -141,7 +141,7 @@ export type WebRole = "admin" | "adminStore" | "customer";
 
 export function webRole(role: ApiUser["role"]): WebRole {
   const normalized = String(role).toLowerCase();
-  if (normalized === "super_admin" || normalized === "admin") return "admin";
+  if (normalized === "super_admin") return "admin";
   if (normalized === "store_admin") return "adminStore";
   return "customer";
 }

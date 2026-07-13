@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { FiBell, FiBox, FiCalendar, FiGrid, FiHeadphones, FiHome, FiPackage, FiPieChart, FiSettings, FiShoppingCart, FiTrendingUp, FiUsers } from "react-icons/fi";
 import { fetchDashboardSnapshot, type DashboardSnapshot } from "@/lib/dashboard-api";
@@ -54,7 +55,7 @@ export function SnapAdminDashboard() {
       <aside className="admin-sidebar">
         <h1>MARKET SNAP</h1>
         <nav>{nav.map(([label, href, Icon], index) => <a className={index === 0 ? "active" : ""} href={href} key={label}><Icon /> {label}</a>)}</nav>
-        <div className="upgrade-card"><img alt="" src="/product.png" /><h3>Grow your business</h3><p>Add more branches and promos to reach customers.</p><button type="button">Upgrade Plan</button></div>
+        <div className="upgrade-card"><Image alt="" height={120} src="/product.png" width={120} /><h3>Grow your business</h3><p>Add more branches and promos to reach customers.</p><button type="button">Upgrade Plan</button></div>
         <div className="support-card"><FiHeadphones /><strong>Butuh bantuan?</strong><button type="button">Hubungi Support</button></div>
       </aside>
       <section className="admin-main">
@@ -76,9 +77,9 @@ export function SnapAdminDashboard() {
         <section className="admin-two">
           <article className="recent-card"><h3>Low Stock Products</h3>{lowStock.slice(0, 5).map((product) => {
             const stock = Object.values(product.stockByStore)[0] ?? 0;
-            return <p key={product.id}><img alt="" src={product.image} /><b>{product.name}</b><span>{product.category}</span><strong>{stock}</strong><em>{stock < 20 ? "Kritis" : "Rendah"}</em></p>;
+            return <p key={product.id}><Image alt="" height={44} src={product.image} width={44} /><b>{product.name}</b><span>{product.category}</span><strong>{stock}</strong><em>{stock < 20 ? "Kritis" : "Rendah"}</em></p>;
           })}</article>
-          <article className="branch-performance"><h3>Branch Performance</h3>{(snapshot?.stores ?? []).slice(0, 4).map((store, index) => <div key={String(store.id ?? store.name ?? index)}><img alt="" src="/market-snap-favicon-transparent.png" /><h4>{String(store.name ?? "Cabang")}</h4><p>{String(store.city ?? "Jakarta")}</p><strong>{rupiah([98450000, 67320000, 54780000, 36340000][index] ?? 12000000)}</strong><span>Naik {[16.2, 11.4, 9.8, 7.3][index] ?? 4.2}%</span></div>)}</article>
+          <article className="branch-performance"><h3>Branch Performance</h3>{(snapshot?.stores ?? []).slice(0, 4).map((store, index) => <div key={String(store.id ?? store.name ?? index)}><Image alt="" height={36} src="/market-snap-favicon-transparent.png" width={36} /><h4>{String(store.name ?? "Cabang")}</h4><p>{String(store.city ?? "Jakarta")}</p><strong>{rupiah([98450000, 67320000, 54780000, 36340000][index] ?? 12000000)}</strong><span>Naik {[16.2, 11.4, 9.8, 7.3][index] ?? 4.2}%</span></div>)}</article>
         </section>
         <section className="voucher-performance">
           <h3>Voucher Performance</h3>

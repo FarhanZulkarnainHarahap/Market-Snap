@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiClock, FiHome, FiLock, FiMinus, FiPlus, FiTrash2, FiTruck, FiZap } from "react-icons/fi";
@@ -95,7 +96,7 @@ export function SnapCartPage() {
               {!loading && message && <p className="catalog-message">{message}</p>}
               {!loading && items.map((item) => (
                 <div className="cart-item-row" key={item.cartId ?? item.id}>
-                  <img alt={item.name} src={item.image} />
+                  <Image alt={item.name} height={72} src={item.image} width={72} />
                   <div><h3>{item.name}</h3><p>{item.unit}</p><strong>Stok: {item.stock ?? "-"}</strong><span>{store?.name ?? item.storeId}</span></div>
                   <div className="qty-stepper"><button onClick={() => updateQuantity(item, item.quantity - 1)} type="button"><FiMinus /></button><span>{item.quantity}</span><button onClick={() => updateQuantity(item, item.quantity + 1)} type="button"><FiPlus /></button></div>
                   <b>{rupiah(item.subtotal ?? item.price * item.quantity)}</b>
@@ -250,7 +251,7 @@ export function SnapCheckoutPage() {
                   <select><option>08:00 - 10:00</option><option>18:00 - 20:00</option></select>
                 </CheckoutBlock>
                 <CheckoutBlock title="3. Cabang Terdekat" action="Ubah cabang">
-                  <div className="branch-checkout"><img alt="" src="/market-snap-favicon-transparent.png" /><div><h3>{store?.name ?? "Market Snap"}</h3><p>{store?.area ?? "Jakarta Selatan"}</p><span>{store?.distanceKm?.toFixed(1) ?? "0"} km jarak dari lokasi Anda</span></div></div>
+                  <div className="branch-checkout"><Image alt="" height={48} src="/market-snap-favicon-transparent.png" width={48} /><div><h3>{store?.name ?? "Market Snap"}</h3><p>{store?.area ?? "Jakarta Selatan"}</p><span>{store?.distanceKm?.toFixed(1) ?? "0"} km jarak dari lokasi Anda</span></div></div>
                 </CheckoutBlock>
                 <CheckoutBlock title="4. Opsi Pengiriman">
                   <div className="delivery-row"><button className="active" type="button"><FiTruck /> Pengiriman Standar<br /><strong>{rupiah(shipping)}</strong></button><button type="button"><FiZap /> Pengiriman Express<br /><strong>Rp 18.000</strong></button><button type="button"><FiHome /> Ambil di Cabang<br /><strong>GRATIS</strong></button></div>
@@ -270,7 +271,7 @@ export function SnapCheckoutPage() {
               <aside className="checkout-summary">
                 <article className="summary-panel">
                   <h2>Ringkasan Pesanan <small>{items.length} item</small></h2>
-                  {items.map((item) => <div className="mini-order" key={item.cartId ?? item.id}><img alt={item.name} src={item.image} /><span><strong>{item.name}</strong><small>{item.unit}</small><b>{rupiah(item.price)}</b></span><small>Qty: {item.quantity}</small></div>)}
+                  {items.map((item) => <div className="mini-order" key={item.cartId ?? item.id}><Image alt={item.name} height={52} src={item.image} width={52} /><span><strong>{item.name}</strong><small>{item.unit}</small><b>{rupiah(item.price)}</b></span><small>Qty: {item.quantity}</small></div>)}
                   <p><span>Subtotal</span><strong>{rupiah(subtotal)}</strong></p>
                   <p className="green"><span>Diskon Voucher</span><strong>- {rupiah(discount)}</strong></p>
                   <p><span>Biaya Pengiriman</span><strong>{rupiah(shipping)}</strong></p>

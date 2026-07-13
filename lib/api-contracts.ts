@@ -60,7 +60,7 @@ export type ApiUser = {
   authProvider?: string;
   canEditAvatar?: boolean;
   createdAt?: string;
-  role: "user" | "admin" | "super_admin" | "store_admin" | "USER" | "ADMIN" | "SUPER_ADMIN" | "STORE_ADMIN";
+  role: "customer" | "super_admin" | "store_admin" | "CUSTOMER" | "SUPER_ADMIN" | "STORE_ADMIN";
   verified?: boolean;
 };
 

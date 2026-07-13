@@ -311,7 +311,7 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
   return (
     <article className="snap-product-card">
       <Link className="product-picture" href={`/product/${product.id}`}>
-        <img alt={product.name} src={product.image} />
+        <Image alt={product.name} height={220} src={product.image} width={260} />
         {product.discount && <span className="promo-dot">{product.discount}</span>}
       </Link>
       <div className="snap-product-body">

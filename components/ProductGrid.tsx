@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { rupiah } from "../lib/format";
 import type { Product } from "../lib/types";
 
@@ -19,7 +20,7 @@ export function ProductGrid({ products, storeId, onAdd }: ProductGridProps) {
         return (
           <article className="product-card" key={product.id}>
             <div className="product-media">
-              <img alt={product.name} src={product.image} />
+              <Image alt={product.name} height={220} src={product.image} width={260} />
               {product.discount && <span className="discount-badge">{product.discount}</span>}
             </div>
             <div className="product-body">

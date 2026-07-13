@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FiChevronLeft, FiChevronRight, FiHeart, FiMapPin, FiMinus, FiPlus, FiShoppingCart, FiStar } from "react-icons/fi";
@@ -62,12 +63,12 @@ export function SnapProductPage({ productId }: { productId: string }) {
               <div>
                 <div className="product-gallery-main">
                   <button type="button"><FiChevronLeft /></button>
-                  <img alt={product.name} src={product.image} />
+                  <Image alt={product.name} height={420} priority src={product.image} width={520} />
                   <button type="button"><FiChevronRight /></button>
                   <button className="favorite-button" type="button"><FiHeart /></button>
                 </div>
                 <div className="thumbnail-row">
-                  {[product.image, "/tomato.png", "/bread.png", "/pineapple.png"].map((src, index) => <img alt="" className={index === 0 ? "active" : ""} key={src} src={src} />)}
+                  {[product.image, "/tomato.png", "/bread.png", "/pineapple.png"].map((src, index) => <Image alt="" className={index === 0 ? "active" : ""} height={84} key={src} src={src} width={84} />)}
                 </div>
               </div>
               <article className="product-info-panel">

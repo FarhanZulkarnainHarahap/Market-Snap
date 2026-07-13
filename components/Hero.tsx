@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Store } from "../lib/types";
 
 type HeroProps = {
@@ -37,7 +38,7 @@ export function Hero({ store, serviceable, distanceKm, onLocate }: HeroProps) {
 function FeatureCard({ image, tone, title, action }: { image: string; tone: string; title: string; action: string }) {
   return (
     <article className={`feature-card ${tone}`}>
-      <img alt={title} src={image} />
+      <Image alt={title} height={120} src={image} width={120} />
       <h2>{title}</h2>
       <span>{action}</span>
     </article>
