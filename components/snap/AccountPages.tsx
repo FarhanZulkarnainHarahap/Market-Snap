@@ -44,13 +44,13 @@ type AddressForm = {
 };
 
 const accountMenus: Array<{ key: AccountSection; href: string; label: string; text: string; icon: typeof FiUser }> = [
-  { key: "profile", href: "/account/profile", label: "Profile", text: "Data personal", icon: FiUser },
-  { key: "address", href: "/account/address", label: "Address", text: "Alamat pengiriman", icon: FiMapPin },
-  { key: "orders", href: "/account/orders", label: "My Orders", text: "Riwayat belanja", icon: FiPackage },
-  { key: "notifications", href: "/account/notifications", label: "Notifications", text: "Update pesanan", icon: FiBell },
-  { key: "vouchers", href: "/account/vouchers", label: "Vouchers", text: "Promo tersimpan", icon: FiTag },
-  { key: "security", href: "/account/security", label: "Security", text: "Password & akses", icon: FiLock },
-  { key: "help", href: "/account/help-center", label: "Help Center", text: "Bantuan pelanggan", icon: FiHeadphones }
+  { key: "profile", href: "/dashboard/customer/profile", label: "Profil Saya", text: "Data personal", icon: FiUser },
+  { key: "address", href: "/dashboard/customer/profile/address", label: "Alamat", text: "Alamat pengiriman", icon: FiMapPin },
+  { key: "orders", href: "/dashboard/customer/my-orders", label: "Pesanan Saya", text: "Riwayat belanja", icon: FiPackage },
+  { key: "notifications", href: "/dashboard/customer/profile/notifications", label: "Notifikasi", text: "Update pesanan", icon: FiBell },
+  { key: "vouchers", href: "/dashboard/customer/profile/vouchers", label: "Voucher", text: "Promo tersimpan", icon: FiTag },
+  { key: "security", href: "/dashboard/customer/profile/security", label: "Keamanan", text: "Password & akses", icon: FiLock },
+  { key: "help", href: "/dashboard/customer/profile/help-center", label: "Bantuan", text: "Bantuan pelanggan", icon: FiHeadphones }
 ];
 
 export function AccountLayout({ active, children, title, description }: { active: AccountSection; children: React.ReactNode; title: string; description: string }) {
@@ -63,7 +63,7 @@ export function AccountLayout({ active, children, title, description }: { active
       <main className="account-page">
         <section className="account-hero">
           <div>
-            <span className="eyebrow">My Account</span>
+            <span className="eyebrow">Akun Customer</span>
             <h1>{title}</h1>
             <p>{description}</p>
           </div>
@@ -208,10 +208,10 @@ export function ProfileAccountContent() {
       </section>
 
       <section className="account-grid">
-        <QuickPanel actionHref="/account/address" action="Tambah" title="Alamat utama">
+        <QuickPanel actionHref="/dashboard/customer/profile/address" action="Tambah" title="Alamat utama">
           {primaryAddress ? <SavedAddress address={primaryAddress} /> : <p className="empty-copy">Belum ada alamat tersimpan.</p>}
         </QuickPanel>
-        <QuickPanel actionHref="/account/orders" action="Lihat semua" title="Pesanan terakhir">
+        <QuickPanel actionHref="/dashboard/customer/my-orders" action="Lihat semua" title="Pesanan terakhir">
           <OrderList orders={recentOrders} compact />
         </QuickPanel>
       </section>

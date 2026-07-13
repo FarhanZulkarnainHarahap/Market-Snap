@@ -19,7 +19,7 @@ export function VerifyEmailPage() {
       .then((response) => {
         setSuccess(true);
         setMessage(response.message);
-        window.setTimeout(() => router.push("/account/profile"), 1400);
+        window.setTimeout(() => router.push("/dashboard/customer/profile"), 1400);
       })
       .catch((error) => setMessage(error instanceof Error ? error.message : "Verifikasi belum dapat diproses."));
   }, [router, token]);
@@ -30,7 +30,7 @@ export function VerifyEmailPage() {
         {success ? <FiCheck /> : <FiMail />}
         <h1>{success ? "Akun terverifikasi" : "Verifikasi akun"}</h1>
         <p>{message}</p>
-        <Link className="primary-snap wide" href="/account/profile">Kembali ke profil</Link>
+        <Link className="primary-snap wide" href="/dashboard/customer/profile">Kembali ke profil</Link>
       </section>
     </main>
   );

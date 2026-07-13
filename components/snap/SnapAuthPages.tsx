@@ -40,7 +40,7 @@ export function SnapLoginPage() {
       setModal({
         variant: "success",
         title: "Login berhasil",
-        message: "Akun kamu sudah masuk. Lanjut ke halaman utama Market Snap.",
+        message: "Akun kamu sudah aktif. Lanjut ke halaman utama Market Snap.",
         redirectTo
       });
     } catch (error) {
@@ -65,17 +65,17 @@ export function SnapLoginPage() {
       <main className="auth-capture login-capture">
         <section className="auth-left">
           <Link className="auth-brand" href="/">MARKET SNAP</Link>
-          <h1>Masuk ke Market Snap</h1>
-          <p>Masuk untuk melanjutkan belanja kebutuhan harian atau mengelola tokomu dengan mudah.</p>
+          <h1>Login ke Market Snap</h1>
+          <p>Login untuk melanjutkan belanja kebutuhan harian atau mengelola tokomu dengan mudah.</p>
           <form className="capture-form" onSubmit={submit}>
             <label>Email <span><FiMail /><input name="email" placeholder="your@email.com" required type="email" /></span></label>
             <label>Password <span><FiLock /><input name="password" placeholder="password123" required type="password" /><FiEyeOff /></span></label>
-            <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/auth/login">Lupa password?</Link></div>
-            <button aria-busy={busy} className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> Masuk</button>
+            <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/auth/forgot-password">Lupa password?</Link></div>
+            <button aria-busy={busy} className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> Login</button>
             <em>atau</em>
-            <Link className="google-auth-button" href={googleAuthUrl()}><GoogleIcon /> Masuk dengan Google</Link>
-            <Link className="google-auth-button facebook-auth-button" href={facebookAuthUrl()}><FacebookIcon /> Masuk dengan Facebook</Link>
-            <Link className="secondary-snap wide" href="/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
+            <Link className="google-auth-button" href={googleAuthUrl()}><GoogleIcon /> Login dengan Google</Link>
+            <Link className="google-auth-button facebook-auth-button" href={facebookAuthUrl()}><FacebookIcon /> Login dengan Facebook</Link>
+            <Link className="secondary-snap wide" href="/auth/register"><FiUser /> Belum punya akun? Daftar sekarang</Link>
           </form>
           <div className="login-benefits">
             <AuthMini icon={<FiShoppingBag />} title="Belanja mudah & cepat" text="Temukan kebutuhan harian dari cabang terdekat." />
@@ -141,8 +141,8 @@ export function SnapRegisterPage() {
       setModal({
         variant: "success",
         title: "Registrasi berhasil",
-        message: "Akun Market Snap sudah dibuat. Silakan masuk untuk mulai belanja.",
-        redirectTo: "/login"
+        message: "Akun Market Snap sudah dibuat. Silakan login untuk mulai belanja.",
+        redirectTo: "/auth/login"
       });
     } catch (error) {
       setModal({
@@ -207,7 +207,7 @@ export function SnapRegisterPage() {
               <Link className="google-auth-button" href={googleAuthUrl()}><GoogleIcon /> Daftar dengan Google</Link>
               <Link className="google-auth-button facebook-auth-button" href={facebookAuthUrl()}><FacebookIcon /> Daftar dengan Facebook</Link>
             </div>
-            <p className="center-copy">Sudah punya akun? <Link href="/login">Masuk di sini</Link></p>
+            <p className="center-copy">Sudah punya akun? <Link href="/auth/login">Login di sini</Link></p>
           </form>
         </section>
         <section className="register-info">

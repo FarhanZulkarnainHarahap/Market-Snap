@@ -82,7 +82,7 @@ export default function CustomerDashboardPage() {
 
               <Link
                 className="secondary-snap"
-                href="/my-orders"
+                href="/dashboard/customer/my-orders"
               >
                 Pesanan saya
               </Link>

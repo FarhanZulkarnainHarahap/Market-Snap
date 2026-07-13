@@ -21,8 +21,8 @@ const publicLinks = [
 const customerLinks = [
   { key: "customer", href: "/", icon: FiHome, label: "Overview" },
   { key: "catalog", href: "/catalog", icon: FiGrid, label: "Catalog" },
-  { key: "orders", href: "/my-orders", icon: FiPackage, label: "My Orders" },
-  { key: "profile", href: "/profile/address", icon: FiMapPin, label: "Address" },
+  { key: "orders", href: "/dashboard/customer/my-orders", icon: FiPackage, label: "Pesanan" },
+  { key: "profile", href: "/dashboard/customer/profile/address", icon: FiMapPin, label: "Alamat" },
   { key: "cart", href: "/cart", icon: FiShoppingCart, label: "Cart" }
 ];
 
@@ -44,7 +44,7 @@ export function Header({ cartCount = 0, active = "home", mode = "public" }: Head
           <button aria-label="Cari produk" title="Cari produk" type="submit"><FiSearch /></button>
         </form>
         <div className="header-actions">
-          <Link className="ghost-button" href="/auth/login"><FiLogIn /><span>Masuk</span></Link>
+          <Link className="ghost-button" href="/auth/login"><FiLogIn /><span>Login</span></Link>
           <Link className="cart-button" href="/cart" aria-label="Keranjang">
             <FiShoppingCart />
             <span>Cart</span>
@@ -70,7 +70,7 @@ export function Header({ cartCount = 0, active = "home", mode = "public" }: Head
               <span>{link.label}</span>
             </Link>
           ))}
-          <Link className="mobile-login" href="/auth/login" onClick={() => setMenuOpen(false)}><FiUser /><span>Masuk</span></Link>
+          <Link className="mobile-login" href="/auth/login" onClick={() => setMenuOpen(false)}><FiUser /><span>Login</span></Link>
         </nav>
       </div>
     </header>

@@ -112,7 +112,7 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
             {profileOpen && <ProfileMenu onLogout={() => logout(setSession, setProfileOpen)} />}
           </div>
         ) : (
-          <Link className="outline-action" href="/auth/login">Masuk</Link>
+          <Link className="outline-action" href="/auth/login">Login</Link>
         ))}
         {!simple && <Link className="cart-action" href="/cart"><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
       </div>
@@ -136,7 +136,7 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
           <FiShoppingBag />
           <span>Catalog</span>
         </Link>
-        <Link className={active === "orders" ? "active" : ""} href="/account/orders">
+        <Link className={active === "orders" ? "active" : ""} href="/dashboard/customer/my-orders">
           <FiPackage />
           <span>Orders</span>
         </Link>
@@ -145,13 +145,13 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
           <span>Cart</span>
           <strong>{cartCount}</strong>
         </Link>
-        <Link className={active === "notifications" ? "active" : ""} href="/notifications">
+        <Link className={active === "notifications" ? "active" : ""} href="/dashboard/customer/profile/notifications">
           <FiBell />
           <span>Notif</span>
         </Link>
-        <Link className={active === "profile" ? "mobile-profile-link active" : "mobile-profile-link"} href={session.isLoggedIn ? "/account/profile" : "/login"}>
+        <Link className={active === "profile" ? "mobile-profile-link active" : "mobile-profile-link"} href={session.isLoggedIn ? "/dashboard/customer/profile" : "/auth/login"}>
           <FiUser />
-          <span>{session.isLoggedIn ? profileLabel : "Masuk"}</span>
+          <span>{session.isLoggedIn ? profileLabel : "Login"}</span>
         </Link>
       </div>
     </nav>
@@ -160,8 +160,8 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
 
 function ProfileMenu({ onLogout }: { onLogout: () => void }) {
   const menuItems = [
-    { href: "/account/profile", icon: FiUser, label: "Account", text: "Profile, alamat, pesanan" },
-    { href: "/notifications", icon: FiBell, label: "Notification", text: "Update pesanan & promo" }
+    { href: "/dashboard/customer/profile", icon: FiUser, label: "Profil Saya", text: "Profil, alamat, pesanan" },
+    { href: "/dashboard/customer/profile/notifications", icon: FiBell, label: "Notifikasi", text: "Update pesanan & promo" }
   ];
 
   return (
@@ -181,7 +181,7 @@ function logout(setSession: (session: HeaderSession) => void, setProfileOpen: (o
   setSession({ isLoggedIn: false, name: "" });
   setProfileOpen(false);
   void logoutUser().finally(() => {
-    window.location.href = "/login";
+    window.location.href = "/auth/login";
   });
 }
 

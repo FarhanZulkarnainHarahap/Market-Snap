@@ -36,7 +36,7 @@ export function GoogleOAuthCallbackPage() {
         {shownError ? <FiAlertCircle /> : <FiCheckCircle />}
         <h1>{shownError ? `Login ${provider} gagal` : `Login ${provider}`}</h1>
         <p>{shownError || `Menyelesaikan login ${provider}...`}</p>
-        {shownError && <Link className="primary-snap wide" href="/login">Kembali ke login</Link>}
+        {shownError && <Link className="primary-snap wide" href="/auth/login">Kembali ke login</Link>}
       </section>
     </main>
   );

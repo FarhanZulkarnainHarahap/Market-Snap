@@ -65,7 +65,7 @@ export function SnapCartPage() {
       setVouchers([]);
       if (code === "AUTH_REQUIRED") {
         setStatus("auth");
-        setMessage("Masuk ke akun Market Snap untuk melihat keranjang belanja.");
+        setMessage("Login ke akun Market Snap untuk melihat keranjang belanja.");
         return;
       }
       if (code === "VERIFICATION_REQUIRED") {
