@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const apiBaseUrl = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? "https://api-node.market-snap.web.id");
+
 const nextConfig: NextConfig = {
   async redirects() {
     return [
@@ -39,7 +41,7 @@ const nextConfig: NextConfig = {
         },
         {
           source: "/authjs/:path*",
-          destination: "https://apimarket-snap.vercel.app/authjs/:path*"
+          destination: `${apiBaseUrl}/authjs/:path*`
         }
       ],
       afterFiles: [
@@ -121,3 +123,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+function normalizeApiBase(value: string): string {
+  return value.trim().replace(/\/+$/, "").replace(/\/api$/, "");
+}
