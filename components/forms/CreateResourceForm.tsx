@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { currentUserHeaders } from "../../lib/api";
+import { apiFetch, currentUserHeaders } from "../../lib/api";
 import { apiUrl } from "../../lib/api-url";
 import { ManagementHeader } from "../dashboard/ManagementHeader";
 import { SnapHeader } from "../snap/SnapCommon";
@@ -36,7 +36,7 @@ export function CreateResourceForm({ active, description, endpoint, fields, meth
     setSubmitting(true);
     try {
       const body = formBody(new FormData(event.currentTarget));
-      const response = await fetch(apiUrl(endpoint), { method, headers: headers(role), body: JSON.stringify(body) });
+      const response = await apiFetch(apiUrl(endpoint), { method, headers: headers(role), body: JSON.stringify(body) });
       if (!response.ok) throw new Error(await responseMessage(response));
       event.currentTarget.reset();
       setMessage("Data berhasil disimpan.");

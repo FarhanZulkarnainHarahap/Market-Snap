@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FiBell, FiHome, FiSearch } from "react-icons/fi";
 import type { DashboardRole } from "../../lib/dashboard-api";
 
 type ManagementHeaderProps = {
@@ -37,7 +38,14 @@ export function ManagementHeader({ role }: ManagementHeaderProps) {
           <Image src="/market-snap-favicon-transparent.png" alt="Market Snap" height={42} width={42} />
           <span><strong>Market Snap</strong><small>{title}</small></span>
         </Link>
-        <Link className="management-exit" href="/">Storefront</Link>
+        <label className="management-search">
+          <FiSearch />
+          <input placeholder="Cari produk, pesanan, pelanggan..." />
+        </label>
+        <div className="management-actions">
+          <button aria-label="Notifikasi" className="management-icon-button" type="button"><FiBell /></button>
+          <Link className="management-exit" href="/"><FiHome /> Storefront</Link>
+        </div>
       </div>
       <nav className="management-nav" aria-label={title}>
         {links[role].map((link) => <Link href={link.href} key={link.href}>{link.label}</Link>)}

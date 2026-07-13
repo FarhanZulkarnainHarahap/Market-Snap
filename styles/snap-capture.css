@@ -1,11 +1,11 @@
 :root {
   --snap-green: #064220;
   --snap-green-2: #0d642f;
-  --snap-light: #f4faf3;
-  --snap-line: #dfe7df;
-  --snap-muted: #68736b;
+  --snap-light: #f7fbf7;
+  --snap-line: #dfe8df;
+  --snap-muted: #66766b;
   --snap-orange: #ff8a1d;
-  --snap-shadow: 0 16px 42px rgba(11, 43, 24, .08);
+  --snap-shadow: 0 14px 34px rgba(11, 43, 24, .07);
 }
 
 body {
@@ -16,11 +16,12 @@ body {
 .snap-header {
   align-items: center;
   background: rgba(255, 255, 255, .96);
-  border-bottom: 1px solid #edf1ed;
+  border-bottom: 1px solid #eaf0ea;
+  box-shadow: 0 10px 28px rgba(6, 66, 32, .05);
   display: grid;
-  gap: 16px;
+  gap: 12px;
   grid-template-columns: 1fr;
-  padding: 22px clamp(18px, 4vw, 52px);
+  padding: 13px clamp(16px, 4vw, 48px);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -28,7 +29,7 @@ body {
 
 .snap-brand {
   color: var(--snap-green);
-  font-size: clamp(24px, 3vw, 34px);
+  font-size: clamp(16px, 1.8vw, 22px);
   font-weight: 950;
   letter-spacing: 0;
 }
@@ -49,20 +50,29 @@ body {
 }
 
 .snap-nav {
-  gap: 22px;
+  gap: 18px;
   justify-content: center;
 }
 
 .snap-nav a {
   border-bottom: 2px solid transparent;
   color: #13251a;
+  font-size: 13px;
   font-weight: 800;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 .snap-nav a.active {
   border-color: #5eaa39;
   color: var(--snap-green);
+}
+
+.refreshing-copy {
+  color: #0d642f;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 850;
+  margin-top: 6px;
 }
 
 .snap-actions {
@@ -113,8 +123,8 @@ body {
   align-items: center;
   display: inline-flex;
   gap: 8px;
-  min-height: 46px;
-  padding: 0 18px;
+  min-height: 40px;
+  padding: 0 14px;
 }
 
 .profile-action {
@@ -206,7 +216,7 @@ body {
 
 .cart-action,
 .primary-snap {
-  background: linear-gradient(135deg, #0c572b, #06401f);
+  background: #064220;
   border: 0;
   color: #fff;
   font-weight: 950;

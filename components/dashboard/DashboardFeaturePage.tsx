@@ -6,6 +6,7 @@ import { ManagementHeader } from "./ManagementHeader";
 import { SnapHeader } from "../snap/SnapCommon";
 import { fetchDashboardSnapshot, type DashboardRecord, type DashboardRole } from "../../lib/dashboard-api";
 import { rupiah } from "../../lib/format";
+import { readStaleCache, writeStaleCache } from "../../lib/stale-cache";
 
 type FeatureResource = "products" | "categories" | "stores" | "orders" | "users" | "discounts" | "addresses" | "reports";
 
@@ -21,21 +22,29 @@ type FeaturePageProps = {
 };
 
 export function DashboardFeaturePage(props: FeaturePageProps) {
-  const [rows, setRows] = useState<DashboardRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = useMemo(() => `dashboard:${props.role}:${props.resource}:${props.detailId ?? "all"}`, [props.detailId, props.resource, props.role]);
+  const [rows, setRows] = useState<DashboardRecord[]>(() => readStaleCache<DashboardRecord[]>(cacheKey) ?? []);
+  const [loading, setLoading] = useState(() => !readStaleCache<DashboardRecord[]>(cacheKey));
+  const [refreshing, setRefreshing] = useState(() => Boolean(readStaleCache<DashboardRecord[]>(cacheKey)));
 
   useEffect(() => {
     let mounted = true;
     fetchDashboardSnapshot(props.role).then((snapshot) => {
       const data = snapshot[props.resource];
-      if (mounted) setRows(data);
+      if (mounted) {
+        setRows(data);
+        writeStaleCache(cacheKey, data, 1000 * 60);
+      }
     }).finally(() => {
-      if (mounted) setLoading(false);
+      if (mounted) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     });
     return () => {
       mounted = false;
     };
-  }, [props.resource, props.role]);
+  }, [cacheKey, props.resource, props.role]);
 
   const visibleRows = useMemo(() => {
     if (!props.detailId) return rows.slice(0, 8);
@@ -50,7 +59,7 @@ export function DashboardFeaturePage(props: FeaturePageProps) {
           <span className="mini-label">{props.eyebrow}</span>
           <h1>{props.title}</h1>
           <p>{props.description}</p>
-          <span className="status-pill">{loading ? "Memuat data..." : "Data terbaru"}</span>
+          <span className="status-pill">{loading ? "Memuat data..." : refreshing ? "Memperbarui data..." : "Data terbaru"}</span>
         </section>
         {props.actions?.length ? (
           <nav className="dashboard-actions" aria-label="Aksi halaman">

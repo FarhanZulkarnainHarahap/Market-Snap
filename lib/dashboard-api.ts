@@ -1,4 +1,5 @@
 import { apiUrl } from "./api-url";
+import { apiFetch } from "./api";
 
 export type DashboardRole = "customer" | "admin" | "adminStore";
 
@@ -15,17 +16,17 @@ export type DashboardSnapshot = {
   reports: DashboardRecord[];
 };
 
-export async function fetchDashboardSnapshot(role: DashboardRole): Promise<DashboardSnapshot> {
-  const headers = authHeaders();
+export async function fetchDashboardSnapshot(_role: DashboardRole): Promise<DashboardSnapshot> {
+  void _role;
   const [products, categories, stores, orders, users, discounts, addresses, reports] = await Promise.all([
     fetchData("/products?limit=12"),
     fetchData("/categories"),
-    fetchData("/admin/stores", headers),
-    fetchData("/orders", headers),
-    fetchData("/admin/users", headers),
-    fetchData("/admin/discounts", headers),
-    fetchData("/addresses", headers),
-    fetchData("/admin/reports/sales", headers)
+    fetchData("/admin/stores"),
+    fetchData("/orders"),
+    fetchData("/admin/users"),
+    fetchData("/admin/discounts"),
+    fetchData("/addresses"),
+    fetchData("/admin/reports/sales")
   ]);
 
   return {
@@ -40,15 +41,9 @@ export async function fetchDashboardSnapshot(role: DashboardRole): Promise<Dashb
   };
 }
 
-function authHeaders(): Record<string, string> {
-  if (typeof window === "undefined") return {};
-  const token = window.localStorage.getItem("market-snap-token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 async function fetchData(path: string, headers?: HeadersInit): Promise<DashboardRecord[]> {
   try {
-    const response = await fetch(apiUrl(path), { headers, cache: "no-store" });
+    const response = await apiFetch(apiUrl(path), { headers, cache: "no-store" });
     if (!response.ok) return [];
     const payload = await response.json() as { data?: unknown };
     return normalize(payload.data);

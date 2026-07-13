@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FiChevronRight, FiSearch, FiSliders } from "react-icons/fi";
 import { addCartItem, fetchCart, fetchCategories, fetchProducts, fetchStores } from "@/lib/api";
 import { rupiah } from "@/lib/format";
+import { readStaleCache, writeStaleCache } from "@/lib/stale-cache";
 import type { Product, Store } from "@/lib/types";
 import { GroceryVisual, ProductCard, ProductGridSkeleton, SnapFooter, SnapHeader, BenefitStrip } from "./SnapCommon";
 
@@ -17,6 +18,7 @@ type CatalogState = {
   cartCount: number;
   message: string;
   loading: boolean;
+  refreshing: boolean;
 };
 
 const defaultState: CatalogState = {
@@ -26,15 +28,23 @@ const defaultState: CatalogState = {
   serviceable: true,
   cartCount: 0,
   message: "",
-  loading: true
+  loading: true,
+  refreshing: false
 };
 
 export function SnapHomePage() {
-  const [state, setState] = useState(defaultState);
+  const [state, setState] = useState<CatalogState>(() => {
+    const cached = readStaleCache<CatalogState>("catalog:home:limit-8");
+    return cached ? { ...cached, loading: false, refreshing: true } : defaultState;
+  });
   const featured = state.products.slice(0, 8);
 
   useEffect(() => {
-    loadCatalog({ limit: "8" }).then(setState);
+    const cacheKey = "catalog:home:limit-8";
+    loadCatalog({ limit: "8" }).then((next) => {
+      writeStaleCache(cacheKey, next, 1000 * 60 * 5);
+      setState(next);
+    });
   }, []);
 
   return (
@@ -58,6 +68,7 @@ export function SnapHomePage() {
             <div>
               <span className="eyebrow">Produk pilihan</span>
               <h2>Stok segar di {state.store?.name ?? "cabang utama"}</h2>
+              {state.refreshing && <small className="refreshing-copy">Memperbarui data...</small>}
             </div>
             <Link href="/catalog">Lihat catalog <FiChevronRight /></Link>
           </div>
@@ -92,7 +103,13 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
     if (query.trim()) params.search = query.trim();
     if (category !== "Semua" && category !== "Semua Produk") params.category = category;
     if (storeId) params.storeId = storeId;
-    loadCatalog(params).then(setState);
+    const cacheKey = catalogCacheKey(params);
+    const cached = readStaleCache<CatalogState>(cacheKey);
+    if (cached) window.setTimeout(() => setState({ ...cached, loading: false, refreshing: true }), 0);
+    loadCatalog(params).then((next) => {
+      writeStaleCache(cacheKey, next, 1000 * 60 * 3);
+      setState(next);
+    });
   }, [category, query, sort, storeId]);
 
   const visibleProducts = useMemo(() => {
@@ -181,6 +198,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
               <div className="filter-chips">
                 {["Semua Produk", "Promo", "Stok Tersedia"].map((chip) => <button className={chip === "Semua Produk" ? "active" : ""} key={chip} type="button">{chip}</button>)}
               </div>
+              {state.refreshing && <span className="refreshing-copy">Memperbarui data...</span>}
               <button className="clear-filter" onClick={() => { setCategory("Semua"); setOnlyPromo(false); setOnlyStock(false); setMaxPrice(100000); setQuery(""); }} type="button"><FiSliders /> Hapus filter</button>
             </div>
             {state.loading ? <ProductGridSkeleton count={12} /> : (
@@ -229,11 +247,16 @@ async function loadCatalog(extra: Record<string, string>): Promise<CatalogState>
       serviceable: catalog.serviceable,
       cartCount: cart.summary.totalItems,
       message: "",
-      loading: false
+      loading: false,
+      refreshing: false
     };
   } catch (error) {
-    return { ...defaultState, loading: false, message: error instanceof Error ? error.message : "Data belum dapat dimuat." };
+    return { ...defaultState, loading: false, refreshing: false, message: error instanceof Error ? error.message : "Data belum dapat dimuat." };
   }
+}
+
+function catalogCacheKey(params: Record<string, string>): string {
+  return `catalog:${Object.entries(params).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `${key}-${value}`).join(":")}`;
 }
 
 async function browserLocation(): Promise<{ lat: number; lng: number } | null> {

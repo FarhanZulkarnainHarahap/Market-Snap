@@ -11,25 +11,22 @@ export function GoogleOAuthCallbackPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
-  const token = searchParams.get("token");
   const provider = pathname.includes("/facebook/") ? "Facebook" : "Google";
-  const immediateError = searchParams.get("error") || (!token ? `Token login ${provider} tidak ditemukan.` : "");
+  const immediateError = searchParams.get("error") ?? "";
 
   useEffect(() => {
-    if (immediateError || !token) return;
+    if (immediateError) return;
 
-    window.localStorage.setItem("market-snap-token", token);
     fetchCurrentUser()
       .then((user) => {
-        saveSession({ token, user });
+        saveSession({ token: "", user });
         const role = webRole(user.role);
         router.replace(role === "admin" ? "/admin" : role === "adminStore" ? "/admin-store" : "/");
       })
       .catch((fetchError) => {
-        window.localStorage.removeItem("market-snap-token");
         setError(fetchError instanceof Error ? fetchError.message : `Login ${provider} gagal.`);
       });
-  }, [immediateError, provider, router, token]);
+  }, [immediateError, provider, router]);
 
   const shownError = immediateError || error;
 

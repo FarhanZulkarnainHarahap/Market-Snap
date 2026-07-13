@@ -1,9 +1,14 @@
 import type { ApiAddress, ApiCartItem, ApiOrder, ApiProduct, ApiStore, ApiUser, ApiVoucher, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
 import { apiUrl } from "./api-url";
+import { clearStaleCache } from "./stale-cache";
 import type { Address, CartItem, OrderSummary, Product, Store, Voucher } from "./types";
 
+export function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  return fetch(input, { ...init, credentials: "include" });
+}
+
 export async function loginUser(email: string, password: string) {
-  const response = await fetch(apiUrl("/auth/login"), {
+  const response = await apiFetch(apiUrl("/auth/login"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
@@ -22,8 +27,13 @@ export function facebookAuthUrl() {
   return apiUrl("/auth/facebook");
 }
 
+export async function logoutUser() {
+  await apiFetch(apiUrl("/auth/logout"), { method: "POST" }).catch(() => undefined);
+  clearSession();
+}
+
 export async function registerUser(payload: { name: string; email: string; password: string; referralCode?: string }) {
-  const response = await fetch(apiUrl("/auth/register"), {
+  const response = await apiFetch(apiUrl("/auth/register"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -33,14 +43,14 @@ export async function registerUser(payload: { name: string; email: string; passw
 }
 
 export async function fetchCurrentUser() {
-  const response = await fetch(apiUrl("/auth/me"), { headers: currentUserHeaders(), cache: "no-store" });
+  const response = await apiFetch(apiUrl("/auth/me"), { headers: currentUserHeaders(), cache: "no-store" });
   if (!response.ok) throw new Error(await responseMessage(response, "Profil belum dapat dimuat"));
   const payload = await response.json() as { data: ApiUser };
   return payload.data;
 }
 
 export async function updateCurrentUser(payload: { avatarUrl?: string; email?: string; name?: string; phone?: string }) {
-  const response = await fetch(apiUrl("/users/me"), {
+  const response = await apiFetch(apiUrl("/users/me"), {
     method: "PATCH",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -54,7 +64,7 @@ export async function updateCurrentUser(payload: { avatarUrl?: string; email?: s
 export async function uploadProfileAvatar(file: File) {
   const form = new FormData();
   form.append("avatar", file);
-  const response = await fetch(apiUrl("/auth/avatar"), {
+  const response = await apiFetch(apiUrl("/auth/avatar"), {
     method: "POST",
     headers: currentUserHeaders(),
     body: form
@@ -66,7 +76,7 @@ export async function uploadProfileAvatar(file: File) {
 }
 
 export async function requestPasswordReset(email: string) {
-  const response = await fetch(apiUrl("/auth/password-reset/request"), {
+  const response = await apiFetch(apiUrl("/auth/password-reset/request"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email })
@@ -76,7 +86,7 @@ export async function requestPasswordReset(email: string) {
 }
 
 export async function confirmPasswordReset(token: string, password: string) {
-  const response = await fetch(apiUrl("/auth/password-reset/confirm"), {
+  const response = await apiFetch(apiUrl("/auth/password-reset/confirm"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ password, token })
@@ -86,7 +96,7 @@ export async function confirmPasswordReset(token: string, password: string) {
 }
 
 export async function requestEmailVerification(email: string) {
-  const response = await fetch(apiUrl("/auth/verification/request"), {
+  const response = await apiFetch(apiUrl("/auth/verification/request"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ email })
@@ -96,7 +106,7 @@ export async function requestEmailVerification(email: string) {
 }
 
 export async function confirmEmailVerification(token: string) {
-  const response = await fetch(apiUrl("/auth/verification/confirm"), {
+  const response = await apiFetch(apiUrl("/auth/verification/confirm"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token })
@@ -108,16 +118,23 @@ export async function confirmEmailVerification(token: string) {
 export function saveSession(payload: LoginResponse) {
   const role = webRole(payload.user.role);
   document.cookie = `market-snap-role=${role}; path=/; max-age=86400; SameSite=Lax`;
-  window.localStorage.setItem("market-snap-token", payload.token);
   window.localStorage.setItem("market-snap-user-id", payload.user.id);
   window.localStorage.setItem("market-snap-user-name", payload.user.name);
   window.localStorage.setItem("market-snap-user-email", payload.user.email);
   window.localStorage.setItem("market-snap-role", role);
 }
 
+export function clearSession() {
+  window.localStorage.removeItem("market-snap-user-id");
+  window.localStorage.removeItem("market-snap-user-name");
+  window.localStorage.removeItem("market-snap-user-email");
+  window.localStorage.removeItem("market-snap-role");
+  clearStaleCache();
+  document.cookie = "market-snap-role=; path=/; max-age=0; SameSite=Lax";
+}
+
 export function currentUserHeaders(): Record<string, string> {
-  const token = currentToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return {};
 }
 
 export type WebRole = "admin" | "adminStore" | "customer";
@@ -130,19 +147,18 @@ export function webRole(role: ApiUser["role"]): WebRole {
 }
 
 function currentToken() {
-  if (typeof window === "undefined") return "";
-  return window.localStorage.getItem("market-snap-token") ?? "";
+  return "";
 }
 
 export async function fetchCategories(): Promise<string[]> {
-  const response = await fetch(apiUrl("/categories"));
+  const response = await apiFetch(apiUrl("/categories"));
   if (!response.ok) throw new Error("Gagal memuat kategori");
   const payload = await response.json() as { data: string[] };
   return ["Semua", ...payload.data];
 }
 
 export async function fetchProducts(params: URLSearchParams) {
-  const response = await fetch(apiUrl(`/products?${params.toString()}`));
+  const response = await apiFetch(apiUrl(`/products?${params.toString()}`));
   if (!response.ok) throw new Error("Gagal memuat produk");
   const payload = await response.json() as ProductsResponse;
   const store = mapStore(payload.store);
@@ -155,21 +171,21 @@ export async function fetchProducts(params: URLSearchParams) {
 }
 
 export async function fetchStores(): Promise<Store[]> {
-  const response = await fetch(apiUrl("/stores"), { cache: "no-store" });
+  const response = await apiFetch(apiUrl("/stores"), { cache: "no-store" });
   if (!response.ok) throw new Error("Gagal memuat cabang");
   const payload = await response.json() as { data: ApiStore[] };
   return payload.data.map(mapStore);
 }
 
 export async function fetchNearestStore(params: URLSearchParams = new URLSearchParams()) {
-  const response = await fetch(apiUrl(`/stores/nearest?${params.toString()}`), { cache: "no-store" });
+  const response = await apiFetch(apiUrl(`/stores/nearest?${params.toString()}`), { cache: "no-store" });
   if (!response.ok) throw new Error("Gagal memuat cabang terdekat");
   const payload = await response.json() as { store: ApiStore; serviceable: boolean; inRange?: boolean };
   return { store: mapStore(payload.store), serviceable: payload.serviceable ?? payload.inRange ?? true };
 }
 
 export async function fetchProductDetail(productId: string, params: URLSearchParams = new URLSearchParams()) {
-  const response = await fetch(apiUrl(`/products/${productId}?${params.toString()}`), { cache: "no-store" });
+  const response = await apiFetch(apiUrl(`/products/${productId}?${params.toString()}`), { cache: "no-store" });
   if (!response.ok) throw new Error(await responseMessage(response, "Produk tidak ditemukan"));
   const payload = await response.json() as { data: ApiProduct; store: ApiStore };
   const store = mapStore(payload.store);
@@ -177,21 +193,21 @@ export async function fetchProductDetail(productId: string, params: URLSearchPar
 }
 
 export async function fetchCart() {
-  const response = await fetch(apiUrl("/cart"), { headers: currentUserHeaders(), cache: "no-store" });
+  const response = await apiFetch(apiUrl("/cart"), { headers: currentUserHeaders(), cache: "no-store" });
   if (!response.ok) throw new Error("Gagal memuat cart");
   const payload = await response.json() as CartResponse;
   return { items: payload.data.map(mapCartItem), summary: payload.summary };
 }
 
 export async function fetchAddresses(): Promise<Address[]> {
-  const response = await fetch(apiUrl("/addresses"), { headers: currentUserHeaders(), cache: "no-store" });
+  const response = await apiFetch(apiUrl("/addresses"), { headers: currentUserHeaders(), cache: "no-store" });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat alamat"));
   const payload = await response.json() as { data: ApiAddress[] };
   return payload.data.map(mapAddress);
 }
 
 export async function createAddress(payload: { detail: string; isPrimary?: boolean; label: string; lat: number; lng: number }) {
-  const response = await fetch(apiUrl("/addresses"), {
+  const response = await apiFetch(apiUrl("/addresses"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -202,7 +218,7 @@ export async function createAddress(payload: { detail: string; isPrimary?: boole
 }
 
 export async function updateAddress(addressId: string, payload: { detail?: string; isPrimary?: boolean; label?: string; lat?: number; lng?: number }) {
-  const response = await fetch(apiUrl(`/addresses/${addressId}`), {
+  const response = await apiFetch(apiUrl(`/addresses/${addressId}`), {
     method: "PATCH",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -213,21 +229,21 @@ export async function updateAddress(addressId: string, payload: { detail?: strin
 }
 
 export async function fetchOrders(): Promise<OrderSummary[]> {
-  const response = await fetch(apiUrl("/orders"), { headers: currentUserHeaders(), cache: "no-store" });
+  const response = await apiFetch(apiUrl("/orders"), { headers: currentUserHeaders(), cache: "no-store" });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat pesanan"));
   const payload = await response.json() as { data: ApiOrder[] };
   return payload.data.map(mapOrder);
 }
 
 export async function fetchVouchers(): Promise<Voucher[]> {
-  const response = await fetch(apiUrl("/vouchers"), { cache: "no-store" });
+  const response = await apiFetch(apiUrl("/vouchers"), { cache: "no-store" });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat voucher"));
   const payload = await response.json() as { data: ApiVoucher[] };
   return payload.data.map(mapVoucher);
 }
 
 export async function addCartItem(productId: string, storeId: string, quantity = 1) {
-  const response = await fetch(apiUrl("/cart"), {
+  const response = await apiFetch(apiUrl("/cart"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ productId, storeId, quantity })
@@ -238,7 +254,7 @@ export async function addCartItem(productId: string, storeId: string, quantity =
 }
 
 export async function updateCartItem(cartId: string, quantity: number) {
-  const response = await fetch(apiUrl(`/cart/${cartId}`), {
+  const response = await apiFetch(apiUrl(`/cart/${cartId}`), {
     method: "PATCH",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ quantity })
@@ -249,17 +265,17 @@ export async function updateCartItem(cartId: string, quantity: number) {
 }
 
 export async function deleteCartItem(cartId: string) {
-  const response = await fetch(apiUrl(`/cart/${cartId}`), { method: "DELETE", headers: currentUserHeaders() });
+  const response = await apiFetch(apiUrl(`/cart/${cartId}`), { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal hapus cart"));
 }
 
 export async function clearCart() {
-  const response = await fetch(apiUrl("/cart"), { method: "DELETE", headers: currentUserHeaders() });
+  const response = await apiFetch(apiUrl("/cart"), { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal kosongkan cart"));
 }
 
 export async function createOrderFromCart(items: CartItem[], total: number, options: CreateOrderOptions = {}) {
-  const response = await fetch(apiUrl("/orders"), {
+  const response = await apiFetch(apiUrl("/orders"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({

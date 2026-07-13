@@ -59,7 +59,7 @@ Project ini dibuat sebagai repo frontend terpisah dan terhubung ke Market Snap A
 - Mobile-first grocery landing page with hero, category, promo, nearest store, and product sections.
 - Location-aware catalog powered by the backend nearest-store API.
 - Product listing, product detail, store detail, and stock visibility by selected branch.
-- Authenticated cart flow using JWT Bearer token.
+- Authenticated cart flow using a secure httpOnly session cookie.
 - Checkout form with RajaOngkir destination ID, courier selection, and payment method.
 - Xendit invoice redirect when the API returns `payment.invoiceUrl`.
 - Customer profile, address page, checkout page, and order tracking pages.
@@ -171,10 +171,10 @@ Main frontend helpers:
 | `lib/api-contracts.ts` | API response and request contracts |
 | `lib/dashboard-api.ts` | Dashboard snapshot fetcher |
 
-Protected requests use:
+Protected browser requests use the API session cookie with `credentials: "include"`.
 
 ```txt
-Authorization: Bearer <JWT_TOKEN>
+Cookie: market_snap_session=<httpOnly>
 ```
 
 ### Checkout Payload

@@ -23,7 +23,7 @@ import {
   FiTruck
 } from "react-icons/fi";
 import { rupiah } from "@/lib/format";
-import { fetchCurrentUser } from "@/lib/api";
+import { fetchCurrentUser, logoutUser } from "@/lib/api";
 import type { Product, Store } from "@/lib/types";
 
 type HeaderProps = {
@@ -178,29 +178,31 @@ function ProfileMenu({ onLogout }: { onLogout: () => void }) {
 }
 
 function logout(setSession: (session: HeaderSession) => void, setProfileOpen: (open: boolean) => void) {
-  window.localStorage.removeItem("market-snap-token");
-  window.localStorage.removeItem("market-snap-user-id");
-  window.localStorage.removeItem("market-snap-user-name");
-  window.localStorage.removeItem("market-snap-user-email");
-  window.localStorage.removeItem("market-snap-role");
-  document.cookie = "market-snap-role=; path=/; max-age=0; SameSite=Lax";
   setSession({ isLoggedIn: false, name: "" });
   setProfileOpen(false);
-  window.location.href = "/login";
+  void logoutUser().finally(() => {
+    window.location.href = "/login";
+  });
 }
 
 function readSession(): HeaderSession {
   if (typeof window === "undefined") return { isLoggedIn: false, name: "" };
-  const token = window.localStorage.getItem("market-snap-token");
+  const role = readCookie("market-snap-role") || window.localStorage.getItem("market-snap-role");
+  const name = window.localStorage.getItem("market-snap-user-name") || window.localStorage.getItem("market-snap-user-email") || "";
   return {
-    isLoggedIn: Boolean(token),
-    name: window.localStorage.getItem("market-snap-user-name") || window.localStorage.getItem("market-snap-user-email") || ""
+    isLoggedIn: Boolean(role || name),
+    name
   };
 }
 
 function readCachedLocationLabel() {
   if (typeof window === "undefined") return DEFAULT_LOCATION_LABEL;
-  return DEFAULT_LOCATION_LABEL;
+  return window.localStorage.getItem("market-snap-location-label") || DEFAULT_LOCATION_LABEL;
+}
+
+function readCookie(name: string): string {
+  if (typeof document === "undefined") return "";
+  return document.cookie.split(";").map((cookie) => cookie.trim()).find((cookie) => cookie.startsWith(`${name}=`))?.slice(name.length + 1) ?? "";
 }
 
 function displayName(name: string) {

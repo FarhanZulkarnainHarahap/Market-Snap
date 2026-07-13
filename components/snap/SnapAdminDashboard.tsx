@@ -5,27 +5,39 @@ import { FiBell, FiBox, FiCalendar, FiGrid, FiHeadphones, FiHome, FiPackage, FiP
 import { fetchDashboardSnapshot, type DashboardSnapshot } from "@/lib/dashboard-api";
 import { fetchProducts } from "@/lib/api";
 import { rupiah } from "@/lib/format";
+import { readStaleCache, writeStaleCache } from "@/lib/stale-cache";
 import type { Product } from "@/lib/types";
 
 const nav = [
-  ["Dashboard", FiGrid],
-  ["Products", FiPackage],
-  ["Inventory", FiBox],
-  ["Orders", FiShoppingCart],
-  ["Branches", FiHome],
-  ["Vouchers", FiPieChart],
-  ["Customers", FiUsers],
-  ["Reports", FiTrendingUp],
-  ["Settings", FiSettings]
+  ["Dashboard", "/dashboard/admin", FiGrid],
+  ["Products", "/dashboard/admin/product", FiPackage],
+  ["Inventory", "/dashboard/admin/inventory-history", FiBox],
+  ["Orders", "/dashboard/admin-store/manage-order", FiShoppingCart],
+  ["Branches", "/dashboard/admin/store", FiHome],
+  ["Vouchers", "/dashboard/admin-store/discount", FiPieChart],
+  ["Customers", "/dashboard/admin/user", FiUsers],
+  ["Reports", "/dashboard/admin/inventory-history", FiTrendingUp],
+  ["Settings", "/dashboard/admin/user-store", FiSettings]
 ] as const;
 
 export function SnapAdminDashboard() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [snapshot, setSnapshot] = useState<DashboardSnapshot>();
+  const [products, setProducts] = useState<Product[]>(() => readStaleCache<Product[]>("admin-overview:products") ?? []);
+  const [snapshot, setSnapshot] = useState<DashboardSnapshot | undefined>(() => readStaleCache<DashboardSnapshot>("admin-overview:snapshot") ?? undefined);
 
   useEffect(() => {
-    fetchProducts(new URLSearchParams({ limit: "12", sort: "stock" })).then((result) => setProducts(result.products)).catch(() => setProducts([]));
-    fetchDashboardSnapshot("admin").then(setSnapshot).catch(() => undefined);
+    const cachedProducts = readStaleCache<Product[]>("admin-overview:products");
+    fetchProducts(new URLSearchParams({ limit: "12", sort: "stock" }))
+      .then((result) => {
+        setProducts(result.products);
+        writeStaleCache("admin-overview:products", result.products, 1000 * 60);
+      })
+      .catch(() => setProducts(cachedProducts ?? []));
+    fetchDashboardSnapshot("admin")
+      .then((result) => {
+        setSnapshot(result);
+        writeStaleCache("admin-overview:snapshot", result, 1000 * 60);
+      })
+      .catch(() => undefined);
   }, []);
 
   const totalSales = useMemo(() => {
@@ -41,7 +53,7 @@ export function SnapAdminDashboard() {
     <main className="admin-capture">
       <aside className="admin-sidebar">
         <h1>MARKET SNAP</h1>
-        <nav>{nav.map(([label, Icon], index) => <a className={index === 0 ? "active" : ""} href="#" key={label}><Icon /> {label}</a>)}</nav>
+        <nav>{nav.map(([label, href, Icon], index) => <a className={index === 0 ? "active" : ""} href={href} key={label}><Icon /> {label}</a>)}</nav>
         <div className="upgrade-card"><img alt="" src="/product.png" /><h3>Grow your business</h3><p>Add more branches and promos to reach customers.</p><button type="button">Upgrade Plan</button></div>
         <div className="support-card"><FiHeadphones /><strong>Butuh bantuan?</strong><button type="button">Hubungi Support</button></div>
       </aside>
