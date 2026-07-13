@@ -32,6 +32,9 @@ const defaultState: CatalogState = {
   refreshing: false
 };
 
+const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
+const CUSTOMER_ABOUT = "/dashboard/customer/about";
+
 export function SnapHomePage() {
   const [state, setState] = useState<CatalogState>(() => {
     const cached = readStaleCache<CatalogState>("catalog:home:limit-8");
@@ -57,8 +60,8 @@ export function SnapHomePage() {
             <h1>Belanja segar dari cabang yang paling dekat.</h1>
             <p>Market Snap menampilkan stok aktual dari cabang terdekat supaya belanja harian lebih cepat, transparan, dan praktis.</p>
             <div className="hero-buttons">
-              <Link className="primary-snap" href="/catalog">Mulai belanja <FiChevronRight /></Link>
-              <Link className="secondary-snap" href="/about">Tentang kami</Link>
+              <Link className="primary-snap" href={CUSTOMER_CATALOG}>Mulai belanja <FiChevronRight /></Link>
+              <Link className="secondary-snap" href={CUSTOMER_ABOUT}>Tentang kami</Link>
             </div>
           </div>
           <GroceryVisual variant="hero" />
@@ -70,7 +73,7 @@ export function SnapHomePage() {
               <h2>Stok segar di {state.store?.name ?? "cabang utama"}</h2>
               {state.refreshing && <small className="refreshing-copy">Memperbarui data...</small>}
             </div>
-            <Link href="/catalog">Lihat catalog <FiChevronRight /></Link>
+            <Link href={CUSTOMER_CATALOG}>Lihat catalog <FiChevronRight /></Link>
           </div>
           {state.loading ? <ProductGridSkeleton count={8} /> : (
             <>
@@ -190,7 +193,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
             <div className="promo-panel">
               <strong>Promo aktif</strong>
               <p>Diskon mengikuti cabang terpilih</p>
-              <Link href="/catalog">Belanja Sekarang</Link>
+              <Link href={CUSTOMER_CATALOG}>Belanja Sekarang</Link>
             </div>
           </aside>
           <div className="catalog-results">

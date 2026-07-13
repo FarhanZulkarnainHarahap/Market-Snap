@@ -1,13 +1,5 @@
-import { AccountLayout, OrdersAccountContent } from "@/components/snap/AccountPages";
+import { redirect } from "next/navigation";
 
-export default function CustomerOrdersPage() {
-  return (
-    <AccountLayout
-      active="orders"
-      description="Pantau status pesanan, pembayaran, pengiriman, dan riwayat belanja dari satu halaman."
-      title="Riwayat pesananmu."
-    >
-      <OrdersAccountContent />
-    </AccountLayout>
-  );
+export default function CustomerOrdersRedirectPage() {
+  redirect("/dashboard/customer/profile/orders");
 }

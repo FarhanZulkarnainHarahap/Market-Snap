@@ -31,7 +31,7 @@ export function ForgotPasswordPage() {
   return (
     <main className="auth-capture reset-password-capture">
       <section className="auth-left reset-password-panel">
-        <Link className="auth-brand" href="/">MARKET SNAP</Link>
+        <Link className="auth-brand" href="/dashboard/customer">MARKET SNAP</Link>
         <FiMail className="auth-big-icon" />
         <h1>Reset password akun</h1>
         <p>Masukkan email akun Market Snap. Kami akan mengirim tautan aman untuk membuat password baru.</p>
@@ -87,7 +87,7 @@ export function ResetPasswordPage() {
   return (
     <main className="auth-capture reset-password-capture">
       <section className="auth-left reset-password-panel">
-        <Link className="auth-brand" href="/">MARKET SNAP</Link>
+        <Link className="auth-brand" href="/dashboard/customer">MARKET SNAP</Link>
         <FiLock className="auth-big-icon" />
         <h1>Buat password baru</h1>
         <p>Gunakan password yang kuat agar akun belanjamu tetap aman.</p>

@@ -1,5 +1,5 @@
-import { SnapNotificationsPage } from "@/components/snap/SnapNotificationsPage";
+import { redirect } from "next/navigation";
 
 export default function CustomerNotificationsStandalonePage() {
-  return <SnapNotificationsPage />;
+  redirect("/dashboard/customer/profile/notifications");
 }

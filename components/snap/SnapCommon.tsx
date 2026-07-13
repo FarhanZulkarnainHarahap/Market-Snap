@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FiArrowRight,
   FiBell,
@@ -14,16 +14,18 @@ import {
   FiLock,
   FiLogOut,
   FiMapPin,
+  FiMenu,
   FiPackage,
   FiPlus,
   FiUser,
   FiShield,
   FiShoppingBag,
   FiShoppingCart,
-  FiTruck
+  FiTruck,
+  FiX
 } from "react-icons/fi";
 import { rupiah } from "@/lib/format";
-import { fetchCurrentUser, logoutUser } from "@/lib/api";
+import { fetchCurrentUser, fetchStores, logoutUser } from "@/lib/api";
 import type { Product, Store } from "@/lib/types";
 
 type HeaderProps = {
@@ -38,18 +40,28 @@ type HeaderSession = {
 };
 
 const DEFAULT_LOCATION_LABEL = "Market Snap Center";
+const CUSTOMER_HOME = "/dashboard/customer";
+const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
+const CUSTOMER_ABOUT = "/dashboard/customer/about";
+const CUSTOMER_CONTACT = "/dashboard/customer/contact";
+const CUSTOMER_CART = "/dashboard/customer/cart";
+const CUSTOMER_PROFILE = "/dashboard/customer/profile";
+const CUSTOMER_ORDERS = "/dashboard/customer/profile/orders";
+const CUSTOMER_NOTIFICATIONS = "/dashboard/customer/profile/notifications";
 
 const navItems = [
-  { key: "home", href: "/", label: "Home" },
-  { key: "catalog", href: "/catalog", label: "Catalog" },
-  { key: "about", href: "/about", label: "About" },
-  { key: "contact", href: "/contact-us", label: "Contact" }
+  { key: "home", href: CUSTOMER_HOME, label: "Home" },
+  { key: "catalog", href: CUSTOMER_CATALOG, label: "Catalog" },
+  { key: "about", href: CUSTOMER_ABOUT, label: "About" },
+  { key: "contact", href: CUSTOMER_CONTACT, label: "Contact" }
 ] as const;
 
 export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: HeaderProps) {
   const [locationLabel, setLocationLabel] = useState(readCachedLocationLabel);
   const [session, setSession] = useState<HeaderSession>(readSession);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const storedSession = readSession();
@@ -64,6 +76,12 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
         .catch(() => undefined);
     }
     refreshLocationLabel(setLocationLabel);
+    fetchStores()
+      .then((stores) => {
+        const selected = stores[0];
+        if (selected) setLocationLabel(selected.area || selected.name);
+      })
+      .catch(() => undefined);
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
@@ -74,11 +92,54 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
     return () => window.removeEventListener("click", close);
   }, [profileOpen]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !drawerRef.current) return;
+      const focusable = Array.from(drawerRef.current.querySelectorAll<HTMLElement>("a,button")).filter((item) => !item.hasAttribute("disabled"));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeydown);
+    window.setTimeout(() => drawerRef.current?.querySelector<HTMLElement>("a,button")?.focus(), 0);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  }, [mobileOpen]);
+
   const profileLabel = displayName(session.name);
 
   return (
     <header className="snap-header">
-      <Link className="snap-brand" href="/">MARKET SNAP</Link>
+      <Link className="snap-brand" href={CUSTOMER_HOME}>MARKET SNAP</Link>
+      {!simple && (
+        <button
+          aria-expanded={mobileOpen}
+          aria-label={mobileOpen ? "Tutup menu customer" : "Buka menu customer"}
+          className="customer-menu-toggle"
+          onClick={() => setMobileOpen((open) => !open)}
+          type="button"
+        >
+          {mobileOpen ? <FiX /> : <FiMenu />}
+        </button>
+      )}
       {!simple ? (
         <nav className="snap-nav" aria-label="Navigasi utama">
           {navItems.map((item) => (
@@ -89,8 +150,8 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
         </nav>
       ) : (
         <nav className="snap-nav snap-simple-nav" aria-label="Navigasi utama">
-          <Link href="/">Beranda</Link>
-          <Link href="/about">Tentang Kami</Link>
+          <Link href={CUSTOMER_HOME}>Beranda</Link>
+          <Link href={CUSTOMER_ABOUT}>Tentang Kami</Link>
         </nav>
       )}
       <div className="snap-actions">
@@ -114,8 +175,27 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
         ) : (
           <Link className="outline-action" href="/auth/login">Login</Link>
         ))}
-        {!simple && <Link className="cart-action" href="/cart"><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
+        {!simple && <Link className="cart-action" href={CUSTOMER_CART}><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
       </div>
+      {mobileOpen && <button aria-label="Tutup menu" className="customer-drawer-overlay" onClick={() => setMobileOpen(false)} type="button" />}
+      {mobileOpen && (
+        <div aria-modal="true" className="customer-mobile-drawer" ref={drawerRef} role="dialog">
+          <div className="customer-mobile-drawer-head">
+            <strong>MARKET SNAP</strong>
+            <button aria-label="Tutup menu customer" onClick={() => setMobileOpen(false)} type="button"><FiX /></button>
+          </div>
+          <nav aria-label="Menu customer mobile">
+            {navItems.map((item) => (
+              <Link className={active === item.key ? "active" : ""} href={item.href} key={item.key} onClick={() => setMobileOpen(false)}>
+                {item.label}
+              </Link>
+            ))}
+            <Link className={active === "profile" ? "active" : ""} href={session.isLoggedIn ? CUSTOMER_PROFILE : "/auth/login"} onClick={() => setMobileOpen(false)}>Profile</Link>
+            <Link className={active === "cart" ? "active" : ""} href={CUSTOMER_CART} onClick={() => setMobileOpen(false)}>Cart ({cartCount})</Link>
+            {session.isLoggedIn && <button onClick={() => logout(setSession, setProfileOpen)} type="button">Logout</button>}
+          </nav>
+        </div>
+      )}
       {!simple && <MobileGroceryNav active={active} cartCount={cartCount} locationLabel={locationLabel} profileLabel={profileLabel} session={session} />}
     </header>
   );
@@ -128,28 +208,28 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
       <span className="mobile-veg veg-right" aria-hidden="true">🥕</span>
       <div className="mobile-location"><FiMapPin /> {locationLabel}</div>
       <div className="mobile-nav-track">
-        <Link className={active === "home" ? "active" : ""} href="/">
+        <Link className={active === "home" ? "active" : ""} href={CUSTOMER_HOME}>
           <FiHome />
           <span>Home</span>
         </Link>
-        <Link className={active === "catalog" ? "active" : ""} href="/catalog">
+        <Link className={active === "catalog" ? "active" : ""} href={CUSTOMER_CATALOG}>
           <FiShoppingBag />
           <span>Catalog</span>
         </Link>
-        <Link className={active === "orders" ? "active" : ""} href="/dashboard/customer/my-orders">
+        <Link className={active === "orders" ? "active" : ""} href={CUSTOMER_ORDERS}>
           <FiPackage />
           <span>Orders</span>
         </Link>
-        <Link className={active === "cart" ? "mobile-cart-link active" : "mobile-cart-link"} href="/cart">
+        <Link className={active === "cart" ? "mobile-cart-link active" : "mobile-cart-link"} href={CUSTOMER_CART}>
           <FiShoppingCart />
           <span>Cart</span>
           <strong>{cartCount}</strong>
         </Link>
-        <Link className={active === "notifications" ? "active" : ""} href="/dashboard/customer/profile/notifications">
+        <Link className={active === "notifications" ? "active" : ""} href={CUSTOMER_NOTIFICATIONS}>
           <FiBell />
           <span>Notif</span>
         </Link>
-        <Link className={active === "profile" ? "mobile-profile-link active" : "mobile-profile-link"} href={session.isLoggedIn ? "/dashboard/customer/profile" : "/auth/login"}>
+        <Link className={active === "profile" ? "mobile-profile-link active" : "mobile-profile-link"} href={session.isLoggedIn ? CUSTOMER_PROFILE : "/auth/login"}>
           <FiUser />
           <span>{session.isLoggedIn ? profileLabel : "Login"}</span>
         </Link>
@@ -160,8 +240,8 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
 
 function ProfileMenu({ onLogout }: { onLogout: () => void }) {
   const menuItems = [
-    { href: "/dashboard/customer/profile", icon: FiUser, label: "Profil Saya", text: "Profil, alamat, pesanan" },
-    { href: "/dashboard/customer/profile/notifications", icon: FiBell, label: "Notifikasi", text: "Update pesanan & promo" }
+    { href: CUSTOMER_PROFILE, icon: FiUser, label: "Profil Saya", text: "Profil, alamat, pesanan" },
+    { href: CUSTOMER_NOTIFICATIONS, icon: FiBell, label: "Notifikasi", text: "Update pesanan & promo" }
   ];
 
   return (
@@ -308,14 +388,15 @@ export function GroceryVisual({ compact = false, variant = "hero" }: { compact?:
 export function ProductCard({ product, storeId, disabled = false, onAdd }: { product: Product; storeId?: string; disabled?: boolean; onAdd?: (product: Product) => void }) {
   const activeStoreId = storeId ?? Object.keys(product.stockByStore)[0] ?? "";
   const stock = product.stockByStore[activeStoreId] ?? 0;
+  const productHref = `${CUSTOMER_HOME}/product/${product.id}`;
   return (
     <article className="snap-product-card">
-      <Link className="product-picture" href={`/product/${product.id}`}>
+      <Link className="product-picture" href={productHref}>
         <Image alt={product.name} height={220} src={product.image} width={260} />
         {product.discount && <span className="promo-dot">{product.discount}</span>}
       </Link>
       <div className="snap-product-body">
-        <Link href={`/product/${product.id}`}><h3>{product.name}</h3></Link>
+        <Link href={productHref}><h3>{product.name}</h3></Link>
         <p>{product.unit}</p>
         <strong>{rupiah(product.price)}</strong>
         <small>Stok: {stock}</small>
@@ -394,9 +475,9 @@ export function SnapFooter() {
       </div>
       <div>
         <h3>Useful Link</h3>
-        <Link href="/catalog">Cara Belanja</Link>
-        <Link href="/about">Syarat & Ketentuan</Link>
-        <Link href="/contact-us">Pusat Bantuan</Link>
+        <Link href={CUSTOMER_CATALOG}>Cara Belanja</Link>
+        <Link href={CUSTOMER_ABOUT}>Syarat & Ketentuan</Link>
+        <Link href={CUSTOMER_CONTACT}>Pusat Bantuan</Link>
       </div>
       <div>
         <h3>Download Our App</h3>
@@ -427,7 +508,7 @@ export function RelatedProducts({ products, store }: { products: Product[]; stor
     <section className="snap-section">
       <div className="snap-section-title inline">
         <h2>Produk Terkait</h2>
-        <Link href="/catalog">Lihat semua <FiArrowRight /></Link>
+        <Link href={CUSTOMER_CATALOG}>Lihat semua <FiArrowRight /></Link>
       </div>
       <div className="related-row">
         {products.slice(0, 6).map((product) => <ProductCard key={product.id} product={product} storeId={store?.id} />)}

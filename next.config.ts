@@ -18,28 +18,63 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/dashboard/customer",
-        destination: "/",
+        source: "/",
+        destination: "/dashboard/customer",
         permanent: false
       },
       {
-        source: "/dashboard/customer/:path*",
-        destination: "/:path*",
+        source: "/catalog",
+        destination: "/dashboard/customer/catalog",
+        permanent: false
+      },
+      {
+        source: "/cart",
+        destination: "/dashboard/customer/cart",
+        permanent: false
+      },
+      {
+        source: "/checkout",
+        destination: "/dashboard/customer/checkout",
+        permanent: false
+      },
+      {
+        source: "/about",
+        destination: "/dashboard/customer/about",
+        permanent: false
+      },
+      {
+        source: "/contact",
+        destination: "/dashboard/customer/contact",
+        permanent: false
+      },
+      {
+        source: "/contact-us",
+        destination: "/dashboard/customer/contact",
+        permanent: false
+      },
+      {
+        source: "/product/:slug",
+        destination: "/dashboard/customer/product/:slug",
         permanent: false
       },
       {
         source: "/profile",
-        destination: "/account/profile",
+        destination: "/dashboard/customer/profile",
         permanent: false
       },
       {
         source: "/profile/:path*",
-        destination: "/account/:path*",
+        destination: "/dashboard/customer/profile/:path*",
         permanent: false
       },
       {
         source: "/my-orders",
-        destination: "/account/orders",
+        destination: "/dashboard/customer/profile/orders",
+        permanent: false
+      },
+      {
+        source: "/notifications",
+        destination: "/dashboard/customer/profile/notifications",
         permanent: false
       },
       {
@@ -68,10 +103,6 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         {
-          source: "/",
-          destination: "/dashboard/customer"
-        },
-        {
           source: "/authjs/:path*",
           destination: `${apiBaseUrl}/authjs/:path*`
         }
@@ -95,11 +126,11 @@ const nextConfig: NextConfig = {
         },
         {
           source: "/account/address",
-          destination: "/dashboard/customer/profile/address"
+          destination: "/dashboard/customer/profile/addresses"
         },
         {
           source: "/account/orders",
-          destination: "/dashboard/customer/my-orders"
+          destination: "/dashboard/customer/profile/orders"
         },
         {
           source: "/account/notifications",
@@ -111,7 +142,7 @@ const nextConfig: NextConfig = {
         },
         {
           source: "/account/payment",
-          destination: "/dashboard/customer/profile/payment"
+          destination: "/dashboard/customer/profile/payment-methods"
         },
         {
           source: "/account/security",
@@ -120,10 +151,6 @@ const nextConfig: NextConfig = {
         {
           source: "/account/help-center",
           destination: "/dashboard/customer/profile/help-center"
-        },
-        {
-          source: "/:path*",
-          destination: "/dashboard/customer/:path*"
         }
       ]
     };

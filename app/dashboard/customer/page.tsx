@@ -74,7 +74,7 @@ export default function CustomerDashboardPage() {
             <div className="hero-buttons">
               <Link
                 className="primary-snap"
-                href="/catalog"
+                href="/dashboard/customer/catalog"
               >
                 Mulai belanja
                 <FiArrowRight />
@@ -82,7 +82,7 @@ export default function CustomerDashboardPage() {
 
               <Link
                 className="secondary-snap"
-                href="/dashboard/customer/my-orders"
+                href="/dashboard/customer/profile/orders"
               >
                 Pesanan saya
               </Link>
@@ -128,7 +128,7 @@ export default function CustomerDashboardPage() {
               </h2>
             </div>
 
-            <Link href="/catalog">
+            <Link href="/dashboard/customer/catalog">
               Lihat catalog
               <FiArrowRight />
             </Link>
@@ -177,7 +177,7 @@ export default function CustomerDashboardPage() {
 
               <Link
                 className="primary-snap"
-                href="/catalog"
+                href="/dashboard/customer/catalog"
               >
                 Belanja sekarang
                 <FiArrowRight />

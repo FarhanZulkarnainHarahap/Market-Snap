@@ -86,7 +86,7 @@ export function ManagementHeader({ role }: ManagementHeaderProps) {
         <div className="management-actions">
           <button aria-label="Notifikasi" className="management-icon-button" type="button"><FiBell /></button>
           <span className="management-user"><strong>{userLabel}</strong><small>{role === "admin" ? "Super Admin" : "Store Admin"}</small></span>
-          <Link className="management-exit" href="/"><FiHome /> Storefront</Link>
+          <Link className="management-exit" href="/dashboard/customer"><FiHome /> Storefront</Link>
         </div>
       </div>
     </header>

@@ -9,6 +9,10 @@ import { rupiah } from "@/lib/format";
 import type { Product, Store } from "@/lib/types";
 import { BenefitStrip, FeatureList, PanelSkeleton, RelatedProducts, SnapFooter, SnapHeader } from "./SnapCommon";
 
+const CUSTOMER_HOME = "/dashboard/customer";
+const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
+const CUSTOMER_CHECKOUT = "/dashboard/customer/checkout";
+
 export function SnapProductPage({ productId }: { productId: string }) {
   const [product, setProduct] = useState<Product>();
   const [store, setStore] = useState<Store>();
@@ -54,7 +58,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
     <>
       <SnapHeader active="catalog" cartCount={cartCount} />
       <main>
-        <nav className="breadcrumb"><Link href="/">Beranda</Link><FiChevronRight /> <Link href="/catalog">{product?.category ?? "Produk"}</Link><FiChevronRight /> <span>{product?.name ?? "Detail"}</span></nav>
+        <nav className="breadcrumb"><Link href={CUSTOMER_HOME}>Beranda</Link><FiChevronRight /> <Link href={CUSTOMER_CATALOG}>{product?.category ?? "Produk"}</Link><FiChevronRight /> <span>{product?.name ?? "Detail"}</span></nav>
         {loading && <ProductDetailSkeleton />}
         {!loading && message && <p className="catalog-message">{message}</p>}
         {!loading && product && (
@@ -95,7 +99,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
                 </div>
                 <div className="buy-actions">
                   <button className="secondary-snap" disabled={!stock} onClick={addProduct} type="button"><FiShoppingCart /> Tambah ke keranjang</button>
-                  <Link className="primary-snap" href="/checkout">Beli sekarang</Link>
+                  <Link className="primary-snap" href={CUSTOMER_CHECKOUT}>Beli sekarang</Link>
                 </div>
               </article>
             </section>

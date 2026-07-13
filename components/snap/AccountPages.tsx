@@ -10,6 +10,7 @@ import {
   FiChevronRight,
   FiEdit2,
   FiHeadphones,
+  FiHeart,
   FiHome,
   FiLock,
   FiMail,
@@ -27,7 +28,7 @@ import { rupiah } from "@/lib/format";
 import type { Address, OrderSummary, Voucher } from "@/lib/types";
 import type { ApiUser } from "@/lib/api-contracts";
 
-type AccountSection = "profile" | "address" | "orders" | "notifications" | "vouchers" | "security" | "help";
+type AccountSection = "profile" | "personal-data" | "addresses" | "orders" | "notifications" | "vouchers" | "wishlist" | "payment-methods" | "security" | "help";
 
 type ProfileForm = {
   email: string;
@@ -44,11 +45,14 @@ type AddressForm = {
 };
 
 const accountMenus: Array<{ key: AccountSection; href: string; label: string; text: string; icon: typeof FiUser }> = [
-  { key: "profile", href: "/dashboard/customer/profile", label: "Profil Saya", text: "Data personal", icon: FiUser },
-  { key: "address", href: "/dashboard/customer/profile/address", label: "Alamat", text: "Alamat pengiriman", icon: FiMapPin },
-  { key: "orders", href: "/dashboard/customer/my-orders", label: "Pesanan Saya", text: "Riwayat belanja", icon: FiPackage },
+  { key: "profile", href: "/dashboard/customer/profile", label: "Overview", text: "Ringkasan akun", icon: FiUser },
+  { key: "personal-data", href: "/dashboard/customer/profile/personal-data", label: "Data Pribadi", text: "Nama, email, foto", icon: FiUser },
+  { key: "addresses", href: "/dashboard/customer/profile/addresses", label: "Alamat", text: "Alamat pengiriman", icon: FiMapPin },
+  { key: "orders", href: "/dashboard/customer/profile/orders", label: "Pesanan Saya", text: "Riwayat belanja", icon: FiPackage },
   { key: "notifications", href: "/dashboard/customer/profile/notifications", label: "Notifikasi", text: "Update pesanan", icon: FiBell },
-  { key: "vouchers", href: "/dashboard/customer/profile/vouchers", label: "Voucher", text: "Promo tersimpan", icon: FiTag },
+  { key: "vouchers", href: "/dashboard/customer/profile/vouchers", label: "Voucher Saya", text: "Promo tersimpan", icon: FiTag },
+  { key: "wishlist", href: "/dashboard/customer/profile/wishlist", label: "Wishlist", text: "Produk favorit", icon: FiHeart },
+  { key: "payment-methods", href: "/dashboard/customer/profile/payment-methods", label: "Metode Pembayaran", text: "Token pembayaran", icon: FiShield },
   { key: "security", href: "/dashboard/customer/profile/security", label: "Keamanan", text: "Password & akses", icon: FiLock },
   { key: "help", href: "/dashboard/customer/profile/help-center", label: "Bantuan", text: "Bantuan pelanggan", icon: FiHeadphones }
 ];
@@ -208,10 +212,10 @@ export function ProfileAccountContent() {
       </section>
 
       <section className="account-grid">
-        <QuickPanel actionHref="/dashboard/customer/profile/address" action="Tambah" title="Alamat utama">
+        <QuickPanel actionHref="/dashboard/customer/profile/addresses" action="Tambah" title="Alamat utama">
           {primaryAddress ? <SavedAddress address={primaryAddress} /> : <p className="empty-copy">Belum ada alamat tersimpan.</p>}
         </QuickPanel>
-        <QuickPanel actionHref="/dashboard/customer/my-orders" action="Lihat semua" title="Pesanan terakhir">
+        <QuickPanel actionHref="/dashboard/customer/profile/orders" action="Lihat semua" title="Pesanan terakhir">
           <OrderList orders={recentOrders} compact />
         </QuickPanel>
       </section>
@@ -512,7 +516,7 @@ export function HelpAccountContent() {
           <h2>Butuh bantuan lebih cepat?</h2>
           <p>Tim Market Snap siap membantu pesanan, pembayaran, dan pengirimanmu setiap hari.</p>
         </div>
-        <Link className="primary-snap" href="/contact-us">Hubungi kami</Link>
+        <Link className="primary-snap" href="/dashboard/customer/contact">Hubungi kami</Link>
       </section>
     </>
   );

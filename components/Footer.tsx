@@ -16,10 +16,10 @@ export function Footer() {
         <p>Cabang terdekat, promo pilihan, dan pengiriman praktis.</p>
       </div>
       <div className="footer-links">
-        <Link href="/">Home</Link>
-        <Link href="/catalog">Catalog</Link>
-        <Link href="/about">About</Link>
-        <Link href="/contact-us">Contact</Link>
+        <Link href="/dashboard/customer">Home</Link>
+        <Link href="/dashboard/customer/catalog">Catalog</Link>
+        <Link href="/dashboard/customer/about">About</Link>
+        <Link href="/dashboard/customer/contact">Contact</Link>
       </div>
       <div className="footer-bottom">Copyright | The Market Snap | Developed by FARNAJO</div>
     </footer>

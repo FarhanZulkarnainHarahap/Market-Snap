@@ -1,5 +1,5 @@
-import { SnapContactPage } from "@/components/snap/SnapInfoPages";
+import { redirect } from "next/navigation";
 
-export default function CustomerContactPage() {
-  return <SnapContactPage />;
+export default function CustomerContactUsRedirectPage() {
+  redirect("/dashboard/customer/contact");
 }

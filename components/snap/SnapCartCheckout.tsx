@@ -22,6 +22,9 @@ const xenditPaymentMethods = [
 ];
 
 type CartStatus = "loading" | "success" | "empty" | "error" | "auth" | "verification";
+const CUSTOMER_HOME = "/dashboard/customer";
+const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
+const CUSTOMER_CHECKOUT = "/dashboard/customer/checkout";
 
 export function SnapCartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -142,9 +145,9 @@ export function SnapCartPage() {
             <article className="cart-list">
               {status === "loading" && <CartRowsSkeleton />}
               {status === "auth" && <CartState icon={<FiLock />} message={message} primaryHref="/auth/login" primaryLabel="Login" secondaryHref="/auth/register" secondaryLabel="Daftar" title="Login dulu untuk melihat cart" />}
-              {status === "verification" && <CartState icon={<FiAlertCircle />} message={message} primaryHref="/auth/login" primaryLabel="Buka akun saya" secondaryHref="/catalog" secondaryLabel="Kembali belanja" title="Email belum diverifikasi" />}
-              {status === "error" && <CartState action={loadCart} icon={<FiRefreshCcw />} message={message} primaryLabel="Muat ulang cart" secondaryHref="/catalog" secondaryLabel="Lihat katalog" title="Cart belum bisa dimuat" />}
-              {status === "empty" && <CartState icon={<FiShoppingCart />} image="/market-snap-catalog-v2.png" message={message} primaryHref="/catalog" primaryLabel="Mulai belanja" secondaryHref="/" secondaryLabel="Ke beranda" title="Keranjang masih kosong" />}
+              {status === "verification" && <CartState icon={<FiAlertCircle />} message={message} primaryHref="/auth/login" primaryLabel="Buka akun saya" secondaryHref={CUSTOMER_CATALOG} secondaryLabel="Kembali belanja" title="Email belum diverifikasi" />}
+              {status === "error" && <CartState action={loadCart} icon={<FiRefreshCcw />} message={message} primaryLabel="Muat ulang cart" secondaryHref={CUSTOMER_CATALOG} secondaryLabel="Lihat katalog" title="Cart belum bisa dimuat" />}
+              {status === "empty" && <CartState icon={<FiShoppingCart />} image="/market-snap-catalog-v2.png" message={message} primaryHref={CUSTOMER_CATALOG} primaryLabel="Mulai belanja" secondaryHref={CUSTOMER_HOME} secondaryLabel="Ke beranda" title="Keranjang masih kosong" />}
               {isSuccess && (
                 <>
                   <div className="cart-store-card">
@@ -227,7 +230,7 @@ export function SnapCartPage() {
 }
 
 function CartState({ action, icon, image, message, primaryHref, primaryLabel, secondaryHref, secondaryLabel, title }: { action?: () => void; icon: React.ReactNode; image?: string; message: string; primaryHref?: string; primaryLabel: string; secondaryHref?: string; secondaryLabel: string; title: string }) {
-  const primary = action ? <button onClick={action} type="button">{primaryLabel}</button> : <Link href={primaryHref ?? "/catalog"}>{primaryLabel}</Link>;
+  const primary = action ? <button onClick={action} type="button">{primaryLabel}</button> : <Link href={primaryHref ?? CUSTOMER_CATALOG}>{primaryLabel}</Link>;
   return (
     <div className="cart-state-card">
       {image ? <Image alt="" height={150} src={image} width={210} /> : <i>{icon}</i>}
@@ -255,7 +258,7 @@ function Summary({ disabled, discount, itemCount, shipping, store, subtotal, tot
       <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
       <div className="eta-card"><FiClock /><span><strong>{store ? `Estimasi tiba ${store.eta}` : "Pilih alamat saat checkout"}</strong><small>{store?.name ?? "Cabang akan ditentukan dari lokasi pengiriman"}</small></span></div>
       {disabled && <p className="summary-warning">Pilih minimal satu produk untuk melanjutkan checkout.</p>}
-      <Link aria-disabled={disabled} className={disabled ? "primary-snap wide disabled" : "primary-snap wide"} href={disabled ? "#" : "/checkout"}><FiLock /> Checkout Sekarang</Link>
+      <Link aria-disabled={disabled} className={disabled ? "primary-snap wide disabled" : "primary-snap wide"} href={disabled ? "#" : CUSTOMER_CHECKOUT}><FiLock /> Checkout Sekarang</Link>
     </article>
   );
 }

@@ -1,5 +1,5 @@
-import { SnapHomePage } from "../components/snap/SnapCatalogPage";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <SnapHomePage />;
+  redirect("/dashboard/customer");
 }
