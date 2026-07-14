@@ -28,9 +28,13 @@ body:has(.management-header.is-collapsed) {
   border-right: 1px solid #e3ece4;
   bottom: 0;
   box-shadow: 12px 0 28px rgba(6, 66, 32, .05);
-  flex-direction: column;
-  gap: 18px;
+  display: grid;
+  gap: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100dvh;
   left: 0;
+  max-height: 100dvh;
+  overflow: hidden;
   padding: 24px;
   position: fixed;
   top: 0;
@@ -99,8 +103,15 @@ body:has(.management-header.is-collapsed) {
 }
 
 .management-nav {
+  align-content: start;
   display: grid;
   gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px 0;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .management-nav a {
@@ -129,9 +140,9 @@ body:has(.management-header.is-collapsed) {
   background: linear-gradient(180deg, #f0f9ee, #ffffff);
   border: 1px solid #e2efe0;
   border-radius: 8px;
-  display: grid;
+  display: none;
   gap: 10px;
-  margin-top: auto;
+  margin-bottom: 12px;
   padding: 16px;
 }
 
@@ -232,10 +243,10 @@ body:has(.management-header.is-collapsed) {
 }
 
 .management-sidebar-footer {
+  background: #fff;
   border-top: 1px solid #e3ece4;
   display: grid;
   gap: 10px;
-  margin-top: auto;
   padding-top: 14px;
 }
 
@@ -350,6 +361,16 @@ body:has(.management-header.is-collapsed) {
 
 .management-header.is-collapsed .management-nav a {
   padding: 0;
+}
+
+@media (min-width: 901px) and (min-height: 960px) {
+  .management-sidebar {
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+
+  .management-sidebar-card {
+    display: grid;
+  }
 }
 
 @media (max-width: 900px) {
