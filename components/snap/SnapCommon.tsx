@@ -48,12 +48,13 @@ const CUSTOMER_CART = "/dashboard/customer/cart";
 const CUSTOMER_PROFILE = "/dashboard/customer/profile";
 const CUSTOMER_ORDERS = "/dashboard/customer/profile/orders";
 const CUSTOMER_NOTIFICATIONS = "/dashboard/customer/profile/notifications";
+const CUSTOMER_VOUCHERS = "/dashboard/customer/profile/vouchers";
 
 const navItems = [
-  { key: "home", href: CUSTOMER_HOME, label: "Home" },
-  { key: "catalog", href: CUSTOMER_CATALOG, label: "Catalog" },
-  { key: "about", href: CUSTOMER_ABOUT, label: "About" },
-  { key: "contact", href: CUSTOMER_CONTACT, label: "Contact" }
+  { key: "home", href: CUSTOMER_HOME, label: "Home", icon: FiHome },
+  { key: "catalog", href: CUSTOMER_CATALOG, label: "Catalog", icon: FiShoppingBag },
+  { key: "about", href: CUSTOMER_ABOUT, label: "About", icon: FiShield },
+  { key: "contact", href: CUSTOMER_CONTACT, label: "Contact", icon: FiHeadphones }
 ] as const;
 
 export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: HeaderProps) {
@@ -62,6 +63,7 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const storedSession = readSession();
@@ -95,6 +97,7 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
   useEffect(() => {
     if (!mobileOpen) return;
     const previousOverflow = document.body.style.overflow;
+    const opener = menuButtonRef.current;
     document.body.style.overflow = "hidden";
 
     function handleKeydown(event: KeyboardEvent) {
@@ -121,20 +124,31 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeydown);
+      opener?.focus();
     };
   }, [mobileOpen]);
 
   const profileLabel = displayName(session.name);
+  const mobileItems = [
+    ...navItems,
+    { key: "profile", href: session.isLoggedIn ? CUSTOMER_PROFILE : "/auth/login", label: "Profile", icon: FiUser },
+    { key: "orders", href: CUSTOMER_ORDERS, label: "Pesanan Saya", icon: FiPackage },
+    { key: "vouchers", href: CUSTOMER_VOUCHERS, label: "Voucher Saya", icon: FiHeart },
+    { key: "cart", href: CUSTOMER_CART, label: `Cart (${cartCount})`, icon: FiShoppingCart },
+    { key: "location", href: CUSTOMER_PROFILE, label: locationLabel, icon: FiMapPin },
+    { key: "notifications", href: CUSTOMER_NOTIFICATIONS, label: "Notifikasi", icon: FiBell }
+  ] as const;
 
   return (
     <header className="snap-header">
-      <Link className="snap-brand" href={CUSTOMER_HOME}>MARKET SNAP</Link>
+      <Link className="snap-brand" href={CUSTOMER_HOME}><span>MARKET SNAP</span></Link>
       {!simple && (
         <button
           aria-expanded={mobileOpen}
           aria-label={mobileOpen ? "Tutup menu customer" : "Buka menu customer"}
           className="customer-menu-toggle"
           onClick={() => setMobileOpen((open) => !open)}
+          ref={menuButtonRef}
           type="button"
         >
           {mobileOpen ? <FiX /> : <FiMenu />}
@@ -181,18 +195,24 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
       {mobileOpen && (
         <div aria-modal="true" className="customer-mobile-drawer" ref={drawerRef} role="dialog">
           <div className="customer-mobile-drawer-head">
-            <strong>MARKET SNAP</strong>
+            <div>
+              <strong>MARKET SNAP</strong>
+              <small>{session.isLoggedIn ? `Halo, ${profileLabel}` : "Belanja dari cabang terdekat"}</small>
+            </div>
             <button aria-label="Tutup menu customer" onClick={() => setMobileOpen(false)} type="button"><FiX /></button>
           </div>
+          <button className="customer-drawer-location" onClick={() => refreshLocationLabel(setLocationLabel)} type="button"><FiMapPin /> <span>{locationLabel}</span></button>
           <nav aria-label="Menu customer mobile">
-            {navItems.map((item) => (
+            {mobileItems.map((item) => {
+              const Icon = item.icon;
+              return (
               <Link className={active === item.key ? "active" : ""} href={item.href} key={item.key} onClick={() => setMobileOpen(false)}>
-                {item.label}
+                <Icon />
+                <span>{item.label}</span>
               </Link>
-            ))}
-            <Link className={active === "profile" ? "active" : ""} href={session.isLoggedIn ? CUSTOMER_PROFILE : "/auth/login"} onClick={() => setMobileOpen(false)}>Profile</Link>
-            <Link className={active === "cart" ? "active" : ""} href={CUSTOMER_CART} onClick={() => setMobileOpen(false)}>Cart ({cartCount})</Link>
-            {session.isLoggedIn && <button onClick={() => logout(setSession, setProfileOpen)} type="button">Logout</button>}
+              );
+            })}
+            {session.isLoggedIn && <button onClick={() => logout(setSession, setProfileOpen)} type="button"><FiLogOut /><span>Logout</span></button>}
           </nav>
         </div>
       )}

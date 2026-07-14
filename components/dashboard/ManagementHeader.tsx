@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiBell, FiBox, FiGrid, FiHome, FiLayers, FiMenu, FiPackage, FiPieChart, FiSearch, FiSettings, FiShoppingCart, FiTrendingUp, FiUsers, FiX } from "react-icons/fi";
 import type { DashboardRole } from "../../lib/dashboard-api";
 
@@ -39,24 +39,58 @@ export function ManagementHeader({ role }: ManagementHeaderProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const title = role === "admin" ? "Super Admin Console" : "Store Admin Console";
   const userLabel = role === "admin" ? "Admin" : "Store Admin";
   const rootHref = links[role][0].href;
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const opener = menuButtonRef.current;
+    document.body.style.overflow = "hidden";
+    const onKeydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+      if (event.key !== "Tab" || !sidebarRef.current) return;
+      const focusable = Array.from(sidebarRef.current.querySelectorAll<HTMLElement>("a,button")).filter((item) => !item.hasAttribute("disabled"));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeydown);
+    window.setTimeout(() => sidebarRef.current?.querySelector<HTMLElement>("a,button")?.focus(), 0);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeydown);
+      opener?.focus();
+    };
+  }, [mobileOpen]);
+
   function toggleMenu() {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+      setMobileOpen((value) => !value);
+      return;
+    }
     setCollapsed((value) => !value);
-    setMobileOpen((value) => !value);
   }
 
   return (
     <header className={`management-header${collapsed ? " is-collapsed" : ""}${mobileOpen ? " is-mobile-open" : ""}`}>
-      <aside className="management-sidebar" aria-label={title}>
+      <aside className="management-sidebar" aria-label={title} ref={sidebarRef}>
         <div className="management-sidebar-head">
           <Link className="management-brand" href={rootHref} onClick={() => setMobileOpen(false)}>
             <Image src="/market-snap-favicon-transparent.png" alt="Market Snap" height={42} width={42} />
             <span><strong>MARKET SNAP</strong><small>{title}</small></span>
           </Link>
-          <button aria-label="Tutup menu" className="management-close-button" onClick={toggleMenu} type="button"><FiX /></button>
+          <button aria-label="Tutup menu" className="management-close-button" onClick={() => setMobileOpen(false)} type="button"><FiX /></button>
         </div>
         <nav className="management-nav">
           {links[role].map((link) => {
@@ -78,7 +112,7 @@ export function ManagementHeader({ role }: ManagementHeaderProps) {
       </aside>
       <button aria-label="Tutup overlay menu" className="management-overlay" onClick={() => setMobileOpen(false)} type="button" />
       <div className="management-topbar">
-        <button aria-label="Buka atau tutup sidebar" className="management-menu-button" onClick={toggleMenu} type="button"><FiMenu /></button>
+        <button aria-label="Buka atau tutup sidebar" className="management-menu-button" onClick={toggleMenu} ref={menuButtonRef} type="button"><FiMenu /></button>
         <label className="management-search">
           <FiSearch />
           <input placeholder="Search products, orders, customers..." />

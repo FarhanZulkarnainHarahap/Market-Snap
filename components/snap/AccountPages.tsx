@@ -44,18 +44,20 @@ type AddressForm = {
   lng: string;
 };
 
-const accountMenus: Array<{ key: AccountSection; href: string; label: string; text: string; icon: typeof FiUser }> = [
-  { key: "profile", href: "/dashboard/customer/profile", label: "Overview", text: "Ringkasan akun", icon: FiUser },
-  { key: "personal-data", href: "/dashboard/customer/profile/personal-data", label: "Data Pribadi", text: "Nama, email, foto", icon: FiUser },
-  { key: "addresses", href: "/dashboard/customer/profile/addresses", label: "Alamat", text: "Alamat pengiriman", icon: FiMapPin },
-  { key: "orders", href: "/dashboard/customer/profile/orders", label: "Pesanan Saya", text: "Riwayat belanja", icon: FiPackage },
-  { key: "notifications", href: "/dashboard/customer/profile/notifications", label: "Notifikasi", text: "Update pesanan", icon: FiBell },
-  { key: "vouchers", href: "/dashboard/customer/profile/vouchers", label: "Voucher Saya", text: "Promo tersimpan", icon: FiTag },
-  { key: "wishlist", href: "/dashboard/customer/profile/wishlist", label: "Wishlist", text: "Produk favorit", icon: FiHeart },
-  { key: "payment-methods", href: "/dashboard/customer/profile/payment-methods", label: "Metode Pembayaran", text: "Token pembayaran", icon: FiShield },
-  { key: "security", href: "/dashboard/customer/profile/security", label: "Keamanan", text: "Password & akses", icon: FiLock },
-  { key: "help", href: "/dashboard/customer/profile/help-center", label: "Bantuan", text: "Bantuan pelanggan", icon: FiHeadphones }
+const accountMenus: Array<{ key: AccountSection; href: string; label: string; section: "Akun" | "Belanja" | "Informasi"; text: string; icon: typeof FiUser }> = [
+  { key: "profile", href: "/dashboard/customer/profile", label: "Overview", section: "Akun", text: "Ringkasan akun", icon: FiUser },
+  { key: "personal-data", href: "/dashboard/customer/profile/personal-data", label: "Data Pribadi", section: "Akun", text: "Nama, email, foto", icon: FiUser },
+  { key: "addresses", href: "/dashboard/customer/profile/addresses", label: "Alamat", section: "Akun", text: "Alamat pengiriman", icon: FiMapPin },
+  { key: "security", href: "/dashboard/customer/profile/security", label: "Keamanan", section: "Akun", text: "Password & akses", icon: FiLock },
+  { key: "orders", href: "/dashboard/customer/profile/orders", label: "Pesanan Saya", section: "Belanja", text: "Riwayat belanja", icon: FiPackage },
+  { key: "vouchers", href: "/dashboard/customer/profile/vouchers", label: "Voucher Saya", section: "Belanja", text: "Promo tersimpan", icon: FiTag },
+  { key: "wishlist", href: "/dashboard/customer/profile/wishlist", label: "Wishlist", section: "Belanja", text: "Produk favorit", icon: FiHeart },
+  { key: "payment-methods", href: "/dashboard/customer/profile/payment-methods", label: "Metode Pembayaran", section: "Belanja", text: "Token pembayaran", icon: FiShield },
+  { key: "notifications", href: "/dashboard/customer/profile/notifications", label: "Notifikasi", section: "Informasi", text: "Update pesanan", icon: FiBell },
+  { key: "help", href: "/dashboard/customer/profile/help-center", label: "Bantuan", section: "Informasi", text: "Bantuan pelanggan", icon: FiHeadphones }
 ];
+
+const accountSections = ["Akun", "Belanja", "Informasi"] as const;
 
 export function AccountLayout({ active, children, title, description }: { active: AccountSection; children: React.ReactNode; title: string; description: string }) {
   const headerActive = active === "orders" ? "orders" : active === "notifications" ? "notifications" : "profile";
@@ -71,23 +73,23 @@ export function AccountLayout({ active, children, title, description }: { active
             <h1>{title}</h1>
             <p>{description}</p>
           </div>
-          <div className="account-summary">
-            <span><FiShield /> Akun aktif</span>
-            {loading ? <span className="skeleton-line short" /> : <strong>{user?.name ?? "Customer"}</strong>}
-            {loading ? <span className="skeleton-line medium" /> : <small>{user?.role ? roleLabel(user.role) : "Customer Market Snap"}</small>}
-          </div>
         </section>
 
         <section className="account-layout">
           <aside className="account-sidebar" aria-label="Menu akun">
             <UserCard loading={loading} user={user} />
             <nav>
-              {accountMenus.map(({ key, href, label, text, icon: Icon }) => (
-                <Link className={active === key ? "active" : ""} href={href} key={key}>
-                  <Icon />
-                  <span><strong>{label}</strong><small>{text}</small></span>
-                  <FiChevronRight />
-                </Link>
+              {accountSections.map((section) => (
+                <div className="account-menu-group" key={section}>
+                  <p>{section}</p>
+                  {accountMenus.filter((item) => item.section === section).map(({ key, href, label, text, icon: Icon }) => (
+                    <Link className={active === key ? "active" : ""} href={href} key={key}>
+                      <Icon />
+                      <span><strong>{label}</strong><small>{text}</small></span>
+                      <FiChevronRight />
+                    </Link>
+                  ))}
+                </div>
               ))}
             </nav>
           </aside>
@@ -201,12 +203,20 @@ export function ProfileAccountContent() {
             <span className={user?.verified ? "verified-pill" : "verified-pill pending"}>{user?.verified ? "Terverifikasi" : "Belum terverifikasi"}</span>
           </div>
         )}
-        <form className="account-form" onSubmit={submit}>
-          <label>Nama lengkap<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} value={profileForm.name} /></label>
-          <label>Email<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} type="email" value={profileForm.email} /></label>
-          <label>Nomor handphone<input disabled={!editing} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} placeholder="0812-3456-7890" value={profileForm.phone} /></label>
-          {editing && <button className="primary-snap" type="submit"><FiCheck /> Simpan perubahan</button>}
-        </form>
+        {editing ? (
+          <form className="account-form" onSubmit={submit}>
+            <label>Nama lengkap<input onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} value={profileForm.name} /></label>
+            <label>Email<input onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} type="email" value={profileForm.email} /></label>
+            <label>Nomor handphone<input onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} placeholder="0812-3456-7890" value={profileForm.phone} /></label>
+            <button className="primary-snap" type="submit"><FiCheck /> Simpan perubahan</button>
+          </form>
+        ) : (
+          <div className="account-read-grid">
+            <p><span>Nama lengkap</span><strong>{profileForm.name || "Belum diisi"}</strong></p>
+            <p><span>Email</span><strong>{profileForm.email || "Belum tersedia"}</strong></p>
+            <p><span>Nomor handphone</span><strong>{profileForm.phone || "Belum diisi"}</strong></p>
+          </div>
+        )}
         {!loading && !user?.verified && <button className="secondary-snap account-verify-button" onClick={openVerificationModal} type="button"><FiMail /> Verifikasi akun</button>}
         {message && <p className="account-message">{message}</p>}
       </section>
@@ -680,13 +690,6 @@ function emptyAddressForm(isPrimary = false): AddressForm {
 function memberSince(date?: string) {
   if (!date) return "Member Market Snap";
   return `Member sejak ${new Date(date).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}`;
-}
-
-function roleLabel(role: ApiUser["role"]) {
-  const normalized = String(role).toLowerCase();
-  if (normalized === "super_admin") return "Super Admin Market Snap";
-  if (normalized === "store_admin") return "Admin Store Market Snap";
-  return "Customer Market Snap";
 }
 
 function statusLabel(status: string) {

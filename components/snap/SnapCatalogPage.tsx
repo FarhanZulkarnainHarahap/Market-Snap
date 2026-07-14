@@ -99,7 +99,10 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
   const [storeId, setStoreId] = useState("");
   const [onlyStock, setOnlyStock] = useState(true);
   const [onlyPromo, setOnlyPromo] = useState(false);
+  const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100000);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
 
   useEffect(() => {
     const params: Record<string, string> = { limit: "48", sort };
@@ -120,10 +123,37 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
       const stock = state.store ? product.stockByStore[state.store.id] ?? 0 : 0;
       if (onlyStock && stock < 1) return false;
       if (onlyPromo && !product.discount) return false;
+      if (product.price < minPrice) return false;
       if (product.price > maxPrice) return false;
       return true;
     });
-  }, [maxPrice, onlyPromo, onlyStock, state.products, state.store]);
+  }, [maxPrice, minPrice, onlyPromo, onlyStock, state.products, state.store]);
+
+  useEffect(() => {
+    if (!filterOpen && !sortOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setFilterOpen(false);
+        setSortOpen(false);
+      }
+    };
+    window.addEventListener("keydown", close);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", close);
+    };
+  }, [filterOpen, sortOpen]);
+
+  function clearFilters() {
+    setCategory("Semua");
+    setOnlyPromo(false);
+    setOnlyStock(false);
+    setMinPrice(0);
+    setMaxPrice(100000);
+    setQuery("");
+  }
 
   async function addProduct(product: Product) {
     if (!state.store) return;
@@ -142,7 +172,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
       <main>
         <section className="catalog-hero">
           <div>
-            <h1>Fresh Catalog</h1>
+            <h1>Belanja kebutuhan harian</h1>
             <p>Belanja grocery dari cabang terdekat</p>
           </div>
           <GroceryVisual compact variant="catalog" />
@@ -168,6 +198,18 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
             </select>
           </label>
         </section>
+        <section className="catalog-mobile-controls" aria-label="Kontrol katalog mobile">
+          <div className="mobile-category-chips">
+            {["Semua Produk", ...state.categories.filter((item) => item !== "Semua")].slice(0, 8).map((item) => (
+              <button className={item === category || (item === "Semua Produk" && category === "Semua") ? "active" : ""} key={item} onClick={() => setCategory(item === "Semua Produk" ? "Semua" : item)} type="button">{item.replace("Semua Produk", "Semua")}</button>
+            ))}
+            <button onClick={() => setFilterOpen(true)} type="button">Lihat Semua</button>
+          </div>
+          <div className="mobile-filter-actions">
+            <button onClick={() => setFilterOpen(true)} type="button"><FiSliders /> Filter</button>
+            <button onClick={() => setSortOpen(true)} type="button">Urutkan</button>
+          </div>
+        </section>
         <section className="catalog-layout">
           <aside className="filter-sidebar">
             <h3>Kategori</h3>
@@ -186,7 +228,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
                 type="range"
                 value={maxPrice}
               />
-              <div className="price-pills"><span>Rp 0</span><span>{maxPrice >= 100000 ? "Rp 100.000+" : rupiah(maxPrice)}</span></div>
+              <div className="price-pills"><span>{rupiah(minPrice)}</span><span>{maxPrice >= 100000 ? "Rp 100.000+" : rupiah(maxPrice)}</span></div>
             </div>
             <label className="switch-row">Stok Tersedia <input checked={onlyStock} onChange={(event) => setOnlyStock(event.target.checked)} type="checkbox" /></label>
             <label className="switch-row">Produk Promo <input checked={onlyPromo} onChange={(event) => setOnlyPromo(event.target.checked)} type="checkbox" /></label>
@@ -202,24 +244,75 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
                 {["Semua Produk", "Promo", "Stok Tersedia"].map((chip) => <button className={chip === "Semua Produk" ? "active" : ""} key={chip} type="button">{chip}</button>)}
               </div>
               {state.refreshing && <span className="refreshing-copy">Memperbarui data...</span>}
-              <button className="clear-filter" onClick={() => { setCategory("Semua"); setOnlyPromo(false); setOnlyStock(false); setMaxPrice(100000); setQuery(""); }} type="button"><FiSliders /> Hapus filter</button>
+              <button className="clear-filter" onClick={clearFilters} type="button"><FiSliders /> Hapus filter</button>
             </div>
             {state.loading ? <ProductGridSkeleton count={12} /> : (
               <>
                 {state.message && <p className="catalog-message">{state.message}</p>}
                 {!state.serviceable && <p className="catalog-message warning">Lokasi Anda di luar radius cabang terdekat. Silakan pilih alamat lain.</p>}
-                <div className="snap-product-grid">
-                  {visibleProducts.map((product) => <ProductCard key={product.id} onAdd={addProduct} product={product} storeId={state.store?.id} />)}
-                </div>
+                {visibleProducts.length ? (
+                  <div className="snap-product-grid">
+                    {visibleProducts.map((product) => <ProductCard key={product.id} onAdd={addProduct} product={product} storeId={state.store?.id} />)}
+                  </div>
+                ) : (
+                  <div className="catalog-empty-state">
+                    <h2>Produk tidak ditemukan</h2>
+                    <p>Coba ubah kategori, harga, lokasi, atau filter yang digunakan.</p>
+                    <div>
+                      <button onClick={clearFilters} type="button">Hapus Filter</button>
+                      <button onClick={() => setFilterOpen(true)} type="button">Ganti Lokasi</button>
+                      <Link href={CUSTOMER_CATALOG}>Lihat Semua Produk</Link>
+                    </div>
+                  </div>
+                )}
               </>
             )}
-            <div className="pagination-row">
+            {visibleProducts.length > 0 && <div className="pagination-row">
               <span>Menampilkan {visibleProducts.length} produk</span>
               <div><button type="button">1</button><button type="button">2</button><button type="button">3</button></div>
               <select defaultValue="48"><option value="48">48 / halaman</option></select>
-            </div>
+            </div>}
           </div>
         </section>
+        {(filterOpen || sortOpen) && <button aria-label="Tutup filter" className="sheet-backdrop" onClick={() => { setFilterOpen(false); setSortOpen(false); }} type="button" />}
+        {filterOpen && (
+          <section aria-modal="true" className="mobile-bottom-sheet" role="dialog">
+            <header><span /> <h2>Filter produk</h2><button aria-label="Tutup filter" onClick={() => setFilterOpen(false)} type="button">X</button></header>
+            <div className="sheet-content">
+              <label>
+                <small>Cabang</small>
+                <select value={storeId || state.store?.id || ""} onChange={(event) => setStoreId(event.target.value)}>
+                  {state.stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}
+                </select>
+              </label>
+              <div className="sheet-chip-grid">
+                {["Semua Produk", ...state.categories.filter((item) => item !== "Semua")].map((item) => (
+                  <button className={item === category || (item === "Semua Produk" && category === "Semua") ? "active" : ""} key={item} onClick={() => setCategory(item === "Semua Produk" ? "Semua" : item)} type="button">{item}</button>
+                ))}
+              </div>
+              <div className="sheet-price-grid">
+                <label><small>Harga minimum</small><input min="0" onChange={(event) => setMinPrice(Number(event.target.value))} step="5000" type="number" value={minPrice} /></label>
+                <label><small>Harga maksimum</small><input min={minPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} step="5000" type="number" value={maxPrice} /></label>
+              </div>
+              <label className="sheet-check"><span>Stok tersedia</span><input checked={onlyStock} onChange={(event) => setOnlyStock(event.target.checked)} type="checkbox" /></label>
+              <label className="sheet-check"><span>Produk promo</span><input checked={onlyPromo} onChange={(event) => setOnlyPromo(event.target.checked)} type="checkbox" /></label>
+            </div>
+            <footer><button onClick={clearFilters} type="button">Reset</button><button onClick={() => setFilterOpen(false)} type="button">Terapkan</button></footer>
+          </section>
+        )}
+        {sortOpen && (
+          <section aria-modal="true" className="mobile-bottom-sheet compact" role="dialog">
+            <header><span /> <h2>Urutkan</h2><button aria-label="Tutup urutan" onClick={() => setSortOpen(false)} type="button">X</button></header>
+            <div className="sheet-chip-grid vertical">
+              {[
+                ["featured", "Terbaru"],
+                ["price_asc", "Harga termurah"],
+                ["price_desc", "Harga tertinggi"],
+                ["stock", "Stok terbanyak"]
+              ].map(([value, label]) => <button className={sort === value ? "active" : ""} key={value} onClick={() => { setSort(value); setSortOpen(false); }} type="button">{label}</button>)}
+            </div>
+          </section>
+        )}
       </main>
       <BenefitStrip />
       <SnapFooter />
