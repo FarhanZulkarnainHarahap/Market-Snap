@@ -217,6 +217,103 @@ body:has(.management-header.is-collapsed) {
   padding: 0 14px;
 }
 
+.management-logout {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d8e4d9;
+  border-radius: 8px;
+  color: #9f2b1f;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.management-sidebar-footer {
+  border-top: 1px solid #e3ece4;
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.management-sidebar-user {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.management-sidebar-user > span {
+  align-items: center;
+  background: #e8f6e5;
+  border-radius: 999px;
+  color: #0d642f;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 950;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.management-sidebar-user p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  min-width: 0;
+}
+
+.management-sidebar-user strong,
+.management-sidebar-user small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.management-sidebar-user strong {
+  color: #0b3d21;
+}
+
+.management-sidebar-user small {
+  color: #66766b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.management-sidebar-footer-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr;
+}
+
+.management-sidebar-footer-actions a,
+.management-sidebar-footer-actions button {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 9px;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.management-sidebar-footer-actions a {
+  background: #064220;
+  border: 1px solid #064220;
+  color: #fff;
+}
+
+.management-sidebar-footer-actions button {
+  background: #fff;
+  border: 1px solid #f0c6c0;
+  color: #9f2b1f;
+}
+
 .management-overlay {
   display: none;
 }
@@ -241,6 +338,7 @@ body:has(.management-header.is-collapsed) {
 .management-header.is-collapsed .management-brand span,
 .management-header.is-collapsed .management-nav a span,
 .management-header.is-collapsed .management-sidebar-card,
+.management-header.is-collapsed .management-sidebar-footer,
 .management-header.is-collapsed .management-close-button {
   display: none;
 }
@@ -279,6 +377,7 @@ body:has(.management-header.is-collapsed) {
   .management-header.is-collapsed .management-brand span,
   .management-header.is-collapsed .management-nav a span,
   .management-header.is-collapsed .management-sidebar-card,
+  .management-header.is-collapsed .management-sidebar-footer,
   .management-header.is-collapsed .management-close-button {
     display: revert;
   }
@@ -1068,8 +1167,12 @@ body:has(.management-header.is-collapsed) {
   .management-nav {
     align-content: start;
     gap: 6px;
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 12px 14px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
   }
 
   .management-nav a {
@@ -1080,6 +1183,22 @@ body:has(.management-header.is-collapsed) {
 
   .management-sidebar-card {
     display: none !important;
+  }
+
+  .management-sidebar-footer {
+    background: #fff;
+    border-top: 1px solid #e3ece4;
+    display: grid;
+    margin-top: 0;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .management-header.is-collapsed .management-sidebar-footer {
+    display: grid;
+  }
+
+  .management-sidebar-footer-actions {
+    grid-template-columns: 1fr 1fr;
   }
 
   .management-topbar {
@@ -1106,8 +1225,15 @@ body:has(.management-header.is-collapsed) {
     padding: 0;
   }
 
-  .management-exit svg {
+  .management-exit svg,
+  .management-logout svg {
     font-size: 18px;
+  }
+
+  .management-logout {
+    font-size: 0;
+    min-width: 44px;
+    padding: 0;
   }
 
   .management-overlay {

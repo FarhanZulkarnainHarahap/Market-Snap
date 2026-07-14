@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { FiBell, FiBox, FiGrid, FiHome, FiLayers, FiMenu, FiPackage, FiPieChart, FiSearch, FiSettings, FiShoppingCart, FiTrendingUp, FiUsers, FiX } from "react-icons/fi";
+import { FiBell, FiBox, FiGrid, FiHome, FiLayers, FiLogOut, FiMenu, FiPackage, FiPieChart, FiSearch, FiSettings, FiShoppingCart, FiTrendingUp, FiUsers, FiX } from "react-icons/fi";
+import { logoutUser } from "../../lib/api";
 import type { DashboardRole } from "../../lib/dashboard-api";
 
 type ManagementHeaderProps = {
@@ -39,6 +40,7 @@ export function ManagementHeader({ role }: ManagementHeaderProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const title = role === "admin" ? "Super Admin Console" : "Store Admin Console";
@@ -82,6 +84,13 @@ export function ManagementHeader({ role }: ManagementHeaderProps) {
     setCollapsed((value) => !value);
   }
 
+  function handleLogout() {
+    setLoggingOut(true);
+    void logoutUser().finally(() => {
+      window.location.href = "/auth/login";
+    });
+  }
+
   return (
     <header className={`management-header${collapsed ? " is-collapsed" : ""}${mobileOpen ? " is-mobile-open" : ""}`}>
       <aside className="management-sidebar" aria-label={title} ref={sidebarRef}>
@@ -109,6 +118,16 @@ export function ManagementHeader({ role }: ManagementHeaderProps) {
           <strong>Market Snap</strong>
           <small>Fresh groceries, fast delivery from your nearest branch.</small>
         </div>
+        <footer className="management-sidebar-footer">
+          <div className="management-sidebar-user">
+            <span>{role === "admin" ? "SA" : "ST"}</span>
+            <p><strong>{userLabel}</strong><small>{title}</small></p>
+          </div>
+          <div className="management-sidebar-footer-actions">
+            <Link href="/dashboard/customer" onClick={() => setMobileOpen(false)}><FiHome /> Storefront</Link>
+            <button disabled={loggingOut} onClick={handleLogout} type="button"><FiLogOut /> {loggingOut ? "Logout..." : "Logout"}</button>
+          </div>
+        </footer>
       </aside>
       <button aria-label="Tutup overlay menu" className="management-overlay" onClick={() => setMobileOpen(false)} type="button" />
       <div className="management-topbar">
@@ -121,6 +140,7 @@ export function ManagementHeader({ role }: ManagementHeaderProps) {
           <button aria-label="Notifikasi" className="management-icon-button" type="button"><FiBell /></button>
           <span className="management-user"><strong>{userLabel}</strong><small>{role === "admin" ? "Super Admin" : "Store Admin"}</small></span>
           <Link className="management-exit" href="/dashboard/customer"><FiHome /> Storefront</Link>
+          <button className="management-logout" disabled={loggingOut} onClick={handleLogout} type="button"><FiLogOut /> Logout</button>
         </div>
       </div>
     </header>
