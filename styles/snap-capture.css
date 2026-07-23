@@ -2165,6 +2165,26 @@ body {
   color: #2f6f25;
 }
 
+.payment-method-card {
+  align-content: start;
+  grid-template-columns: 76px 1fr;
+  justify-items: stretch;
+}
+
+.payment-method-card img {
+  align-self: start;
+  border: 1px solid #e1e9e0;
+  border-radius: 7px;
+  height: 38px;
+  object-fit: contain;
+  width: 72px;
+}
+
+.payment-method-card span {
+  display: grid;
+  gap: 4px;
+}
+
 .checkout-block select {
   background: #fff;
   border: 1px solid var(--snap-line);
@@ -2390,6 +2410,92 @@ body {
 
 .branch-modal {
   max-width: 680px;
+}
+
+.address-modal {
+  max-width: min(1040px, calc(100vw - 28px));
+}
+
+.checkout-address-modal-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(280px, .92fr) minmax(360px, 1.08fr);
+  max-height: min(72vh, 720px);
+  overflow-y: auto;
+}
+
+.address-modal-list {
+  align-content: start;
+  display: grid;
+  gap: 10px;
+}
+
+.address-modal-card {
+  background: #fff;
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.address-modal-card.active {
+  border-color: #3f922c;
+  box-shadow: 0 0 0 3px rgba(63, 146, 44, .1);
+}
+
+.address-modal-card > button {
+  align-items: flex-start;
+  background: transparent;
+  border: 0;
+  color: #183822;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 34px 1fr;
+  padding: 0;
+  text-align: left;
+}
+
+.address-modal-card > button > svg {
+  color: var(--snap-green);
+  font-size: 28px;
+}
+
+.address-modal-card em {
+  background: #e8f6e5;
+  border-radius: 999px;
+  color: var(--snap-green);
+  font-size: 11px;
+  font-style: normal;
+  margin-left: 6px;
+  padding: 2px 8px;
+}
+
+.address-modal-card div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.address-modal-card div:last-child button {
+  align-items: center;
+  background: #f7fbf5;
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  color: var(--snap-green);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 10px;
+}
+
+.checkout-address-form {
+  background: #f8fbf7;
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  padding: 16px;
 }
 
 .branch-modal-list {
@@ -2634,6 +2740,7 @@ body {
 
 @media (max-width: 900px) {
   .checkout-stepper,
+  .checkout-address-modal-grid,
   .statistics-grid,
   .tracking-detail-layout,
   .tracking-toolbar {

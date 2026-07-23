@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" role="img" aria-label="Kartu">
+  <rect width="160" height="80" rx="10" fill="#f8fbf7" stroke="#d7e3d7"/>
+  <rect x="24" y="22" width="112" height="56" rx="8" fill="#064220"/>
+  <rect x="34" y="36" width="34" height="8" rx="2" fill="#f6c15b"/>
+  <rect x="34" y="56" width="72" height="6" rx="2" fill="#fff"/>
+</svg>

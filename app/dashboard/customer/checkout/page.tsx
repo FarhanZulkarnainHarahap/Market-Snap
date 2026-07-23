@@ -1,5 +1,5 @@
-import { SnapCheckoutPage } from "@/components/snap/SnapCartCheckout";
+import { CheckoutPage } from "@/components/checkout/CheckoutPage";
 
 export default function CustomerCheckoutPage() {
-  return <SnapCheckoutPage />;
+  return <CheckoutPage />;
 }

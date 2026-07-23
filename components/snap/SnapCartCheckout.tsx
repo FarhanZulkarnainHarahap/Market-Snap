@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FiAlertCircle, FiCheckCircle, FiClock, FiHome, FiLock, FiMinus, FiPlus, FiRefreshCcw, FiShoppingCart, FiTag, FiTrash2, FiTruck, FiX, FiZap } from "react-icons/fi";
-import { createOrderFromCart, deleteCartItem, deleteSelectedCartItems, fetchAddresses, fetchCart, fetchCheckoutOptions, fetchNearestStore, fetchStores, fetchVouchers, updateCartItem, validateCartVoucher } from "@/lib/api";
+import { FiAlertCircle, FiCheck, FiCheckCircle, FiClock, FiEdit2, FiHome, FiLock, FiMinus, FiPlus, FiRefreshCcw, FiShoppingCart, FiTag, FiTrash2, FiTruck, FiX, FiZap } from "react-icons/fi";
+import { createAddress, createOrderFromCart, deleteAddress, deleteCartItem, deleteSelectedCartItems, fetchAddresses, fetchCart, fetchCheckoutOptions, fetchNearestStore, fetchStores, fetchVouchers, updateAddress, updateCartItem, validateCartVoucher } from "@/lib/api";
+import { PaymentMethodCard } from "@/components/checkout/PaymentMethodCard";
 import { rupiah } from "@/lib/format";
 import type { Address, CartItem, CheckoutOption, Store, Voucher } from "@/lib/types";
 import { BenefitStrip, PanelSkeleton, SnapFooter, SnapHeader } from "./SnapCommon";
@@ -34,6 +35,20 @@ const fallbackDeliveryOptions = [
 ];
 
 type CartStatus = "loading" | "success" | "empty" | "error" | "auth" | "verification";
+type CheckoutAddressForm = {
+  city: string;
+  detail: string;
+  district: string;
+  isPrimary: boolean;
+  label: string;
+  lat: string;
+  lng: string;
+  note: string;
+  phone: string;
+  postalCode: string;
+  province: string;
+  recipientName: string;
+};
 const CUSTOMER_HOME = "/dashboard/customer";
 const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
 const CUSTOMER_CHECKOUT = "/dashboard/customer/checkout";
@@ -365,11 +380,18 @@ function selectedDeliveryDate(id: string) {
 function availableDeliveryTimes(dateId: string) {
   if (dateId !== "today") return deliveryTimes;
   const now = new Date();
-  const available = deliveryTimes.filter((slot) => {
+  return deliveryTimes.filter((slot) => {
     const endHour = Number(slot.split(" - ")[1]?.split(":")[0] ?? 0);
     return endHour > now.getHours();
   });
-  return available.length ? available : deliveryTimes.slice(-1);
+}
+
+function initialDeliveryDateId() {
+  return availableDeliveryTimes("today").length ? "today" : "tomorrow";
+}
+
+function initialDeliveryTime() {
+  return availableDeliveryTimes(initialDeliveryDateId())[0] ?? deliveryTimes[0];
 }
 
 function shippingIcon(id: string) {
@@ -385,8 +407,8 @@ export function SnapCheckoutPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [checkoutSelection] = useState(readCheckoutSelection);
   const [selectedAddressId, setSelectedAddressId] = useState("");
-  const [selectedDateId, setSelectedDateId] = useState(deliveryDates[0].id);
-  const [selectedTime, setSelectedTime] = useState(deliveryTimes[0]);
+  const [selectedDateId, setSelectedDateId] = useState(initialDeliveryDateId);
+  const [selectedTime, setSelectedTime] = useState(initialDeliveryTime);
   const [shippingMethods, setShippingMethods] = useState<CheckoutOption[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<CheckoutOption[]>([]);
   const [selectedDeliveryId, setSelectedDeliveryId] = useState(fallbackDeliveryOptions[0].id);
@@ -394,6 +416,11 @@ export function SnapCheckoutPage() {
   const [voucherCode, setVoucherCode] = useState(() => readCheckoutSelection().voucherCode ?? "");
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [orderNote, setOrderNote] = useState("");
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [addressEditingId, setAddressEditingId] = useState<string | null>(null);
+  const [addressForm, setAddressForm] = useState<CheckoutAddressForm>(() => emptyCheckoutAddressForm());
+  const [addressSaving, setAddressSaving] = useState(false);
+  const [addressMessage, setAddressMessage] = useState("");
   const [branchModalOpen, setBranchModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -409,6 +436,82 @@ export function SnapCheckoutPage() {
     () => addresses.find((address) => address.id === selectedAddressId) ?? addresses.find((address) => address.isPrimary) ?? addresses[0],
     [addresses, selectedAddressId]
   );
+  const orderDisabledReason = checkoutDisabledReason({
+    hasAddress: Boolean(selectedAddress),
+    hasItems: Boolean(items.length),
+    hasPayment: Boolean(selectedPaymentId),
+    hasSchedule: Boolean(selectedDateId && selectedTime),
+    hasShipping: Boolean(selectedDeliveryId),
+    hasStore: Boolean(store),
+    requiresAddress: selectedDelivery.requiresAddress !== false,
+    submitting
+  });
+
+  async function reloadAddresses(selectId?: string) {
+    const fresh = await fetchAddresses();
+    setAddresses(fresh);
+    const nextId = selectId ?? fresh.find((address) => address.isPrimary)?.id ?? fresh[0]?.id ?? "";
+    setSelectedAddressId(nextId);
+    return fresh;
+  }
+
+  function openAddressCreate() {
+    setAddressEditingId(null);
+    setAddressForm(emptyCheckoutAddressForm(addresses.length === 0));
+    setAddressMessage("");
+    setAddressModalOpen(true);
+  }
+
+  function openAddressEdit(address: Address) {
+    setAddressEditingId(address.id);
+    setAddressForm(formFromAddress(address));
+    setAddressMessage("");
+    setAddressModalOpen(true);
+  }
+
+  async function saveCheckoutAddress(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAddressSaving(true);
+    setAddressMessage("");
+    try {
+      const payload = payloadFromAddressForm(addressForm);
+      const saved = addressEditingId ? await updateAddress(addressEditingId, payload) : await createAddress(payload);
+      await reloadAddresses(saved.id);
+      setAddressModalOpen(false);
+      setMessage(addressEditingId ? "Alamat berhasil diperbarui dan dipilih." : "Alamat berhasil ditambahkan dan dipilih.");
+    } catch (error) {
+      setAddressMessage(error instanceof Error ? error.message : "Alamat belum dapat disimpan.");
+    } finally {
+      setAddressSaving(false);
+    }
+  }
+
+  async function removeCheckoutAddress(address: Address) {
+    if (!window.confirm(`Hapus alamat ${address.label}?`)) return;
+    setAddressSaving(true);
+    try {
+      await deleteAddress(address.id);
+      await reloadAddresses();
+      setAddressMessage("Alamat berhasil dihapus.");
+    } catch (error) {
+      setAddressMessage(error instanceof Error ? error.message : "Alamat belum dapat dihapus.");
+    } finally {
+      setAddressSaving(false);
+    }
+  }
+
+  async function makeCheckoutAddressPrimary(address: Address) {
+    setAddressSaving(true);
+    try {
+      const saved = await updateAddress(address.id, { isPrimary: true });
+      await reloadAddresses(saved.id);
+      setAddressMessage("Alamat utama berhasil diperbarui.");
+    } catch (error) {
+      setAddressMessage(error instanceof Error ? error.message : "Alamat utama belum dapat diperbarui.");
+    } finally {
+      setAddressSaving(false);
+    }
+  }
 
   useEffect(() => {
     Promise.all([fetchCart(), fetchNearestStore().catch(() => null), fetchAddresses().catch(() => []), fetchCheckoutOptions().catch(() => ({ paymentMethods: [], shippingMethods: [] })), fetchStores().catch(() => [])])
@@ -441,6 +544,18 @@ export function SnapCheckoutPage() {
         setMessage(error instanceof Error ? error.message : "Voucher tidak dapat digunakan.");
       });
   }, [checkoutSelection.selectedCartItemIds, items, voucherCode]);
+
+  useEffect(() => {
+    if (!addressModalOpen && !branchModalOpen) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setAddressModalOpen(false);
+        setBranchModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [addressModalOpen, branchModalOpen]);
 
   async function syncNearestStore() {
     setMessage("");
@@ -517,7 +632,7 @@ export function SnapCheckoutPage() {
             {message && <p className="catalog-message">{message}</p>}
             <section className="checkout-page-grid">
               <div className="checkout-forms">
-                <CheckoutBlock actionHref="/dashboard/customer/profile/addresses" title="1. Alamat Pengiriman" action="Ubah Alamat">
+                <CheckoutBlock title="1. Alamat Pengiriman" action="Ubah Alamat" onAction={() => setAddressModalOpen(true)}>
                   {addresses.length ? (
                     <div className="address-picker">
                       {addresses.map((address) => (
@@ -526,7 +641,7 @@ export function SnapCheckoutPage() {
                           <div>
                             <strong>{address.label} {address.isPrimary && <span>Utama</span>}</strong>
                             <p>{address.detail}</p>
-                            <small>{address.isPrimary ? "Alamat utama pelanggan" : "Alamat tersimpan"}</small>
+                            <small>{[address.recipientName, address.phone, address.district, address.city, address.province, address.postalCode].filter(Boolean).join(" - ") || (address.isPrimary ? "Alamat utama pelanggan" : "Alamat tersimpan")}</small>
                           </div>
                         </button>
                       ))}
@@ -540,7 +655,7 @@ export function SnapCheckoutPage() {
                       </div>
                     </div>
                   )}
-                  <Link className="dashed-add" href="/dashboard/customer/profile/addresses/new"><FiPlus /> Tambah alamat baru</Link>
+                  <button className="dashed-add" onClick={openAddressCreate} type="button"><FiPlus /> Tambah alamat baru</button>
                 </CheckoutBlock>
                 <CheckoutBlock title="2. Jadwal Pengiriman">
                   <div className="date-row">
@@ -584,10 +699,7 @@ export function SnapCheckoutPage() {
                 <CheckoutBlock title="6. Metode Pembayaran">
                   <div className="payment-row xendit-methods">
                     {availablePaymentMethods.map((method) => (
-                      <button className={method.id === selectedPaymentId ? "active" : ""} key={method.id} onClick={() => setSelectedPaymentId(method.id)} type="button">
-                        <strong>{method.label}</strong>
-                        <small>{method.description}</small>
-                      </button>
+                      <PaymentMethodCard active={method.id === selectedPaymentId} key={method.id} method={method} onSelect={() => setSelectedPaymentId(method.id)} />
                     ))}
                   </div>
                 </CheckoutBlock>
@@ -606,7 +718,8 @@ export function SnapCheckoutPage() {
                   <p><span>Opsi</span><strong>{selectedDelivery.label}</strong></p>
                   <hr />
                   <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
-                  <button className="primary-snap wide" disabled={!items.length || submitting || (selectedDelivery.requiresAddress !== false && !selectedAddress)} onClick={submitOrder} type="button"><FiLock /> {submitting ? "Membuat pesanan..." : "Buat pesanan"}</button>
+                  {orderDisabledReason && <p className="summary-warning">{orderDisabledReason}</p>}
+                  <button className="primary-snap wide" disabled={Boolean(orderDisabledReason)} onClick={submitOrder} type="button"><FiLock /> {submitting ? "Membuat pesanan..." : "Buat pesanan"}</button>
                 </article>
                 <article className="invoice-card"><h2>Preview Invoice</h2><strong>MARKET SNAP</strong><p>Invoice dibuat setelah order tersimpan</p><hr /><p>Total <b>{rupiah(total)}</b></p></article>
               </aside>
@@ -617,7 +730,9 @@ export function SnapCheckoutPage() {
       <SnapFooter />
       <BenefitStrip />
       {branchModalOpen && (
-        <div className="auth-modal-backdrop" role="presentation">
+        <div className="auth-modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setBranchModalOpen(false);
+        }}>
           <section aria-modal="true" className="auth-modal branch-modal" role="dialog">
             <button aria-label="Tutup" className="auth-modal-close" onClick={() => setBranchModalOpen(false)} type="button"><FiX /></button>
             <h2>Pilih cabang</h2>
@@ -629,6 +744,55 @@ export function SnapCheckoutPage() {
                   <small>{item.distanceKm === undefined ? "Jarak belum dapat dihitung" : `${item.distanceKm.toFixed(1)} km`} - estimasi {item.eta}</small>
                 </button>
               ))}
+            </div>
+          </section>
+        </div>
+      )}
+      {addressModalOpen && (
+        <div className="auth-modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setAddressModalOpen(false);
+        }}>
+          <section aria-modal="true" className="auth-modal address-modal" role="dialog">
+            <button aria-label="Tutup" className="auth-modal-close" onClick={() => setAddressModalOpen(false)} type="button"><FiX /></button>
+            <h2>Alamat pengiriman</h2>
+            {addressMessage && <p className="catalog-message">{addressMessage}</p>}
+            <div className="checkout-address-modal-grid">
+              <div className="address-modal-list">
+                <button className="dashed-add" onClick={openAddressCreate} type="button"><FiPlus /> Tambah alamat baru</button>
+                {addresses.map((address) => (
+                  <article className={address.id === selectedAddress?.id ? "address-modal-card active" : "address-modal-card"} key={address.id}>
+                    <button onClick={() => { setSelectedAddressId(address.id); setAddressModalOpen(false); }} type="button">
+                      <FiHome />
+                      <span>
+                        <strong>{address.label} {address.isPrimary && <em>Utama</em>}</strong>
+                        <small>{address.recipientName || "Penerima belum diisi"} - {address.phone || "Nomor belum diisi"}</small>
+                        <small>{[address.detail, address.district, address.city, address.province, address.postalCode].filter(Boolean).join(", ")}</small>
+                      </span>
+                    </button>
+                    <div>
+                      {!address.isPrimary && <button disabled={addressSaving} onClick={() => makeCheckoutAddressPrimary(address)} type="button"><FiCheck /> Utama</button>}
+                      <button disabled={addressSaving} onClick={() => openAddressEdit(address)} type="button"><FiEdit2 /> Edit</button>
+                      <button disabled={addressSaving} onClick={() => removeCheckoutAddress(address)} type="button"><FiTrash2 /> Hapus</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <form className="account-form checkout-address-form" onSubmit={saveCheckoutAddress}>
+                <h3>{addressEditingId ? "Edit alamat" : "Tambah alamat baru"}</h3>
+                <label>Label alamat<input onChange={updateCheckoutAddressField("label", setAddressForm)} placeholder="Rumah / Kantor" required value={addressForm.label} /></label>
+                <label>Nama penerima<input onChange={updateCheckoutAddressField("recipientName", setAddressForm)} placeholder="Nama penerima" required value={addressForm.recipientName} /></label>
+                <label>Nomor telepon<input onChange={updateCheckoutAddressField("phone", setAddressForm)} placeholder="0812-3456-7890" required value={addressForm.phone} /></label>
+                <label>Provinsi<input onChange={updateCheckoutAddressField("province", setAddressForm)} placeholder="Provinsi" required value={addressForm.province} /></label>
+                <label>Kota/Kabupaten<input onChange={updateCheckoutAddressField("city", setAddressForm)} placeholder="Kota atau kabupaten" required value={addressForm.city} /></label>
+                <label>Kecamatan<input onChange={updateCheckoutAddressField("district", setAddressForm)} placeholder="Kecamatan" required value={addressForm.district} /></label>
+                <label>Kode pos<input onChange={updateCheckoutAddressField("postalCode", setAddressForm)} placeholder="Kode pos" required value={addressForm.postalCode} /></label>
+                <label>Alamat lengkap<input onChange={updateCheckoutAddressField("detail", setAddressForm)} placeholder="Nama jalan, nomor rumah, kelurahan" required value={addressForm.detail} /></label>
+                <label>Catatan/patokan<input onChange={updateCheckoutAddressField("note", setAddressForm)} placeholder="Patokan rumah, instruksi kurir" value={addressForm.note} /></label>
+                <label>Latitude<input onChange={updateCheckoutAddressField("lat", setAddressForm)} required type="number" value={addressForm.lat} /></label>
+                <label>Longitude<input onChange={updateCheckoutAddressField("lng", setAddressForm)} required type="number" value={addressForm.lng} /></label>
+                <label className="account-check"><input checked={addressForm.isPrimary} onChange={(event) => setAddressForm((current) => ({ ...current, isPrimary: event.target.checked }))} type="checkbox" /> Jadikan alamat utama</label>
+                <button className="primary-snap" disabled={addressSaving} type="submit"><FiCheck /> {addressSaving ? "Menyimpan..." : addressEditingId ? "Simpan alamat" : "Tambah alamat"}</button>
+              </form>
             </div>
           </section>
         </div>
@@ -647,6 +811,74 @@ function CheckoutBlock({ title, action, actionHref, children, onAction }: { titl
       {children}
     </article>
   );
+}
+
+function checkoutDisabledReason(input: { hasAddress: boolean; hasItems: boolean; hasPayment: boolean; hasSchedule: boolean; hasShipping: boolean; hasStore: boolean; requiresAddress: boolean; submitting: boolean }) {
+  if (input.submitting) return "Pesanan sedang diproses.";
+  if (!input.hasItems) return "Checkout membutuhkan minimal satu produk.";
+  if (input.requiresAddress && !input.hasAddress) return "Pilih atau tambahkan alamat pengiriman.";
+  if (!input.hasStore) return "Pilih cabang terlebih dahulu.";
+  if (!input.hasSchedule) return "Pilih jadwal dan slot pengiriman.";
+  if (!input.hasShipping) return "Pilih metode pengiriman.";
+  if (!input.hasPayment) return "Pilih metode pembayaran.";
+  return "";
+}
+
+function emptyCheckoutAddressForm(isPrimary = false): CheckoutAddressForm {
+  return {
+    city: "",
+    detail: "",
+    district: "",
+    isPrimary,
+    label: "",
+    lat: "-6.2608",
+    lng: "106.8107",
+    note: "",
+    phone: "",
+    postalCode: "",
+    province: "",
+    recipientName: ""
+  };
+}
+
+function formFromAddress(address: Address): CheckoutAddressForm {
+  return {
+    city: address.city ?? "",
+    detail: address.detail,
+    district: address.district ?? "",
+    isPrimary: address.isPrimary,
+    label: address.label,
+    lat: String(address.lat),
+    lng: String(address.lng),
+    note: address.note ?? "",
+    phone: address.phone ?? "",
+    postalCode: address.postalCode ?? "",
+    province: address.province ?? "",
+    recipientName: address.recipientName ?? ""
+  };
+}
+
+function payloadFromAddressForm(form: CheckoutAddressForm) {
+  return {
+    city: form.city.trim(),
+    detail: form.detail.trim(),
+    district: form.district.trim(),
+    isPrimary: form.isPrimary,
+    label: form.label.trim(),
+    lat: Number(form.lat),
+    lng: Number(form.lng),
+    note: form.note.trim() || undefined,
+    phone: form.phone.trim(),
+    postalCode: form.postalCode.trim(),
+    province: form.province.trim(),
+    recipientName: form.recipientName.trim()
+  };
+}
+
+function updateCheckoutAddressField(field: keyof CheckoutAddressForm, setForm: React.Dispatch<React.SetStateAction<CheckoutAddressForm>>) {
+  return (event: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((current) => ({ ...current, [field]: event.target.value }));
+  };
 }
 
 function CartRowsSkeleton() {

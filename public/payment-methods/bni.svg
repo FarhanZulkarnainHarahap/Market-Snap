@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" role="img" aria-label="BNI">
+  <rect width="160" height="80" rx="10" fill="#f58220"/>
+  <rect x="18" y="18" width="34" height="44" rx="4" fill="#008578"/>
+  <text x="96" y="49" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="800" fill="#fff">BNI</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" role="img" aria-label="Gerai Retail">
+  <rect width="160" height="80" rx="10" fill="#fff7e8" stroke="#ead8b8"/>
+  <path d="M30 34h100l-10-18H40z" fill="#f59f2f"/>
+  <rect x="38" y="34" width="84" height="34" rx="4" fill="#064220"/>
+  <text x="80" y="57" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="800" fill="#fff">RETAIL</text>
+</svg>

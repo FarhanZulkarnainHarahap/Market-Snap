@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" role="img" aria-label="Transfer Bank">
+  <rect width="160" height="80" rx="10" fill="#edf7eb" stroke="#cfe8c8"/>
+  <path d="M80 14 26 36h108zM38 40h12v24H38zm24 0h12v24H62zm24 0h12v24H86zm24 0h12v24h-12zM28 66h104" stroke="#064220" stroke-width="6" fill="none" stroke-linecap="round"/>
+</svg>
