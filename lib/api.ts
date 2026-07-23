@@ -524,5 +524,13 @@ function fallbackProduct(productId: string): ApiProduct {
 
 async function responseMessage(response: Response, fallback: string) {
   const payload = await response.json().catch(() => null) as { message?: string } | null;
-  return payload?.message ?? fallback;
+  return publicMessage(payload?.message ?? fallback);
+}
+
+function publicMessage(message: string) {
+  const lower = message.toLowerCase();
+  if (lower.includes("prisma.") || lower.includes("prisma") || lower.includes("does not exist in the current database") || lower.includes("column") || lower.includes("constraint")) {
+    return "Data belum dapat diproses. Coba lagi sebentar atau hubungi bantuan Market Snap.";
+  }
+  return message;
 }
