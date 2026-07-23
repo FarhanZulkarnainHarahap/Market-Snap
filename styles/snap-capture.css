@@ -6779,3 +6779,237 @@ body:has(.mobile-grocery-nav) {
     grid-template-columns: 1fr;
   }
 }
+
+/* Checkout responsive polish */
+.checkout-title-row,
+.checkout-page-grid {
+  max-width: 1240px;
+}
+
+.checkout-title-row {
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, .82fr);
+  padding: 30px 0 18px;
+}
+
+.checkout-title-row h1 {
+  font-size: clamp(32px, 4vw, 52px);
+  line-height: 1.05;
+}
+
+.checkout-title-row p {
+  font-size: 15px;
+  margin-top: 8px;
+}
+
+.checkout-page-grid {
+  align-items: start;
+  grid-template-columns: minmax(0, 1.65fr) minmax(330px, .72fr);
+}
+
+.checkout-summary {
+  align-self: start;
+  position: sticky;
+  top: 92px;
+}
+
+.checkout-block {
+  gap: 14px;
+  padding: clamp(16px, 2.2vw, 28px);
+}
+
+.checkout-block h2 {
+  font-size: clamp(24px, 3vw, 40px);
+  line-height: 1.08;
+}
+
+.checkout-block header {
+  gap: 16px;
+}
+
+.checkout-stepper {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.checkout-stepper span {
+  justify-content: center;
+  min-width: 0;
+  white-space: nowrap;
+  width: auto;
+}
+
+.date-row {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.date-row button {
+  min-height: 78px;
+  padding: 10px;
+}
+
+.delivery-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.delivery-row button {
+  justify-items: center;
+  min-height: 124px;
+  padding: 14px;
+  text-align: center;
+}
+
+.delivery-row button svg {
+  font-size: 22px;
+}
+
+.payment-row.xendit-methods {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.payment-row.xendit-methods .payment-method-card {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 76px minmax(0, 1fr);
+  min-height: 116px;
+  overflow: hidden;
+  padding: 14px;
+}
+
+.payment-method-card strong,
+.payment-method-card small {
+  overflow-wrap: anywhere;
+}
+
+.payment-method-card strong {
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.payment-method-card small {
+  font-size: 13px;
+}
+
+.branch-checkout {
+  align-items: center;
+}
+
+.branch-checkout img {
+  aspect-ratio: 1.2;
+  height: 112px;
+  max-width: 190px;
+  object-fit: contain;
+  width: 30%;
+}
+
+.address-modal {
+  box-sizing: border-box;
+  max-height: min(92vh, 860px);
+  max-width: min(1040px, calc(100vw - 32px));
+  overflow: hidden;
+  width: 100%;
+}
+
+.checkout-address-modal-grid {
+  grid-template-columns: minmax(260px, .92fr) minmax(320px, 1.08fr);
+  overflow-x: hidden;
+}
+
+.checkout-address-form {
+  min-width: 0;
+}
+
+.checkout-address-form .primary-snap {
+  width: 100%;
+}
+
+.summary-panel h2 {
+  font-size: clamp(24px, 2.5vw, 34px);
+}
+
+@media (max-width: 1100px) {
+  .checkout-title-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-page-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .checkout-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .checkout-title-row,
+  .checkout-page-grid {
+    width: min(calc(100% - 28px), 1240px);
+  }
+
+  .checkout-stepper {
+    gap: 6px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checkout-stepper span {
+    font-size: 12px;
+    justify-content: flex-start;
+    min-height: 42px;
+  }
+
+  .date-row,
+  .delivery-row,
+  .payment-row.xendit-methods,
+  .checkout-address-modal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-address-modal-grid {
+    max-height: calc(92vh - 110px);
+  }
+
+  .address-modal {
+    border-radius: 8px 8px 0 0;
+    bottom: 0;
+    left: 0;
+    max-height: 94vh;
+    max-width: 100vw;
+    position: fixed;
+    right: 0;
+    top: auto;
+    transform: none;
+    width: 100vw;
+  }
+
+  .branch-checkout {
+    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 82px 1fr;
+  }
+
+  .branch-checkout img {
+    height: 82px;
+    width: 82px;
+  }
+}
+
+@media (max-width: 430px) {
+  .checkout-block {
+    padding: 16px;
+  }
+
+  .checkout-block h2 {
+    font-size: 25px;
+  }
+
+  .payment-row.xendit-methods .payment-method-card {
+    grid-template-columns: 68px minmax(0, 1fr);
+    min-height: 104px;
+  }
+
+  .payment-method-card img {
+    height: 34px;
+    width: 64px;
+  }
+}
