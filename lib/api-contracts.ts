@@ -61,7 +61,14 @@ export type CartResponse = {
 export type ApiAddress = {
   id: string;
   label: string;
+  recipientName?: string | null;
+  phone?: string | null;
   detail: string;
+  district?: string | null;
+  city?: string | null;
+  province?: string | null;
+  postalCode?: string | null;
+  note?: string | null;
   latitude: number;
   longitude: number;
   isPrimary: boolean;
@@ -93,8 +100,33 @@ export type ApiOrder = {
   orderNumber: string;
   status: string;
   total: number;
+  shippingCost?: number;
+  serviceFee?: number;
+  discountTotal?: number;
+  voucherCode?: string | null;
+  shippingMethod?: string | null;
+  shippingProvider?: string | null;
+  deliveryDate?: string | null;
+  deliverySlot?: string | null;
+  paymentMethod?: string | null;
+  paymentChannel?: string | null;
+  paymentInvoiceUrl?: string | null;
+  trackingNumber?: string | null;
+  courierName?: string | null;
+  estimatedArrival?: string | null;
+  orderNote?: string | null;
+  addressSnapshot?: Record<string, unknown> | null;
   createdAt: string;
   items?: ApiOrderItem[];
+  histories?: ApiOrderStatusHistory[];
+};
+
+export type ApiOrderStatusHistory = {
+  id: string;
+  status: string;
+  description?: string | null;
+  location?: string | null;
+  createdAt: string;
 };
 
 export type ApiVoucher = {
@@ -120,14 +152,55 @@ export type RegisterResponse = {
 };
 
 export type CreateOrderOptions = {
+  addressId?: string;
   courier?: string;
   destinationId?: string;
+  deliveryDate?: string;
+  deliverySlot?: string;
   location?: { lat: number; lng: number };
+  orderNote?: string;
+  paymentChannel?: string;
   paymentMethod?: "manual_transfer" | "xendit";
+  selectedCartItemIds?: string[];
+  shippingMethod?: string;
+  storeId?: string;
+  voucherCode?: string;
 };
 
 export type CreateOrderResponse = {
   data: { id: string; status: string };
   payment?: { invoiceUrl?: string | null; method: string };
   shipping?: { cost: number; provider: string };
+};
+
+export type CheckoutOptionsResponse = {
+  data: {
+    paymentMethods: Array<{ id: string; label: string; provider: string; channel: string; description: string }>;
+    shippingMethods: Array<{ id: string; label: string; description: string; eta: string; cost: number; requiresAddress: boolean }>;
+  };
+};
+
+export type VoucherValidationResponse = {
+  data: {
+    discount: number;
+    subtotal: number;
+    totalAfterDiscount: number;
+    voucher: ApiVoucher;
+  };
+  message: string;
+};
+
+export type OrderStatisticsResponse = {
+  data: {
+    averageOrderValue: number;
+    cancelledOrders: number;
+    completedOrders: number;
+    monthlyOrders: Array<{ label: string; value: number }>;
+    monthlySpending: Array<{ label: string; value: number }>;
+    ordersByStatus: Array<{ label: string; value: number }>;
+    productsByCategory: Array<{ label: string; value: number }>;
+    totalOrders: number;
+    totalSavings: number;
+    totalSpent: number;
+  };
 };

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { FiAlertCircle, FiArrowLeft, FiCheck, FiCheckCircle, FiEyeOff, FiLock, FiLogIn, FiMail, FiShoppingBag, FiTag, FiTruck, FiUser, FiUserPlus, FiX } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { FiAlertCircle, FiArrowLeft, FiCheck, FiCheckCircle, FiEye, FiEyeOff, FiLock, FiLogIn, FiMail, FiShoppingBag, FiTag, FiTruck, FiUser, FiUserPlus, FiX } from "react-icons/fi";
 import { facebookAuthUrl, googleAuthUrl, loginUser, registerUser, webRole } from "@/lib/api";
 import { GroceryVisual } from "./SnapCommon";
 
@@ -28,6 +28,13 @@ export function SnapLoginPage() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [modal, setModal] = useState<AuthModal | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (!modal?.redirectTo) return;
+    const timeout = window.setTimeout(() => router.push(modal.redirectTo!), 900);
+    return () => window.clearTimeout(timeout);
+  }, [modal, router]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -69,7 +76,13 @@ export function SnapLoginPage() {
           <p>Login untuk melanjutkan belanja kebutuhan harian atau mengelola tokomu dengan mudah.</p>
           <form className="capture-form" onSubmit={submit}>
             <label>Email <span><FiMail /><input name="email" placeholder="your@email.com" required type="email" /></span></label>
-            <label>Password <span><FiLock /><input name="password" placeholder="password123" required type="password" /><FiEyeOff /></span></label>
+            <PasswordInput
+              autoComplete="current-password"
+              name="password"
+              onToggle={() => setShowPassword((current) => !current)}
+              placeholder="password123"
+              show={showPassword}
+            />
             <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/auth/forgot-password">Lupa password?</Link></div>
             <button aria-busy={busy} className="primary-snap wide" disabled={busy} type="submit"><FiLogIn /> Login</button>
             <em>atau</em>
@@ -103,6 +116,14 @@ export function SnapRegisterPage() {
   const [error, setError] = useState("");
   const [modal, setModal] = useState<AuthModal | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    if (!modal?.redirectTo) return;
+    const timeout = window.setTimeout(() => router.push(modal.redirectTo!), 900);
+    return () => window.clearTimeout(timeout);
+  }, [modal, router]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -190,8 +211,23 @@ export function SnapRegisterPage() {
             )}
             {step === 2 && (
               <>
-                <label>Password<input autoComplete="new-password" onChange={updateField("password")} placeholder="Buat password" required type="password" value={formState.password} /></label>
-                <label>Konfirmasi Password<input autoComplete="new-password" onChange={updateField("confirmPassword")} placeholder="Ulangi password" required type="password" value={formState.confirmPassword} /></label>
+                <PasswordInput
+                  autoComplete="new-password"
+                  onChange={updateField("password")}
+                  onToggle={() => setShowPassword((current) => !current)}
+                  placeholder="Buat password"
+                  show={showPassword}
+                  value={formState.password}
+                />
+                <PasswordInput
+                  autoComplete="new-password"
+                  label="Konfirmasi Password"
+                  onChange={updateField("confirmPassword")}
+                  onToggle={() => setShowConfirmPassword((current) => !current)}
+                  placeholder="Ulangi password"
+                  show={showConfirmPassword}
+                  value={formState.confirmPassword}
+                />
               </>
             )}
             {step === 3 && (
@@ -228,6 +264,48 @@ function registerStepCopy(step: RegisterStep) {
   if (step === 1) return "Masukkan nama lengkap dan email aktif untuk membuat akun.";
   if (step === 2) return "Buat password akun lalu konfirmasi password yang sama.";
   return "Tambahkan kode referral jika ada. Bagian ini bisa dikosongkan.";
+}
+
+function PasswordInput({
+  autoComplete,
+  label = "Password",
+  name,
+  onChange,
+  onToggle,
+  placeholder,
+  show,
+  value
+}: {
+  autoComplete: string;
+  label?: string;
+  name?: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onToggle: () => void;
+  placeholder: string;
+  show: boolean;
+  value?: string;
+}) {
+  const Icon = show ? FiEyeOff : FiEye;
+  return (
+    <label>
+      {label}
+      <span className="password-field">
+        <FiLock />
+        <input
+          autoComplete={autoComplete}
+          name={name}
+          onChange={onChange}
+          placeholder={placeholder}
+          required
+          type={show ? "text" : "password"}
+          value={value}
+        />
+        <button aria-label={show ? `Sembunyikan ${label}` : `Lihat ${label}`} onClick={onToggle} type="button">
+          <Icon />
+        </button>
+      </span>
+    </label>
+  );
 }
 
 function AuthMini({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {

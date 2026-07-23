@@ -34,7 +34,14 @@ export type CartItem = Product & {
 export type Address = {
   id: string;
   label: string;
+  recipientName?: string;
+  phone?: string;
   detail: string;
+  district?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+  note?: string;
   lat: number;
   lng: number;
   isPrimary: boolean;
@@ -54,8 +61,32 @@ export type OrderSummary = {
   orderNumber: string;
   status: string;
   total: number;
+  shippingCost?: number;
+  serviceFee?: number;
+  discountTotal?: number;
+  voucherCode?: string;
+  shippingMethod?: string;
+  shippingProvider?: string;
+  deliveryDate?: string;
+  deliverySlot?: string;
+  paymentMethod?: string;
+  paymentChannel?: string;
+  paymentInvoiceUrl?: string;
+  trackingNumber?: string;
+  courierName?: string;
+  estimatedArrival?: string;
+  addressSnapshot?: Record<string, unknown>;
   createdAt: string;
   items: OrderItemSummary[];
+  histories?: OrderStatusHistory[];
+};
+
+export type OrderStatusHistory = {
+  id: string;
+  status: string;
+  description?: string;
+  location?: string;
+  createdAt: string;
 };
 
 export type Voucher = {
@@ -77,3 +108,27 @@ export type OrderStatus =
   | "Dikirim"
   | "Pesanan Dikonfirmasi"
   | "Dibatalkan";
+
+export type CheckoutOption = {
+  id: string;
+  label: string;
+  description: string;
+  eta?: string;
+  cost?: number;
+  requiresAddress?: boolean;
+  provider?: string;
+  channel?: string;
+};
+
+export type OrderStatistics = {
+  averageOrderValue: number;
+  cancelledOrders: number;
+  completedOrders: number;
+  monthlyOrders: Array<{ label: string; value: number }>;
+  monthlySpending: Array<{ label: string; value: number }>;
+  ordersByStatus: Array<{ label: string; value: number }>;
+  productsByCategory: Array<{ label: string; value: number }>;
+  totalOrders: number;
+  totalSavings: number;
+  totalSpent: number;
+};

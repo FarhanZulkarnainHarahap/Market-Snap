@@ -26,6 +26,7 @@ import {
 } from "react-icons/fi";
 import { rupiah } from "@/lib/format";
 import { fetchCurrentUser, fetchStores, logoutUser } from "@/lib/api";
+import { customerAccountMenus } from "@/lib/customer-menus";
 import type { Product, Store } from "@/lib/types";
 
 type HeaderProps = {
@@ -35,6 +36,7 @@ type HeaderProps = {
 };
 
 type HeaderSession = {
+  email: string;
   isLoggedIn: boolean;
   name: string;
 };
@@ -48,7 +50,6 @@ const CUSTOMER_CART = "/dashboard/customer/cart";
 const CUSTOMER_PROFILE = "/dashboard/customer/profile";
 const CUSTOMER_ORDERS = "/dashboard/customer/profile/orders";
 const CUSTOMER_NOTIFICATIONS = "/dashboard/customer/profile/notifications";
-const CUSTOMER_VOUCHERS = "/dashboard/customer/profile/vouchers";
 
 const navItems = [
   { key: "home", href: CUSTOMER_HOME, label: "Home", icon: FiHome },
@@ -73,7 +74,9 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
         .then((user) => {
           window.localStorage.setItem("market-snap-user-name", user.name);
           window.localStorage.setItem("market-snap-user-email", user.email);
-          setSession({ isLoggedIn: true, name: user.name || user.email });
+          document.cookie = `market-snap-user-name=${encodeURIComponent(user.name)}; path=/; max-age=86400; SameSite=Lax`;
+          document.cookie = `market-snap-user-email=${encodeURIComponent(user.email)}; path=/; max-age=86400; SameSite=Lax`;
+          setSession({ email: user.email, isLoggedIn: true, name: user.name || user.email });
         })
         .catch(() => undefined);
     }
@@ -131,12 +134,9 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
   const profileLabel = displayName(session.name);
   const mobileItems = [
     ...navItems,
-    { key: "profile", href: session.isLoggedIn ? CUSTOMER_PROFILE : "/auth/login", label: "Profile", icon: FiUser },
-    { key: "orders", href: CUSTOMER_ORDERS, label: "Pesanan Saya", icon: FiPackage },
-    { key: "vouchers", href: CUSTOMER_VOUCHERS, label: "Voucher Saya", icon: FiHeart },
+    ...customerAccountMenus.map((item) => ({ key: item.key, href: session.isLoggedIn ? item.href : "/auth/login", label: item.label, icon: item.icon })),
     { key: "cart", href: CUSTOMER_CART, label: `Cart (${cartCount})`, icon: FiShoppingCart },
     { key: "location", href: CUSTOMER_PROFILE, label: locationLabel, icon: FiMapPin },
-    { key: "notifications", href: CUSTOMER_NOTIFICATIONS, label: "Notifikasi", icon: FiBell }
   ] as const;
 
   return (
@@ -184,7 +184,7 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
             >
               <FiUser /> <span>{profileLabel}</span> <FiChevronDown />
             </button>
-            {profileOpen && <ProfileMenu onLogout={() => logout(setSession, setProfileOpen)} />}
+            {profileOpen && <ProfileMenu onLogout={() => logout(setSession, setProfileOpen)} session={session} />}
           </div>
         ) : (
           <Link className="outline-action" href="/auth/login">Login</Link>
@@ -258,16 +258,12 @@ function MobileGroceryNav({ active, cartCount, locationLabel, profileLabel, sess
   );
 }
 
-function ProfileMenu({ onLogout }: { onLogout: () => void }) {
-  const menuItems = [
-    { href: CUSTOMER_PROFILE, icon: FiUser, label: "Profil Saya", text: "Profil, alamat, pesanan" },
-    { href: CUSTOMER_NOTIFICATIONS, icon: FiBell, label: "Notifikasi", text: "Update pesanan & promo" }
-  ];
-
+function ProfileMenu({ onLogout, session }: { onLogout: () => void; session: HeaderSession }) {
   return (
     <div className="profile-menu" onClick={(event) => event.stopPropagation()} role="menu">
-      {menuItems.map(({ href, icon: Icon, label, text }) => (
-        <Link href={href} key={href} role="menuitem">
+      <div className="profile-menu-user"><strong>{session.name || "Customer"}</strong><small>{session.email || "Market Snap"}</small></div>
+      {customerAccountMenus.map(({ href, icon: Icon, label, text }) => (
+        <Link href={href} key={href} onClick={() => undefined} role="menuitem">
           <Icon />
           <span><strong>{label}</strong><small>{text}</small></span>
         </Link>
@@ -278,7 +274,7 @@ function ProfileMenu({ onLogout }: { onLogout: () => void }) {
 }
 
 function logout(setSession: (session: HeaderSession) => void, setProfileOpen: (open: boolean) => void) {
-  setSession({ isLoggedIn: false, name: "" });
+  setSession({ email: "", isLoggedIn: false, name: "" });
   setProfileOpen(false);
   void logoutUser().finally(() => {
     window.location.href = "/auth/login";
@@ -286,10 +282,12 @@ function logout(setSession: (session: HeaderSession) => void, setProfileOpen: (o
 }
 
 function readSession(): HeaderSession {
-  if (typeof window === "undefined") return { isLoggedIn: false, name: "" };
+  if (typeof window === "undefined") return { email: "", isLoggedIn: false, name: "" };
   const role = readCookie("market-snap-role") || window.localStorage.getItem("market-snap-role");
-  const name = window.localStorage.getItem("market-snap-user-name") || window.localStorage.getItem("market-snap-user-email") || "";
+  const email = readCookie("market-snap-user-email") || window.localStorage.getItem("market-snap-user-email") || "";
+  const name = readCookie("market-snap-user-name") || window.localStorage.getItem("market-snap-user-name") || email;
   return {
+    email,
     isLoggedIn: Boolean(role || name),
     name
   };
@@ -302,7 +300,8 @@ function readCachedLocationLabel() {
 
 function readCookie(name: string): string {
   if (typeof document === "undefined") return "";
-  return document.cookie.split(";").map((cookie) => cookie.trim()).find((cookie) => cookie.startsWith(`${name}=`))?.slice(name.length + 1) ?? "";
+  const value = document.cookie.split(";").map((cookie) => cookie.trim()).find((cookie) => cookie.startsWith(`${name}=`))?.slice(name.length + 1) ?? "";
+  return value ? decodeURIComponent(value) : "";
 }
 
 function displayName(name: string) {

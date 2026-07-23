@@ -3,32 +3,37 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { Bar, Doughnut, Line } from "react-chartjs-2";
+import { ArcElement, BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
+import type { ChartOptions, TooltipItem } from "chart.js";
 import {
   FiBell,
+  FiBarChart2,
   FiCamera,
   FiCheck,
   FiChevronRight,
   FiEdit2,
   FiHeadphones,
-  FiHeart,
   FiHome,
   FiLock,
   FiMail,
-  FiMapPin,
-  FiPackage,
   FiPlus,
   FiShield,
   FiTag,
+  FiTrash2,
   FiUser,
   FiX
 } from "react-icons/fi";
 import { SnapHeader } from "@/components/snap/SnapCommon";
-import { createAddress, fetchAddresses, fetchCurrentUser, fetchOrders, fetchVouchers, requestEmailVerification, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
+import { createAddress, deleteAddress, fetchAddresses, fetchCurrentUser, fetchOrderStatistics, fetchOrders, fetchVouchers, requestEmailVerification, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
+import { customerAccountMenus, type CustomerAccountMenuKey } from "@/lib/customer-menus";
 import { rupiah } from "@/lib/format";
-import type { Address, OrderSummary, Voucher } from "@/lib/types";
+import type { Address, OrderStatistics, OrderSummary, Voucher } from "@/lib/types";
 import type { ApiUser } from "@/lib/api-contracts";
 
-type AccountSection = "profile" | "personal-data" | "addresses" | "orders" | "notifications" | "vouchers" | "wishlist" | "payment-methods" | "security" | "help";
+ChartJS.register(ArcElement, BarElement, CategoryScale, Legend, LinearScale, LineElement, PointElement, Tooltip);
+
+type AccountSection = Exclude<CustomerAccountMenuKey, "logout"> | "security";
 
 type ProfileForm = {
   email: string;
@@ -37,25 +42,19 @@ type ProfileForm = {
 };
 
 type AddressForm = {
+  city: string;
   detail: string;
+  district: string;
   isPrimary: boolean;
   label: string;
   lat: string;
   lng: string;
+  note: string;
+  phone: string;
+  postalCode: string;
+  province: string;
+  recipientName: string;
 };
-
-const accountMenus: Array<{ key: AccountSection; href: string; label: string; section: "Akun" | "Belanja" | "Informasi"; text: string; icon: typeof FiUser }> = [
-  { key: "profile", href: "/dashboard/customer/profile", label: "Overview", section: "Akun", text: "Ringkasan akun", icon: FiUser },
-  { key: "personal-data", href: "/dashboard/customer/profile/personal-data", label: "Data Pribadi", section: "Akun", text: "Nama, email, foto", icon: FiUser },
-  { key: "addresses", href: "/dashboard/customer/profile/addresses", label: "Alamat", section: "Akun", text: "Alamat pengiriman", icon: FiMapPin },
-  { key: "security", href: "/dashboard/customer/profile/security", label: "Keamanan", section: "Akun", text: "Password & akses", icon: FiLock },
-  { key: "orders", href: "/dashboard/customer/profile/orders", label: "Pesanan Saya", section: "Belanja", text: "Riwayat belanja", icon: FiPackage },
-  { key: "vouchers", href: "/dashboard/customer/profile/vouchers", label: "Voucher Saya", section: "Belanja", text: "Promo tersimpan", icon: FiTag },
-  { key: "wishlist", href: "/dashboard/customer/profile/wishlist", label: "Wishlist", section: "Belanja", text: "Produk favorit", icon: FiHeart },
-  { key: "payment-methods", href: "/dashboard/customer/profile/payment-methods", label: "Metode Pembayaran", section: "Belanja", text: "Token pembayaran", icon: FiShield },
-  { key: "notifications", href: "/dashboard/customer/profile/notifications", label: "Notifikasi", section: "Informasi", text: "Update pesanan", icon: FiBell },
-  { key: "help", href: "/dashboard/customer/profile/help-center", label: "Bantuan", section: "Informasi", text: "Bantuan pelanggan", icon: FiHeadphones }
-];
 
 const accountSections = ["Akun", "Belanja", "Informasi"] as const;
 
@@ -82,7 +81,7 @@ export function AccountLayout({ active, children, title, description }: { active
               {accountSections.map((section) => (
                 <div className="account-menu-group" key={section}>
                   <p>{section}</p>
-                  {accountMenus.filter((item) => item.section === section).map(({ key, href, label, text, icon: Icon }) => (
+                  {customerAccountMenus.filter((item) => item.section === section).map(({ key, href, label, text, icon: Icon }) => (
                     <Link className={active === key ? "active" : ""} href={href} key={key}>
                       <Icon />
                       <span><strong>{label}</strong><small>{text}</small></span>
@@ -276,11 +275,18 @@ export function AddressAccountContent() {
   function startEdit(address: Address) {
     setEditingId(address.id);
     setForm({
+      city: address.city ?? "",
       detail: address.detail,
+      district: address.district ?? "",
       isPrimary: address.isPrimary,
       label: address.label,
       lat: String(address.lat),
-      lng: String(address.lng)
+      lng: String(address.lng),
+      note: address.note ?? "",
+      phone: address.phone ?? "",
+      postalCode: address.postalCode ?? "",
+      province: address.province ?? "",
+      recipientName: address.recipientName ?? ""
     });
     setFormOpen(true);
     setMessage("");
@@ -289,11 +295,18 @@ export function AddressAccountContent() {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const payload = {
+      city: form.city.trim() || undefined,
       detail: form.detail.trim(),
+      district: form.district.trim() || undefined,
       isPrimary: form.isPrimary,
       label: form.label.trim(),
       lat: Number(form.lat),
-      lng: Number(form.lng)
+      lng: Number(form.lng),
+      note: form.note.trim() || undefined,
+      phone: form.phone.trim() || undefined,
+      postalCode: form.postalCode.trim() || undefined,
+      province: form.province.trim() || undefined,
+      recipientName: form.recipientName.trim() || undefined
     };
     try {
       if (editingId) await updateAddress(editingId, payload);
@@ -304,6 +317,27 @@ export function AddressAccountContent() {
       await loadAddresses();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Alamat belum dapat disimpan.");
+    }
+  }
+
+  async function removeAddress(address: Address) {
+    if (!window.confirm(`Hapus alamat ${address.label}?`)) return;
+    try {
+      await deleteAddress(address.id);
+      setMessage("Alamat berhasil dihapus.");
+      await loadAddresses();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Alamat belum dapat dihapus.");
+    }
+  }
+
+  async function makePrimary(address: Address) {
+    try {
+      await updateAddress(address.id, { isPrimary: true });
+      setMessage("Alamat utama berhasil diperbarui.");
+      await loadAddresses();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Alamat utama belum dapat diperbarui.");
     }
   }
 
@@ -319,7 +353,7 @@ export function AddressAccountContent() {
         </div>
         {addresses.length ? (
           <div className="account-grid">
-            {addresses.map((address) => <SavedAddress address={address} key={address.id} onEdit={() => startEdit(address)} />)}
+            {addresses.map((address) => <SavedAddress address={address} key={address.id} onDelete={() => removeAddress(address)} onEdit={() => startEdit(address)} onPrimary={() => makePrimary(address)} />)}
           </div>
         ) : (
           <p className="empty-copy">Belum ada alamat tersimpan. Tambahkan alamat untuk checkout lebih cepat.</p>
@@ -329,7 +363,14 @@ export function AddressAccountContent() {
         <QuickPanel title={editingId ? "Edit alamat" : "Form alamat baru"}>
           <form className="account-form" onSubmit={submit}>
             <label>Label alamat<input onChange={updateAddressField("label", setForm)} placeholder="Rumah / Kantor" required value={form.label} /></label>
+            <label>Nama penerima<input onChange={updateAddressField("recipientName", setForm)} placeholder="Nama penerima" value={form.recipientName} /></label>
+            <label>Nomor handphone<input onChange={updateAddressField("phone", setForm)} placeholder="0812-3456-7890" value={form.phone} /></label>
             <label>Detail alamat<input onChange={updateAddressField("detail", setForm)} placeholder="Nama jalan, nomor rumah, patokan" required value={form.detail} /></label>
+            <label>Kecamatan<input onChange={updateAddressField("district", setForm)} placeholder="Kecamatan" value={form.district} /></label>
+            <label>Kota/Kabupaten<input onChange={updateAddressField("city", setForm)} placeholder="Kota atau kabupaten" value={form.city} /></label>
+            <label>Provinsi<input onChange={updateAddressField("province", setForm)} placeholder="Provinsi" value={form.province} /></label>
+            <label>Kode pos<input onChange={updateAddressField("postalCode", setForm)} placeholder="Kode pos" value={form.postalCode} /></label>
+            <label>Catatan/patokan<input onChange={updateAddressField("note", setForm)} placeholder="Catatan atau patokan alamat" value={form.note} /></label>
             <label>Latitude<input onChange={updateAddressField("lat", setForm)} placeholder="3.5952" required type="number" value={form.lat} /></label>
             <label>Longitude<input onChange={updateAddressField("lng", setForm)} placeholder="98.6722" required type="number" value={form.lng} /></label>
             <label className="account-check"><input checked={form.isPrimary} onChange={(event) => setForm((current) => ({ ...current, isPrimary: event.target.checked }))} type="checkbox" /> Jadikan alamat utama</label>
@@ -443,6 +484,73 @@ export function VouchersAccountContent() {
 
 export function PaymentAccountContent() {
   return <section className="account-panel empty-account-state"><FiShield /><h2>Payment dipindahkan ke checkout</h2><p>Metode pembayaran dipilih langsung saat membuat pesanan.</p></section>;
+}
+
+export function StatisticsAccountContent() {
+  const [period, setPeriod] = useState("6months");
+  const [statistics, setStatistics] = useState<OrderStatistics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    fetchOrderStatistics(period)
+      .then(setStatistics)
+      .catch((error) => setMessage(error instanceof Error ? error.message : "Statistik belum dapat dimuat."))
+      .finally(() => setLoading(false));
+  }, [period]);
+
+  if (loading) {
+    return <section className="account-panel"><AccountProfileSkeleton /></section>;
+  }
+
+  if (message || !statistics) {
+    return <section className="account-panel empty-account-state"><FiBarChart2 /><h2>Statistik belum tersedia</h2><p>{message || "Belum ada data belanja untuk periode ini."}</p></section>;
+  }
+
+  const empty = statistics.totalOrders === 0;
+  const lineData = chartData(statistics.monthlySpending, "Pengeluaran");
+  const orderData = chartData(statistics.monthlyOrders, "Jumlah order");
+  const statusData = doughnutData(statistics.ordersByStatus);
+  const categoryData = chartData(statistics.productsByCategory, "Kategori");
+
+  return (
+    <>
+      <section className="account-panel">
+        <div className="account-section-title">
+          <div>
+            <span className="eyebrow">Statistics</span>
+            <h2>Statistik belanja</h2>
+          </div>
+          <select aria-label="Filter periode statistik" onChange={(event) => { setLoading(true); setMessage(""); setPeriod(event.target.value); }} value={period}>
+            <option value="7days">7 hari</option>
+            <option value="30days">30 hari</option>
+            <option value="3months">3 bulan</option>
+            <option value="6months">6 bulan</option>
+            <option value="12months">12 bulan</option>
+            <option value="year">Tahun ini</option>
+          </select>
+        </div>
+        <div className="statistics-summary">
+          <StatCard label="Total pesanan" value={statistics.totalOrders} />
+          <StatCard label="Total pengeluaran" value={rupiah(statistics.totalSpent)} />
+          <StatCard label="Total penghematan" value={rupiah(statistics.totalSavings)} />
+          <StatCard label="Rata-rata order" value={rupiah(statistics.averageOrderValue)} />
+          <StatCard label="Pesanan selesai" value={statistics.completedOrders} />
+          <StatCard label="Pesanan dibatalkan" value={statistics.cancelledOrders} />
+        </div>
+      </section>
+      {empty ? (
+        <section className="account-panel empty-account-state"><FiBarChart2 /><h2>Belum ada transaksi</h2><p>Chart akan muncul setelah pesanan dibuat dari database.</p></section>
+      ) : (
+        <section className="statistics-grid">
+          <ChartPanel title="Pengeluaran per bulan"><Line data={lineData} options={moneyChartOptions} /></ChartPanel>
+          <ChartPanel title="Jumlah order per bulan"><Bar data={orderData} options={basicChartOptions} /></ChartPanel>
+          <ChartPanel title="Status pesanan"><Doughnut data={statusData} options={doughnutOptions} /></ChartPanel>
+          <ChartPanel title="Kategori paling sering dibeli"><Bar data={categoryData} options={basicChartOptions} /></ChartPanel>
+        </section>
+      )}
+    </>
+  );
 }
 
 export function SecurityAccountContent() {
@@ -595,16 +703,23 @@ function QuickPanel({ action, actionHref, children, title }: { action?: string; 
   );
 }
 
-function SavedAddress({ address, onEdit }: { address: Address; onEdit?: () => void }) {
+function SavedAddress({ address, onDelete, onEdit, onPrimary }: { address: Address; onDelete?: () => void; onEdit?: () => void; onPrimary?: () => void }) {
   return (
     <div className="saved-address">
       <FiHome />
       <div>
         <strong>{address.label} {address.isPrimary && <span>Utama</span>}</strong>
         <p>{address.detail}</p>
-        <small>{address.isPrimary ? "Dipakai untuk estimasi cabang terdekat dan ongkir." : "Alamat tersimpan untuk pengiriman."}</small>
+        <small>{[address.recipientName, address.phone, address.district, address.city, address.province, address.postalCode].filter(Boolean).join(" - ") || (address.isPrimary ? "Dipakai untuk estimasi cabang terdekat dan ongkir." : "Alamat tersimpan untuk pengiriman.")}</small>
+        {address.note && <small>{address.note}</small>}
       </div>
-      {onEdit && <button aria-label={`Edit ${address.label}`} className="icon-action" onClick={onEdit} type="button"><FiEdit2 /></button>}
+      {(onEdit || onDelete || onPrimary) && (
+        <div className="saved-address-actions">
+          {onPrimary && !address.isPrimary && <button onClick={onPrimary} type="button"><FiCheck /> Utama</button>}
+          {onEdit && <button aria-label={`Edit ${address.label}`} className="icon-action" onClick={onEdit} type="button"><FiEdit2 /></button>}
+          {onDelete && <button aria-label={`Hapus ${address.label}`} className="icon-action danger" onClick={onDelete} type="button"><FiTrash2 /></button>}
+        </div>
+      )}
     </div>
   );
 }
@@ -645,6 +760,63 @@ function HelpCard({ text, title }: { text: string; title: string }) {
   );
 }
 
+function StatCard({ label, value }: { label: string; value: number | string }) {
+  return <article><span>{label}</span><strong>{value}</strong></article>;
+}
+
+function ChartPanel({ children, title }: { children: React.ReactNode; title: string }) {
+  return <article className="account-panel chart-panel"><h2>{title}</h2><div>{children}</div></article>;
+}
+
+function chartData(items: Array<{ label: string; value: number }>, label: string) {
+  return {
+    labels: items.map((item) => item.label),
+    datasets: [{
+      backgroundColor: "rgba(75, 151, 54, 0.72)",
+      borderColor: "#064220",
+      borderWidth: 2,
+      data: items.map((item) => item.value),
+      label,
+      tension: 0.35
+    }]
+  };
+}
+
+function doughnutData(items: Array<{ label: string; value: number }>) {
+  return {
+    labels: items.map((item) => item.label),
+    datasets: [{
+      backgroundColor: ["#064220", "#4b9736", "#f59f2f", "#1f7a8c", "#b84a3d", "#7d5fff"],
+      data: items.map((item) => item.value)
+    }]
+  };
+}
+
+const basicChartOptions: ChartOptions<"bar"> = {
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  responsive: true
+};
+
+const doughnutOptions: ChartOptions<"doughnut"> = {
+  maintainAspectRatio: false,
+  plugins: { legend: { position: "bottom" as const } },
+  responsive: true
+};
+
+const moneyChartOptions: ChartOptions<"line"> = {
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (context: TooltipItem<"line">) => rupiah(context.parsed.y ?? 0)
+      }
+    }
+  },
+  responsive: true
+};
+
 function useAccountUser() {
   const [user, setUser] = useState<ApiUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -684,7 +856,7 @@ function updateAddressField(field: keyof AddressForm, setForm: React.Dispatch<Re
 }
 
 function emptyAddressForm(isPrimary = false): AddressForm {
-  return { detail: "", isPrimary, label: "", lat: "3.5952", lng: "98.6722" };
+  return { city: "", detail: "", district: "", isPrimary, label: "", lat: "3.5952", lng: "98.6722", note: "", phone: "", postalCode: "", province: "", recipientName: "" };
 }
 
 function memberSince(date?: string) {

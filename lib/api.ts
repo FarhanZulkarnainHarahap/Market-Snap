@@ -1,7 +1,7 @@
-import type { ApiAddress, ApiCartItem, ApiOrder, ApiProduct, ApiStore, ApiUser, ApiVoucher, CartResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, ProductsResponse, RegisterResponse } from "./api-contracts";
+import type { ApiAddress, ApiCartItem, ApiOrder, ApiProduct, ApiStore, ApiUser, ApiVoucher, CartResponse, CheckoutOptionsResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, OrderStatisticsResponse, ProductsResponse, RegisterResponse, VoucherValidationResponse } from "./api-contracts";
 import { apiUrl } from "./api-url";
 import { clearStaleCache } from "./stale-cache";
-import type { Address, CartItem, OrderSummary, Product, Store, Voucher } from "./types";
+import type { Address, CartItem, CheckoutOption, OrderStatistics, OrderSummary, Product, Store, Voucher } from "./types";
 
 export function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
   return fetch(input, { ...init, credentials: "include" });
@@ -117,7 +117,10 @@ export async function confirmEmailVerification(token: string) {
 
 export function saveSession(payload: LoginResponse) {
   const role = webRole(payload.user.role);
-  document.cookie = `market-snap-role=${role}; path=/; max-age=86400; SameSite=Lax`;
+  setClientCookie("market-snap-role", role);
+  setClientCookie("market-snap-user-id", payload.user.id);
+  setClientCookie("market-snap-user-name", payload.user.name);
+  setClientCookie("market-snap-user-email", payload.user.email);
   window.localStorage.setItem("market-snap-user-id", payload.user.id);
   window.localStorage.setItem("market-snap-user-name", payload.user.name);
   window.localStorage.setItem("market-snap-user-email", payload.user.email);
@@ -130,7 +133,10 @@ export function clearSession() {
   window.localStorage.removeItem("market-snap-user-email");
   window.localStorage.removeItem("market-snap-role");
   clearStaleCache();
-  document.cookie = "market-snap-role=; path=/; max-age=0; SameSite=Lax";
+  clearClientCookie("market-snap-role");
+  clearClientCookie("market-snap-user-id");
+  clearClientCookie("market-snap-user-name");
+  clearClientCookie("market-snap-user-email");
 }
 
 export function currentUserHeaders(): Record<string, string> {
@@ -148,6 +154,14 @@ export function webRole(role: ApiUser["role"]): WebRole {
 
 function currentToken() {
   return "";
+}
+
+function setClientCookie(name: string, value: string) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=86400; SameSite=Lax`;
+}
+
+function clearClientCookie(name: string) {
+  document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
 }
 
 export async function fetchCategories(): Promise<string[]> {
@@ -230,7 +244,7 @@ export async function fetchAddresses(): Promise<Address[]> {
   return payload.data.map(mapAddress);
 }
 
-export async function createAddress(payload: { detail: string; isPrimary?: boolean; label: string; lat: number; lng: number }) {
+export async function createAddress(payload: { city?: string; detail: string; district?: string; isPrimary?: boolean; label: string; lat: number; lng: number; note?: string; phone?: string; postalCode?: string; province?: string; recipientName?: string }) {
   const response = await apiFetch(apiUrl("/addresses"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
@@ -241,7 +255,7 @@ export async function createAddress(payload: { detail: string; isPrimary?: boole
   return mapAddress(data.data);
 }
 
-export async function updateAddress(addressId: string, payload: { detail?: string; isPrimary?: boolean; label?: string; lat?: number; lng?: number }) {
+export async function updateAddress(addressId: string, payload: { city?: string; detail?: string; district?: string; isPrimary?: boolean; label?: string; lat?: number; lng?: number; note?: string; phone?: string; postalCode?: string; province?: string; recipientName?: string }) {
   const response = await apiFetch(apiUrl(`/addresses/${addressId}`), {
     method: "PATCH",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
@@ -252,6 +266,11 @@ export async function updateAddress(addressId: string, payload: { detail?: strin
   return mapAddress(data.data);
 }
 
+export async function deleteAddress(addressId: string) {
+  const response = await apiFetch(apiUrl(`/addresses/${addressId}`), { method: "DELETE", headers: currentUserHeaders() });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal menghapus alamat"));
+}
+
 export async function fetchOrders(): Promise<OrderSummary[]> {
   const response = await apiFetch(apiUrl("/orders"), { headers: currentUserHeaders(), cache: "no-store" });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat pesanan"));
@@ -259,11 +278,42 @@ export async function fetchOrders(): Promise<OrderSummary[]> {
   return payload.data.map(mapOrder);
 }
 
+export async function fetchOrder(orderId: string): Promise<OrderSummary> {
+  const response = await apiFetch(apiUrl(`/orders/${orderId}`), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat detail pesanan"));
+  const payload = await response.json() as { data: ApiOrder };
+  return mapOrder(payload.data);
+}
+
+export async function fetchOrderTracking(orderId: string): Promise<OrderSummary> {
+  const response = await apiFetch(apiUrl(`/orders/${orderId}/tracking`), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat tracking pesanan"));
+  const payload = await response.json() as { data: ApiOrder };
+  return mapOrder(payload.data);
+}
+
+export async function fetchOrderStatistics(period = "6months"): Promise<OrderStatistics> {
+  const response = await apiFetch(apiUrl(`/orders/statistics?period=${encodeURIComponent(period)}`), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat statistik belanja"));
+  const payload = await response.json() as OrderStatisticsResponse;
+  return payload.data;
+}
+
 export async function fetchVouchers(): Promise<Voucher[]> {
   const response = await apiFetch(apiUrl("/vouchers"), { cache: "no-store" });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat voucher"));
   const payload = await response.json() as { data: ApiVoucher[] };
   return payload.data.map(mapVoucher);
+}
+
+export async function fetchCheckoutOptions(): Promise<{ paymentMethods: CheckoutOption[]; shippingMethods: CheckoutOption[] }> {
+  const response = await apiFetch(apiUrl("/checkout/options"), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat opsi checkout"));
+  const payload = await response.json() as CheckoutOptionsResponse;
+  return {
+    paymentMethods: payload.data.paymentMethods,
+    shippingMethods: payload.data.shippingMethods
+  };
 }
 
 export async function addCartItem(productId: string, storeId: string, quantity = 1) {
@@ -293,9 +343,30 @@ export async function deleteCartItem(cartId: string) {
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal hapus cart"));
 }
 
+export async function deleteSelectedCartItems(ids: string[]) {
+  const response = await apiFetch(apiUrl("/cart/items/delete-selected"), {
+    method: "POST",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ ids })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal hapus produk terpilih"));
+  return response.json() as Promise<{ message: string; removed: number }>;
+}
+
 export async function clearCart() {
   const response = await apiFetch(apiUrl("/cart"), { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal kosongkan cart"));
+}
+
+export async function validateCartVoucher(code: string, selectedCartItemIds: string[]) {
+  const response = await apiFetch(apiUrl("/cart/voucher/validate"), {
+    method: "POST",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ code, selectedCartItemIds })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Voucher tidak dapat digunakan"));
+  const payload = await response.json() as VoucherValidationResponse;
+  return { ...payload.data, voucher: mapVoucher(payload.data.voucher), message: payload.message };
 }
 
 export async function createOrderFromCart(items: CartItem[], total: number, options: CreateOrderOptions = {}) {
@@ -303,12 +374,21 @@ export async function createOrderFromCart(items: CartItem[], total: number, opti
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({
+      addressId: options.addressId,
+      deliveryDate: options.deliveryDate,
+      deliverySlot: options.deliverySlot,
+      orderNote: options.orderNote,
+      paymentChannel: options.paymentChannel,
+      selectedCartItemIds: options.selectedCartItemIds ?? items.map((item) => item.cartId).filter(Boolean),
+      shippingMethod: options.shippingMethod ?? options.courier,
+      storeId: options.storeId,
       total,
-      items: items.map((item) => ({ productId: item.productId ?? item.id, quantity: item.quantity, price: item.price })),
-      location: options.location ?? { lat: -6.2608, lng: 106.8107 },
+      items: items.map((item) => ({ productId: item.productId ?? item.id, quantity: item.quantity })),
+      location: options.location,
       courier: options.courier,
       destinationId: options.destinationId,
-      paymentMethod: options.paymentMethod
+      paymentMethod: options.paymentMethod,
+      voucherCode: options.voucherCode
     })
   });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal membuat order"));
@@ -373,7 +453,14 @@ function mapAddress(address: ApiAddress): Address {
   return {
     id: address.id,
     label: address.label,
+    recipientName: address.recipientName ?? undefined,
+    phone: address.phone ?? undefined,
     detail: address.detail,
+    district: address.district ?? undefined,
+    city: address.city ?? undefined,
+    province: address.province ?? undefined,
+    postalCode: address.postalCode ?? undefined,
+    note: address.note ?? undefined,
     lat: address.latitude,
     lng: address.longitude,
     isPrimary: address.isPrimary
@@ -386,7 +473,23 @@ function mapOrder(order: ApiOrder): OrderSummary {
     orderNumber: order.orderNumber,
     status: order.status,
     total: order.total,
+    addressSnapshot: order.addressSnapshot ?? undefined,
+    courierName: order.courierName ?? undefined,
     createdAt: order.createdAt,
+    deliveryDate: order.deliveryDate ?? undefined,
+    deliverySlot: order.deliverySlot ?? undefined,
+    discountTotal: order.discountTotal,
+    estimatedArrival: order.estimatedArrival ?? undefined,
+    histories: order.histories?.map((history) => ({ createdAt: history.createdAt, description: history.description ?? undefined, id: history.id, location: history.location ?? undefined, status: history.status })),
+    paymentChannel: order.paymentChannel ?? undefined,
+    paymentInvoiceUrl: order.paymentInvoiceUrl ?? undefined,
+    paymentMethod: order.paymentMethod ?? undefined,
+    serviceFee: order.serviceFee,
+    shippingCost: order.shippingCost,
+    shippingMethod: order.shippingMethod ?? undefined,
+    shippingProvider: order.shippingProvider ?? undefined,
+    trackingNumber: order.trackingNumber ?? undefined,
+    voucherCode: order.voucherCode ?? undefined,
     items: (order.items ?? []).map((item) => {
       const product = item.product;
       return {
