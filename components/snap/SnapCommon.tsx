@@ -42,14 +42,14 @@ type HeaderSession = {
 };
 
 const DEFAULT_LOCATION_LABEL = "Market Snap Center";
-const CUSTOMER_HOME = "/dashboard/customer";
-const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
-const CUSTOMER_ABOUT = "/dashboard/customer/about";
-const CUSTOMER_CONTACT = "/dashboard/customer/contact";
-const CUSTOMER_CART = "/dashboard/customer/cart";
-const CUSTOMER_PROFILE = "/dashboard/customer/profile";
-const CUSTOMER_ORDERS = "/dashboard/customer/profile/orders";
-const CUSTOMER_NOTIFICATIONS = "/dashboard/customer/profile/notifications";
+const CUSTOMER_HOME = "/";
+const CUSTOMER_CATALOG = "/catalog";
+const CUSTOMER_ABOUT = "/about";
+const CUSTOMER_CONTACT = "/contact";
+const CUSTOMER_CART = "/cart";
+const CUSTOMER_PROFILE = "/profile";
+const CUSTOMER_ORDERS = "/profile/orders";
+const CUSTOMER_NOTIFICATIONS = "/profile/notifications";
 
 const navItems = [
   { key: "home", href: CUSTOMER_HOME, label: "Home", icon: FiHome },
@@ -407,7 +407,7 @@ export function GroceryVisual({ compact = false, variant = "hero" }: { compact?:
 export function ProductCard({ product, storeId, disabled = false, onAdd }: { product: Product; storeId?: string; disabled?: boolean; onAdd?: (product: Product) => void }) {
   const activeStoreId = storeId ?? Object.keys(product.stockByStore)[0] ?? "";
   const stock = product.stockByStore[activeStoreId] ?? 0;
-  const productHref = `${CUSTOMER_HOME}/products/${product.slug ?? product.id}`;
+  const productHref = `/products/${product.slug ?? product.id}`;
   return (
     <article className="snap-product-card">
       <Link className="product-picture" href={productHref}>

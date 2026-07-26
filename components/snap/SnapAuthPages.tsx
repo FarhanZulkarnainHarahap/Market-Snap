@@ -43,7 +43,7 @@ export function SnapLoginPage() {
     try {
       const payload = await loginUser(String(form.get("email")), String(form.get("password")));
       const role = webRole(payload.user.role);
-      const redirectTo = role === "admin" ? "/super-admin" : role === "adminStore" ? "/store-admin" : "/dashboard/customer";
+      const redirectTo = role === "admin" ? "/super-admin" : role === "adminStore" ? "/store-admin" : "/";
       setModal({
         variant: "success",
         title: "Login berhasil",
@@ -71,7 +71,7 @@ export function SnapLoginPage() {
     <>
       <main className="auth-capture login-capture">
         <section className="auth-left">
-          <Link className="auth-brand" href="/dashboard/customer">MARKET SNAP</Link>
+          <Link className="auth-brand" href="/">MARKET SNAP</Link>
           <h1>Login ke Market Snap</h1>
           <p>Login untuk melanjutkan belanja kebutuhan harian atau mengelola tokomu dengan mudah.</p>
           <form className="capture-form" onSubmit={submit}>
@@ -192,7 +192,7 @@ export function SnapRegisterPage() {
     <>
       <main className="auth-capture register-capture">
         <section className="register-card">
-          <Link className="auth-brand" href="/dashboard/customer">MARKET SNAP</Link>
+          <Link className="auth-brand" href="/">MARKET SNAP</Link>
           <span className="auth-step-pill">Langkah {step} dari 3</span>
           <FiUserPlus className="auth-big-icon" />
           <h1>Buat akun Market Snap</h1>

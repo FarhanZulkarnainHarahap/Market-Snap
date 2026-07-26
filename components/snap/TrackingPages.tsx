@@ -63,7 +63,7 @@ export function TrackingListPage() {
         </section>
         {loading && <section className="tracking-grid">{Array.from({ length: 3 }, (_, index) => <article className="tracking-card skeleton-row" key={index} />)}</section>}
         {!loading && message && <section className="cart-state-card"><i><FiTruck /></i><div><h2>Tracking belum dapat dimuat</h2><p>{message}</p></div></section>}
-        {!loading && !message && !visibleOrders.length && <section className="cart-state-card"><i><FiPackage /></i><div><h2>Belum ada paket aktif</h2><p>Pesanan aktif akan muncul di sini setelah checkout berhasil.</p><Link href="/dashboard/customer/catalog">Mulai Belanja</Link></div></section>}
+        {!loading && !message && !visibleOrders.length && <section className="cart-state-card"><i><FiPackage /></i><div><h2>Belum ada paket aktif</h2><p>Pesanan aktif akan muncul di sini setelah checkout berhasil.</p><Link href="/catalog">Mulai Belanja</Link></div></section>}
         <section className="tracking-grid">
           {visibleOrders.map((order) => <TrackingCard key={order.id} order={order} />)}
         </section>
@@ -104,7 +104,7 @@ export function TrackingDetailPage({ orderId }: { orderId: string }) {
               <p><span>Estimasi tiba</span><strong>{order.estimatedArrival ? formatDate(order.estimatedArrival) : "Menunggu jadwal"}</strong></p>
               <p><span>Total pembayaran</span><strong>{rupiah(order.total)}</strong></p>
               <button onClick={() => navigator.clipboard?.writeText(order.trackingNumber ?? order.orderNumber)} type="button"><FiCopy /> Salin nomor resi</button>
-              <Link className="secondary-snap wide" href="/dashboard/customer/contact"><FiHeadphones /> Hubungi bantuan</Link>
+              <Link className="secondary-snap wide" href="/contact"><FiHeadphones /> Hubungi bantuan</Link>
               <hr />
               {order.items.map((item) => <div className="mini-order" key={item.id}><Image alt={item.name} height={52} src={item.image} width={52} /><span><strong>{item.name}</strong><small>Qty: {item.quantity}</small></span><b>{rupiah(item.price)}</b></div>)}
             </aside>
@@ -130,8 +130,8 @@ function TrackingCard({ order }: { order: OrderSummary }) {
       <p><span>Nomor resi</span><strong>{order.trackingNumber ?? "Belum tersedia"}</strong></p>
       <p><span>Estimasi tiba</span><strong>{order.estimatedArrival ? formatDate(order.estimatedArrival) : "Menunggu update"}</strong></p>
       <div className="tracking-actions">
-        <Link className="primary-snap" href={`/dashboard/customer/tracking/${order.id}`}>Lacak Paket</Link>
-        <Link className="secondary-snap" href={`/dashboard/customer/profile/orders/${order.id}`}>Lihat Detail Pesanan</Link>
+        <Link className="primary-snap" href={`/tracking/${order.id}`}>Lacak Paket</Link>
+        <Link className="secondary-snap" href={`/profile/orders/${order.id}`}>Lihat Detail Pesanan</Link>
       </div>
     </article>
   );

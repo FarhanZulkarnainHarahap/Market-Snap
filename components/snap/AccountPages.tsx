@@ -222,10 +222,10 @@ export function ProfileAccountContent() {
       </section>
 
       <section className="account-grid">
-        <QuickPanel actionHref="/dashboard/customer/profile/addresses" action="Tambah" title="Alamat utama">
+        <QuickPanel actionHref="/profile/addresses" action="Tambah" title="Alamat utama">
           {primaryAddress ? <SavedAddress address={primaryAddress} /> : <p className="empty-copy">Belum ada alamat tersimpan.</p>}
         </QuickPanel>
-        <QuickPanel actionHref="/dashboard/customer/profile/orders" action="Lihat semua" title="Pesanan terakhir">
+        <QuickPanel actionHref="/profile/orders" action="Lihat semua" title="Pesanan terakhir">
           <OrderList orders={recentOrders} compact />
         </QuickPanel>
       </section>
@@ -818,7 +818,7 @@ export function HelpAccountContent() {
           <h2>Butuh bantuan lebih cepat?</h2>
           <p>Tim Market Snap siap membantu pesanan, pembayaran, dan pengirimanmu setiap hari.</p>
         </div>
-        <Link className="primary-snap" href="/dashboard/customer/contact">Hubungi kami</Link>
+        <Link className="primary-snap" href="/contact">Hubungi kami</Link>
       </section>
     </>
   );

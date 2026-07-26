@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MarketHome } from "@/components/MarketHome";
+import { CustomerHomePage } from "@/components/snap/CustomerHomePage";
 
 export const metadata: Metadata = {
   title: "Market Snap | Grocery dari cabang terdekat",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <MarketHome />;
+  return <CustomerHomePage />;
 }

@@ -18,58 +18,98 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/catalog",
-        destination: "/dashboard/customer/catalog",
+        source: "/dashboard/customer",
+        destination: "/",
         permanent: false
       },
       {
-        source: "/cart",
-        destination: "/dashboard/customer/cart",
+        source: "/dashboard/customer/catalog",
+        destination: "/catalog",
         permanent: false
       },
       {
-        source: "/checkout",
-        destination: "/dashboard/customer/checkout",
+        source: "/dashboard/customer/cart",
+        destination: "/cart",
         permanent: false
       },
       {
-        source: "/about",
-        destination: "/dashboard/customer/about",
+        source: "/dashboard/customer/checkout",
+        destination: "/checkout",
         permanent: false
       },
       {
-        source: "/contact",
-        destination: "/dashboard/customer/contact",
+        source: "/dashboard/customer/checkout/payment/:orderId",
+        destination: "/checkout/payment/:orderId",
         permanent: false
       },
       {
-        source: "/contact-us",
-        destination: "/dashboard/customer/contact",
+        source: "/dashboard/customer/checkout/success/:orderId",
+        destination: "/checkout/success/:orderId",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/about",
+        destination: "/about",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/contact",
+        destination: "/contact",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/contact-us",
+        destination: "/contact",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/product/:slug",
+        destination: "/products/:slug",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/products/:slug",
+        destination: "/products/:slug",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/profile",
+        destination: "/profile",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/profile/:path*",
+        destination: "/profile/:path*",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/tracking",
+        destination: "/tracking",
+        permanent: false
+      },
+      {
+        source: "/dashboard/customer/tracking/:orderId",
+        destination: "/tracking/:orderId",
         permanent: false
       },
       {
         source: "/product/:slug",
-        destination: "/dashboard/customer/products/:slug",
+        destination: "/products/:slug",
         permanent: false
       },
       {
-        source: "/profile",
-        destination: "/dashboard/customer/profile",
-        permanent: false
-      },
-      {
-        source: "/profile/:path*",
-        destination: "/dashboard/customer/profile/:path*",
+        source: "/contact-us",
+        destination: "/contact",
         permanent: false
       },
       {
         source: "/my-orders",
-        destination: "/dashboard/customer/profile/orders",
+        destination: "/profile/orders",
         permanent: false
       },
       {
         source: "/notifications",
-        destination: "/dashboard/customer/profile/notifications",
+        destination: "/profile/notifications",
         permanent: false
       },
       {
@@ -154,6 +194,54 @@ const nextConfig: NextConfig = {
       ],
       afterFiles: [
         {
+          source: "/catalog",
+          destination: "/dashboard/customer/catalog"
+        },
+        {
+          source: "/cart",
+          destination: "/dashboard/customer/cart"
+        },
+        {
+          source: "/checkout",
+          destination: "/dashboard/customer/checkout"
+        },
+        {
+          source: "/checkout/payment/:orderId",
+          destination: "/dashboard/customer/checkout/payment/:orderId"
+        },
+        {
+          source: "/checkout/success/:orderId",
+          destination: "/dashboard/customer/checkout/success/:orderId"
+        },
+        {
+          source: "/about",
+          destination: "/dashboard/customer/about"
+        },
+        {
+          source: "/contact",
+          destination: "/dashboard/customer/contact"
+        },
+        {
+          source: "/products/:slug",
+          destination: "/dashboard/customer/product/:slug"
+        },
+        {
+          source: "/profile",
+          destination: "/dashboard/customer/profile"
+        },
+        {
+          source: "/profile/:path*",
+          destination: "/dashboard/customer/profile/:path*"
+        },
+        {
+          source: "/tracking",
+          destination: "/dashboard/customer/tracking"
+        },
+        {
+          source: "/tracking/:orderId",
+          destination: "/dashboard/customer/tracking/:orderId"
+        },
+        {
           source: "/login",
           destination: "/auth/login"
         },
@@ -163,43 +251,39 @@ const nextConfig: NextConfig = {
         },
         {
           source: "/account",
-          destination: "/dashboard/customer/profile"
+          destination: "/profile"
         },
         {
           source: "/account/profile",
-          destination: "/dashboard/customer/profile"
+          destination: "/profile"
         },
         {
           source: "/account/address",
-          destination: "/dashboard/customer/profile/addresses"
+          destination: "/profile/addresses"
         },
         {
           source: "/account/orders",
-          destination: "/dashboard/customer/profile/orders"
+          destination: "/profile/orders"
         },
         {
           source: "/account/notifications",
-          destination: "/dashboard/customer/profile/notifications"
+          destination: "/profile/notifications"
         },
         {
           source: "/account/vouchers",
-          destination: "/dashboard/customer/profile/vouchers"
+          destination: "/profile/vouchers"
         },
         {
           source: "/account/payment",
-          destination: "/dashboard/customer/profile/payment-methods"
+          destination: "/profile/payment-methods"
         },
         {
           source: "/account/security",
-          destination: "/dashboard/customer/profile/security"
+          destination: "/profile/security"
         },
         {
           source: "/account/help-center",
-          destination: "/dashboard/customer/profile/help-center"
-        },
-        {
-          source: "/dashboard/customer/products/:slug",
-          destination: "/dashboard/customer/product/:slug"
+          destination: "/profile/help-center"
         },
         {
           source: "/dashboard/super-admin/:path*",

@@ -9,8 +9,8 @@ import { rupiah } from "@/lib/format";
 import type { Product, Store } from "@/lib/types";
 import { BenefitStrip, FeatureList, PanelSkeleton, RelatedProducts, SnapFooter, SnapHeader } from "./SnapCommon";
 
-const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
-const CUSTOMER_CHECKOUT = "/dashboard/customer/checkout";
+const CUSTOMER_CATALOG = "/catalog";
+const CUSTOMER_CHECKOUT = "/checkout";
 
 export function SnapProductPage({ productId }: { productId: string }) {
   const [product, setProduct] = useState<Product>();

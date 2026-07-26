@@ -42,9 +42,9 @@ type CheckoutAddressForm = {
   province: string;
   recipientName: string;
 };
-const CUSTOMER_HOME = "/dashboard/customer";
-const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
-const CUSTOMER_CHECKOUT = "/dashboard/customer/checkout";
+const CUSTOMER_HOME = "/";
+const CUSTOMER_CATALOG = "/catalog";
+const CUSTOMER_CHECKOUT = "/checkout";
 const CHECKOUT_STATE_KEY = "market-snap-checkout-selection";
 
 export function SnapCartPage() {

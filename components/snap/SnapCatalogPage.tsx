@@ -32,8 +32,8 @@ const defaultState: CatalogState = {
   refreshing: false
 };
 
-const CUSTOMER_CATALOG = "/dashboard/customer/catalog";
-const CUSTOMER_ABOUT = "/dashboard/customer/about";
+const CUSTOMER_CATALOG = "/catalog";
+const CUSTOMER_ABOUT = "/about";
 
 export function SnapHomePage() {
   const [state, setState] = useState<CatalogState>(() => {
