@@ -1262,6 +1262,20 @@ body {
   overflow-x: auto;
 }
 
+.thumbnail-row button {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.thumbnail-row button:focus-visible {
+  outline: 3px solid rgba(22, 163, 74, 0.28);
+  outline-offset: 3px;
+}
+
 .thumbnail-row img {
   aspect-ratio: 1.15;
   border: 1px solid var(--snap-line);

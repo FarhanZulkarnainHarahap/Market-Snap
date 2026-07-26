@@ -178,6 +178,7 @@ export async function fetchProducts(params: URLSearchParams) {
   const store = mapStore(payload.store);
   return {
     products: payload.data.map((product) => mapProduct(product, store.id)),
+    meta: payload.meta,
     store,
     serviceable: payload.serviceable,
     distanceKm: payload.store.distanceKm ?? 0
@@ -476,14 +477,17 @@ function mapStore(store: ApiStore): Store {
 }
 
 function mapProduct(product: ApiProduct, storeId: string): Product {
+  const images = normalizeProductImages(product);
   return {
     id: product.id,
+    slug: product.slug,
     name: product.name,
     category: product.category,
     price: product.price,
     unit: product.unit,
     description: product.description,
-    image: product.image,
+    image: images[0]?.url ?? product.image,
+    images,
     discount: product.discount ?? undefined,
     badge: product.organic ? "Pilihan" : undefined,
     stockByStore: { [storeId]: product.stock }
@@ -587,6 +591,19 @@ function mapVoucher(voucher: ApiVoucher): Voucher {
 
 function fallbackProduct(productId: string): ApiProduct {
   return { id: productId, name: "Produk", category: "Grocery", price: 0, unit: "item", image: "/product.png", discount: null, organic: false, stock: 0 };
+}
+
+function normalizeProductImages(product: ApiProduct): Product["images"] {
+  const rawImages = product.images?.length ? product.images : product.primaryImage ? [product.primaryImage] : [{ url: product.image }];
+  return rawImages
+    .filter((image) => image.url)
+    .map((image, index) => ({
+      alt: image.altText ?? image.alt ?? product.name,
+      id: image.id ?? `${product.id}-image-${index}`,
+      position: image.position ?? index,
+      url: image.url
+    }))
+    .sort((a, b) => a.position - b.position);
 }
 
 async function responseMessage(response: Response, fallback: string) {

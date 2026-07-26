@@ -18,11 +18,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/",
-        destination: "/dashboard/customer",
-        permanent: false
-      },
-      {
         source: "/catalog",
         destination: "/dashboard/customer/catalog",
         permanent: false
@@ -54,7 +49,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/product/:slug",
-        destination: "/dashboard/customer/product/:slug",
+        destination: "/dashboard/customer/products/:slug",
         permanent: false
       },
       {
@@ -79,22 +74,72 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/admin",
-        destination: "/super-admin",
+        destination: "/dashboard/super-admin",
         permanent: false
       },
       {
         source: "/admin/:path*",
-        destination: "/super-admin",
+        destination: "/dashboard/super-admin/:path*",
         permanent: false
       },
       {
         source: "/admin-store",
-        destination: "/store-admin",
+        destination: "/dashboard/store-admin",
         permanent: false
       },
       {
         source: "/admin-store/:path*",
-        destination: "/store-admin",
+        destination: "/dashboard/store-admin/:path*",
+        permanent: false
+      },
+      {
+        source: "/adminStore",
+        destination: "/dashboard/store-admin",
+        permanent: false
+      },
+      {
+        source: "/adminStore/:path*",
+        destination: "/dashboard/store-admin/:path*",
+        permanent: false
+      },
+      {
+        source: "/dashboard/admin",
+        destination: "/dashboard/super-admin",
+        permanent: false
+      },
+      {
+        source: "/dashboard/admin/:path*",
+        destination: "/dashboard/super-admin/:path*",
+        permanent: false
+      },
+      {
+        source: "/dashboard/admin-store",
+        destination: "/dashboard/store-admin",
+        permanent: false
+      },
+      {
+        source: "/dashboard/admin-store/:path*",
+        destination: "/dashboard/store-admin/:path*",
+        permanent: false
+      },
+      {
+        source: "/super-admin",
+        destination: "/dashboard/super-admin",
+        permanent: false
+      },
+      {
+        source: "/super-admin/:path*",
+        destination: "/dashboard/super-admin/:path*",
+        permanent: false
+      },
+      {
+        source: "/store-admin",
+        destination: "/dashboard/store-admin",
+        permanent: false
+      },
+      {
+        source: "/store-admin/:path*",
+        destination: "/dashboard/store-admin/:path*",
         permanent: false
       }
     ];
@@ -151,6 +196,18 @@ const nextConfig: NextConfig = {
         {
           source: "/account/help-center",
           destination: "/dashboard/customer/profile/help-center"
+        },
+        {
+          source: "/dashboard/customer/products/:slug",
+          destination: "/dashboard/customer/product/:slug"
+        },
+        {
+          source: "/dashboard/super-admin/:path*",
+          destination: "/super-admin/:path*"
+        },
+        {
+          source: "/dashboard/store-admin/:path*",
+          destination: "/store-admin/:path*"
         }
       ]
     };

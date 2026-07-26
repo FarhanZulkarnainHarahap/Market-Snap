@@ -10,22 +10,40 @@ export type ApiStore = {
 
 export type ApiProduct = {
   id: string;
+  slug?: string;
   name: string;
   category: string;
   price: number;
   unit: string;
   description?: string;
   image: string;
-  primaryImage?: { url: string; alt?: string };
+  images?: ApiProductImage[];
+  primaryImage?: ApiProductImage;
   discount: string | null;
   organic: boolean;
   stock: number;
+};
+
+export type ApiProductImage = {
+  alt?: string;
+  altText?: string;
+  id?: string;
+  position?: number;
+  url: string;
 };
 
 export type ProductsResponse = {
   data: ApiProduct[];
   store: ApiStore;
   serviceable: boolean;
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 };
 
 export type ApiCartItem = {

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { FiChevronLeft, FiChevronRight, FiHeart, FiMapPin, FiMinus, FiPlus, FiShoppingCart, FiStar } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiMapPin, FiMinus, FiPlus, FiShoppingCart, FiStar } from "react-icons/fi";
 import { addCartItem, fetchCart, fetchProductDetail, fetchProducts } from "@/lib/api";
 import { rupiah } from "@/lib/format";
 import type { Product, Store } from "@/lib/types";
@@ -18,6 +18,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
   const [related, setRelated] = useState<Product[]>([]);
   const [cartCount, setCartCount] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +28,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
       .then(async (result) => {
         setProduct(result.product);
         setStore(result.store);
+        setSelectedImage(0);
         setMessage("");
         setLoading(false);
         const relatedResult = await fetchProducts(new URLSearchParams({ limit: "6", category: result.product.category, storeId: result.store.id })).catch(() => null);
@@ -40,6 +42,8 @@ export function SnapProductPage({ productId }: { productId: string }) {
   }, [productId]);
 
   const stock = useMemo(() => product && store ? product.stockByStore[store.id] ?? 0 : 0, [product, store]);
+  const gallery = product?.images.length ? product.images : product ? [{ alt: product.name, id: product.id, position: 0, url: product.image }] : [];
+  const activeImage = gallery[selectedImage] ?? gallery[0];
 
   async function addProduct() {
     if (!product || !store) return;
@@ -70,13 +74,16 @@ export function SnapProductPage({ productId }: { productId: string }) {
             <section className="product-detail-layout">
               <div>
                 <div className="product-gallery-main">
-                  <button type="button"><FiChevronLeft /></button>
-                  <Image alt={product.name} height={420} priority src={product.image} width={520} />
-                  <button type="button"><FiChevronRight /></button>
-                  <button className="favorite-button" type="button"><FiHeart /></button>
+                  <button aria-label="Gambar sebelumnya" onClick={() => setSelectedImage((index) => (index <= 0 ? gallery.length - 1 : index - 1))} type="button"><FiChevronLeft /></button>
+                  <Image alt={activeImage?.alt ?? product.name} height={420} priority src={activeImage?.url ?? product.image} width={520} />
+                  <button aria-label="Gambar berikutnya" onClick={() => setSelectedImage((index) => (index + 1) % gallery.length)} type="button"><FiChevronRight /></button>
                 </div>
                 <div className="thumbnail-row">
-                  {[product.image, "/tomato.png", "/bread.png", "/pineapple.png"].map((src, index) => <Image alt="" className={index === 0 ? "active" : ""} height={84} key={src} src={src} width={84} />)}
+                  {gallery.map((image, index) => (
+                    <button aria-label={`Lihat gambar ${index + 1}`} key={image.id} onClick={() => setSelectedImage(index)} type="button">
+                      <Image alt={image.alt} className={index === selectedImage ? "active" : ""} height={84} src={image.url} width={84} />
+                    </button>
+                  ))}
                 </div>
               </div>
               <article className="product-info-panel">

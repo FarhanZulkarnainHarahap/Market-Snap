@@ -53,6 +53,7 @@ function item(
     price,
     unit,
     image,
+    images: [{ alt: name, id: `${id}-image-0`, position: 0, url: image }],
     discount,
     badge,
     stockByStore: {

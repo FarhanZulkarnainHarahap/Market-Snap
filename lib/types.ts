@@ -11,15 +11,24 @@ export type Store = {
 
 export type Product = {
   id: string;
+  slug?: string;
   name: string;
   category: string;
   price: number;
   unit: string;
   description?: string;
   image: string;
+  images: ProductImage[];
   discount?: string;
   badge?: string;
   stockByStore: Record<string, number>;
+};
+
+export type ProductImage = {
+  alt: string;
+  id: string;
+  position: number;
+  url: string;
 };
 
 export type CartItem = Product & {

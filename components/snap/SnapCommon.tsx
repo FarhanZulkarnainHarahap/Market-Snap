@@ -407,7 +407,7 @@ export function GroceryVisual({ compact = false, variant = "hero" }: { compact?:
 export function ProductCard({ product, storeId, disabled = false, onAdd }: { product: Product; storeId?: string; disabled?: boolean; onAdd?: (product: Product) => void }) {
   const activeStoreId = storeId ?? Object.keys(product.stockByStore)[0] ?? "";
   const stock = product.stockByStore[activeStoreId] ?? 0;
-  const productHref = `${CUSTOMER_HOME}/product/${product.id}`;
+  const productHref = `${CUSTOMER_HOME}/products/${product.slug ?? product.id}`;
   return (
     <article className="snap-product-card">
       <Link className="product-picture" href={productHref}>
