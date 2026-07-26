@@ -6,14 +6,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiAlertCircle, FiCheck, FiCheckCircle, FiClock, FiEdit2, FiHome, FiLock, FiMinus, FiPlus, FiRefreshCcw, FiShoppingCart, FiTag, FiTrash2, FiTruck, FiX, FiZap } from "react-icons/fi";
 import { createAddress, createOrderFromCart, deleteAddress, deleteCartItem, deleteSelectedCartItems, fetchAddresses, fetchCart, fetchCheckoutOptions, fetchNearestStore, fetchStores, fetchVouchers, updateAddress, updateCartItem, validateCartVoucher } from "@/lib/api";
-import { PaymentMethodCard } from "@/components/checkout/PaymentMethodCard";
 import { rupiah } from "@/lib/format";
 import type { Address, CartItem, CheckoutOption, Store, Voucher } from "@/lib/types";
 import { BenefitStrip, PanelSkeleton, SnapFooter, SnapHeader } from "./SnapCommon";
 
-const fallbackPaymentMethods = [
-  { id: "midtrans", label: "Midtrans Payment", provider: "midtrans", channel: "", description: "Pilih VA, QRIS, e-wallet, kartu, atau gerai retail di halaman Midtrans" }
-];
+const MIDTRANS_PAYMENT_CHANNEL = "midtrans";
 
 const deliveryDates = [
   { id: "today", label: "Hari ini" },
@@ -406,9 +403,7 @@ export function SnapCheckoutPage() {
   const [selectedDateId, setSelectedDateId] = useState(initialDeliveryDateId);
   const [selectedTime, setSelectedTime] = useState(initialDeliveryTime);
   const [shippingMethods, setShippingMethods] = useState<CheckoutOption[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<CheckoutOption[]>([]);
   const [selectedDeliveryId, setSelectedDeliveryId] = useState(fallbackDeliveryOptions[0].id);
-  const [selectedPaymentId, setSelectedPaymentId] = useState(fallbackPaymentMethods[0].id);
   const [voucherCode, setVoucherCode] = useState(() => readCheckoutSelection().voucherCode ?? "");
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [orderNote, setOrderNote] = useState("");
@@ -424,7 +419,6 @@ export function SnapCheckoutPage() {
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + (item.subtotal ?? item.price * item.quantity), 0), [items]);
   const deliveryOptions = shippingMethods.length ? shippingMethods : fallbackDeliveryOptions.map(({ id, label, cost, description, eta, requiresAddress }) => ({ id, label, cost, description, eta, requiresAddress }));
   const selectedDelivery = useMemo(() => deliveryOptions.find((option) => option.id === selectedDeliveryId) ?? deliveryOptions[0], [deliveryOptions, selectedDeliveryId]);
-  const availablePaymentMethods = paymentMethods.length ? paymentMethods : fallbackPaymentMethods;
   const shipping = items.length ? selectedDelivery.cost ?? 0 : 0;
   const discount = Math.min(voucherDiscount, subtotal);
   const total = Math.max(0, subtotal + shipping - discount);
@@ -435,7 +429,6 @@ export function SnapCheckoutPage() {
   const orderDisabledReason = checkoutDisabledReason({
     hasAddress: Boolean(selectedAddress),
     hasItems: Boolean(items.length),
-    hasPayment: Boolean(selectedPaymentId),
     hasSchedule: Boolean(selectedDateId && selectedTime),
     hasShipping: Boolean(selectedDeliveryId),
     hasStore: Boolean(store),
@@ -518,9 +511,7 @@ export function SnapCheckoutPage() {
         setStores(storeList);
         setAddresses(addressList);
         setShippingMethods(options.shippingMethods);
-        setPaymentMethods(options.paymentMethods);
         setSelectedDeliveryId(options.shippingMethods[0]?.id ?? fallbackDeliveryOptions[0].id);
-        setSelectedPaymentId(options.paymentMethods[0]?.id ?? fallbackPaymentMethods[0].id);
         setSelectedAddressId(addressList.find((address) => address.isPrimary)?.id ?? addressList[0]?.id ?? "");
         setMessage(selected.length ? "" : "Cart kosong atau produk terpilih tidak ditemukan. Checkout membutuhkan produk.");
       })
@@ -577,8 +568,8 @@ export function SnapCheckoutPage() {
       setMessage("Pilih cabang terlebih dahulu.");
       return;
     }
-    if (!selectedDateId || !selectedTime || !selectedPaymentId || !selectedDeliveryId) {
-      setMessage("Lengkapi jadwal, opsi pengiriman, dan metode pembayaran.");
+    if (!selectedDateId || !selectedTime || !selectedDeliveryId) {
+      setMessage("Lengkapi jadwal dan opsi pengiriman.");
       return;
     }
 
@@ -590,7 +581,7 @@ export function SnapCheckoutPage() {
         deliverySlot: selectedTime,
         location: selectedAddress ? { lat: selectedAddress.lat, lng: selectedAddress.lng } : undefined,
         orderNote,
-        paymentChannel: selectedPaymentId,
+        paymentChannel: MIDTRANS_PAYMENT_CHANNEL,
         selectedCartItemIds: checkoutSelection.selectedCartItemIds.length ? checkoutSelection.selectedCartItemIds : items.map(cartItemKey),
         shippingMethod: selectedDelivery.id,
         storeId: store.id,
@@ -599,7 +590,7 @@ export function SnapCheckoutPage() {
       setItems([]);
       window.sessionStorage.removeItem(CHECKOUT_STATE_KEY);
       const schedule = `${deliveryDates.find((date) => date.id === selectedDateId)?.label ?? "Hari ini"}, ${selectedTime}`;
-      setMessage(`Order ${result.data.id} berhasil dibuat untuk ${schedule}. Mengarahkan ke pembayaran ${availablePaymentMethods.find((method) => method.id === selectedPaymentId)?.label ?? "Midtrans"}...`);
+      setMessage(`Order ${result.data.id} berhasil dibuat untuk ${schedule}. Mengarahkan ke pembayaran Midtrans...`);
       if (result.payment?.invoiceUrl) {
         window.location.href = result.payment.invoiceUrl;
       }
@@ -619,7 +610,7 @@ export function SnapCheckoutPage() {
           <div className="stepper checkout-stepper">
             <span className="done"><FiCheckCircle /> Informasi</span>
             <span className={selectedDeliveryId ? "active" : ""}><FiTruck /> Pengiriman</span>
-            <span className={selectedPaymentId ? "active" : ""}><FiLock /> Pembayaran</span>
+            <span className="active"><FiLock /> Pembayaran</span>
             <span><FiCheckCircle /> Selesai</span>
           </div>
         </section>
@@ -692,14 +683,7 @@ export function SnapCheckoutPage() {
                   </div>
                   {discount > 0 && <div className="voucher-success"><strong>Voucher berhasil!</strong><span>Diskon {rupiah(discount)}</span></div>}
                 </CheckoutBlock>
-                <CheckoutBlock title="6. Metode Pembayaran">
-                  <div className="payment-row gateway-methods">
-                    {availablePaymentMethods.map((method) => (
-                      <PaymentMethodCard active={method.id === selectedPaymentId} key={method.id} method={method} onSelect={() => setSelectedPaymentId(method.id)} />
-                    ))}
-                  </div>
-                </CheckoutBlock>
-                <CheckoutBlock title="7. Catatan Pesanan">
+                <CheckoutBlock title="6. Catatan Pesanan">
                   <textarea onChange={(event) => setOrderNote(event.target.value)} placeholder="Catatan untuk toko atau kurir" value={orderNote} />
                 </CheckoutBlock>
               </div>
@@ -809,14 +793,13 @@ function CheckoutBlock({ title, action, actionHref, children, onAction }: { titl
   );
 }
 
-function checkoutDisabledReason(input: { hasAddress: boolean; hasItems: boolean; hasPayment: boolean; hasSchedule: boolean; hasShipping: boolean; hasStore: boolean; requiresAddress: boolean; submitting: boolean }) {
+function checkoutDisabledReason(input: { hasAddress: boolean; hasItems: boolean; hasSchedule: boolean; hasShipping: boolean; hasStore: boolean; requiresAddress: boolean; submitting: boolean }) {
   if (input.submitting) return "Pesanan sedang diproses.";
   if (!input.hasItems) return "Checkout membutuhkan minimal satu produk.";
   if (input.requiresAddress && !input.hasAddress) return "Pilih atau tambahkan alamat pengiriman.";
   if (!input.hasStore) return "Pilih cabang terlebih dahulu.";
   if (!input.hasSchedule) return "Pilih jadwal dan slot pengiriman.";
   if (!input.hasShipping) return "Pilih metode pengiriman.";
-  if (!input.hasPayment) return "Pilih metode pembayaran.";
   return "";
 }
 
