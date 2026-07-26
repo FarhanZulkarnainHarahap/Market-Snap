@@ -12,11 +12,7 @@ import type { Address, CartItem, CheckoutOption, Store, Voucher } from "@/lib/ty
 import { BenefitStrip, PanelSkeleton, SnapFooter, SnapHeader } from "./SnapCommon";
 
 const fallbackPaymentMethods = [
-  { id: "bca_va", label: "BCA Virtual Account", provider: "midtrans", channel: "bca_va", description: "Bayar dari m-BCA, ATM, atau internet banking" },
-  { id: "echannel", label: "Mandiri Bill Payment", provider: "midtrans", channel: "echannel", description: "Livin, ATM, dan transfer bank" },
-  { id: "bni_va", label: "BNI Virtual Account", provider: "midtrans", channel: "bni_va", description: "BNI Mobile, ATM, dan internet banking" },
-  { id: "bri_va", label: "BRI Virtual Account", provider: "midtrans", channel: "bri_va", description: "BRImo, ATM, dan transfer bank" },
-  { id: "qris", label: "QRIS", provider: "midtrans", channel: "qris", description: "Scan QR dari aplikasi pembayaran favorit" }
+  { id: "midtrans", label: "Midtrans Payment", provider: "midtrans", channel: "", description: "Pilih VA, QRIS, e-wallet, kartu, atau gerai retail di halaman Midtrans" }
 ];
 
 const deliveryDates = [

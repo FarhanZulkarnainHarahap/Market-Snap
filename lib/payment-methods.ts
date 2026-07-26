@@ -16,6 +16,8 @@ const paymentLogos: Record<string, string> = {
   MANDIRI: "/payment-methods/mandiri.svg",
   MANUAL_TRANSFER: "/payment-methods/bank-transfer.svg",
   MANUAL_BANK_TRANSFER: "/payment-methods/bank-transfer.svg",
+  MIDTRANS: "/payment-methods/midtrans.svg",
+  midtrans: "/payment-methods/midtrans.svg",
   qris: "/payment-methods/qris.svg",
   QRIS: "/payment-methods/qris.svg",
   OVO: "/payment-methods/ovo.svg"
