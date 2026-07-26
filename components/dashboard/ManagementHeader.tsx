@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { FiBell, FiBox, FiGrid, FiHome, FiLayers, FiLogOut, FiMenu, FiPackage, FiPieChart, FiSearch, FiSettings, FiShoppingCart, FiTrendingUp, FiUsers, FiX } from "react-icons/fi";
+import { FiBell, FiBox, FiGrid, FiHome, FiLayers, FiLogOut, FiMenu, FiPackage, FiPieChart, FiSearch, FiSettings, FiShoppingCart, FiTrendingUp, FiUserPlus, FiUsers, FiX } from "react-icons/fi";
 import { logoutUser } from "../../lib/api";
 import type { DashboardRole } from "../../lib/dashboard-api";
 
@@ -22,6 +22,7 @@ const links = {
     { href: "/super-admin/discounts", icon: FiPieChart, label: "Vouchers" },
     { href: "/super-admin/users", icon: FiUsers, label: "Customers" },
     { href: "/super-admin/store-admins", icon: FiLayers, label: "Store Admins" },
+    { href: "/super-admin/store-admin-requests", icon: FiUserPlus, label: "Requests" },
     { href: "/super-admin/reports", icon: FiTrendingUp, label: "Reports" },
     { href: "/super-admin/settings", icon: FiSettings, label: "Settings" }
   ],

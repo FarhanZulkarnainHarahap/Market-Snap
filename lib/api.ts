@@ -1,4 +1,4 @@
-import type { ApiAddress, ApiCartItem, ApiOrder, ApiProduct, ApiStore, ApiUser, ApiVoucher, CartResponse, CheckoutOptionsResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, OrderStatisticsResponse, ProductsResponse, RegisterResponse, VoucherValidationResponse } from "./api-contracts";
+import type { ApiAddress, ApiCartItem, ApiNotification, ApiOrder, ApiProduct, ApiStore, ApiStoreAdminRequest, ApiUser, ApiVoucher, CartResponse, CheckoutOptionsResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, OrderStatisticsResponse, ProductsResponse, RegisterResponse, VoucherValidationResponse } from "./api-contracts";
 import { apiUrl } from "./api-url";
 import { clearStaleCache } from "./stale-cache";
 import type { Address, CartItem, CheckoutOption, OrderStatistics, OrderSummary, Product, Store, Voucher } from "./types";
@@ -189,6 +189,73 @@ export async function fetchStores(): Promise<Store[]> {
   if (!response.ok) throw new Error("Gagal memuat cabang");
   const payload = await response.json() as { data: ApiStore[] };
   return payload.data.map(mapStore);
+}
+
+export async function fetchMyStoreAdminRequest(): Promise<ApiStoreAdminRequest | null> {
+  const response = await apiFetch(apiUrl("/store-admin-requests/me"), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat pengajuan Store Admin"));
+  const payload = await response.json() as { data: ApiStoreAdminRequest | null };
+  return payload.data;
+}
+
+export async function createStoreAdminRequest(payload: { experience?: string; reason: string; requestedStoreId?: string }) {
+  const response = await apiFetch(apiUrl("/store-admin-requests"), {
+    method: "POST",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Pengajuan belum dapat dikirim"));
+  return response.json() as Promise<{ data: ApiStoreAdminRequest; message: string }>;
+}
+
+export async function cancelStoreAdminRequest() {
+  const response = await apiFetch(apiUrl("/store-admin-requests/me/cancel"), { method: "PATCH", headers: currentUserHeaders() });
+  if (!response.ok) throw new Error(await responseMessage(response, "Pengajuan belum dapat dibatalkan"));
+  return response.json() as Promise<{ data: ApiStoreAdminRequest; message: string }>;
+}
+
+export async function fetchAdminStoreAdminRequests(params = new URLSearchParams()) {
+  const suffix = params.toString();
+  const response = await apiFetch(apiUrl(`/admin/store-admin-requests${suffix ? `?${suffix}` : ""}`), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat pengajuan Store Admin"));
+  return response.json() as Promise<{ data: ApiStoreAdminRequest[]; meta: { limit: number; page: number; total: number }; counts?: Record<string, number> }>;
+}
+
+export async function approveStoreAdminRequest(id: string, storeId: string) {
+  const response = await apiFetch(apiUrl(`/admin/store-admin-requests/${id}/approve`), {
+    method: "PATCH",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ storeId })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Pengajuan belum dapat disetujui"));
+  return response.json() as Promise<{ data: ApiStoreAdminRequest; message: string }>;
+}
+
+export async function rejectStoreAdminRequest(id: string, reason: string) {
+  const response = await apiFetch(apiUrl(`/admin/store-admin-requests/${id}/reject`), {
+    method: "PATCH",
+    headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ reason })
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Pengajuan belum dapat ditolak"));
+  return response.json() as Promise<{ data: ApiStoreAdminRequest; message: string }>;
+}
+
+export async function fetchNotifications(): Promise<ApiNotification[]> {
+  const response = await apiFetch(apiUrl("/notifications"), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat notifikasi"));
+  const payload = await response.json() as { data: ApiNotification[] };
+  return payload.data;
+}
+
+export async function markNotificationRead(id: string) {
+  const response = await apiFetch(apiUrl(`/notifications/${id}/read`), { method: "PATCH", headers: currentUserHeaders() });
+  if (!response.ok) throw new Error(await responseMessage(response, "Notifikasi belum dapat diperbarui"));
+}
+
+export async function markAllNotificationsRead() {
+  const response = await apiFetch(apiUrl("/notifications/read-all"), { method: "PATCH", headers: currentUserHeaders() });
+  if (!response.ok) throw new Error(await responseMessage(response, "Notifikasi belum dapat diperbarui"));
 }
 
 export async function fetchNearestStore(params: URLSearchParams = new URLSearchParams()) {

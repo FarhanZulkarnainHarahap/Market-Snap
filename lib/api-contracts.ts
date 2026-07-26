@@ -87,6 +87,34 @@ export type ApiUser = {
   verified?: boolean;
 };
 
+export type ApiNotification = {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  referenceId?: string | null;
+  referenceType?: string | null;
+  isRead: boolean;
+  createdAt: string;
+};
+
+export type ApiStoreAdminRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+
+export type ApiStoreAdminRequest = {
+  id: string;
+  user: ApiUser;
+  requestedStore?: ApiStore | null;
+  assignedStore?: ApiStore | null;
+  reviewedBy?: ApiUser | null;
+  reason: string;
+  experience?: string | null;
+  status: ApiStoreAdminRequestStatus;
+  rejectionReason?: string | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type ApiOrderItem = {
   id: string;
   productId: string;

@@ -1,4 +1,4 @@
-import { FiBarChart2, FiBell, FiCreditCard, FiEdit3, FiHeart, FiHelpCircle, FiLogOut, FiMapPin, FiShoppingBag, FiTag, FiTruck, FiUser } from "react-icons/fi";
+import { FiBarChart2, FiBell, FiBriefcase, FiCreditCard, FiEdit3, FiHeart, FiHelpCircle, FiLogOut, FiMapPin, FiShoppingBag, FiTag, FiTruck, FiUser } from "react-icons/fi";
 import type { IconType } from "react-icons";
 
 export type CustomerAccountMenuKey =
@@ -12,6 +12,7 @@ export type CustomerAccountMenuKey =
   | "payment-methods"
   | "statistics"
   | "notifications"
+  | "store-admin-request"
   | "help"
   | "logout";
 
@@ -35,6 +36,7 @@ export const customerAccountMenus: CustomerAccountMenu[] = [
   { key: "payment-methods", href: "/dashboard/customer/profile/payment-methods", label: "Metode Pembayaran", section: "Belanja", text: "Pembayaran checkout", icon: FiCreditCard },
   { key: "statistics", href: "/dashboard/customer/profile/statistics", label: "Statistik Belanja", section: "Belanja", text: "Grafik pesanan", icon: FiBarChart2 },
   { key: "notifications", href: "/dashboard/customer/profile/notifications", label: "Notifikasi", section: "Informasi", text: "Update pesanan", icon: FiBell },
+  { key: "store-admin-request", href: "/dashboard/customer/profile/store-admin-request", label: "Daftar Store Admin", section: "Informasi", text: "Pengajuan akses cabang", icon: FiBriefcase },
   { key: "help", href: "/dashboard/customer/profile/help-center", label: "Bantuan", section: "Informasi", text: "Bantuan pelanggan", icon: FiHelpCircle }
 ];
 

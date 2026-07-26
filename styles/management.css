@@ -815,6 +815,116 @@ body:has(.management-header.is-collapsed) {
   max-width: 380px;
 }
 
+.request-admin-card {
+  display: grid;
+  gap: 18px;
+}
+
+.request-admin-filter {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, 220px) auto;
+}
+
+.request-admin-filter label {
+  align-items: center;
+  border: 1px solid #dcebdd;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 12px;
+}
+
+.request-admin-filter input,
+.request-admin-filter select {
+  background: #fff;
+  border: 0;
+  color: #102117;
+  min-width: 0;
+  outline: none;
+  width: 100%;
+}
+
+.request-admin-filter select,
+.request-admin-filter button {
+  border: 1px solid #dcebdd;
+  border-radius: 8px;
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.request-admin-filter button {
+  background: #064220;
+  color: #fff;
+  font-weight: 900;
+}
+
+.request-admin-list {
+  display: grid;
+  gap: 14px;
+}
+
+.request-admin-row {
+  align-items: start;
+  border: 1px solid #dcebdd;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 18px;
+}
+
+.request-admin-row h3 {
+  color: #064220;
+  font-size: 1.15rem;
+  font-weight: 950;
+  margin: 10px 0 4px;
+}
+
+.request-admin-row p,
+.request-admin-row small {
+  color: #5b6a60;
+  display: block;
+  line-height: 1.5;
+}
+
+.request-admin-row blockquote {
+  border-left: 4px solid #338f2d;
+  color: #102117;
+  line-height: 1.55;
+  margin: 14px 0;
+  padding-left: 12px;
+}
+
+.request-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.request-admin-actions button {
+  align-items: center;
+  border: 1px solid #338f2d;
+  border-radius: 8px;
+  color: #064220;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.request-admin-actions button.danger {
+  border-color: #efb7ad;
+  color: #9b2f22;
+}
+
+.request-action-modal textarea {
+  min-height: 110px;
+}
+
 @media (max-width: 1180px) {
   .management-metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -844,6 +954,15 @@ body:has(.management-header.is-collapsed) {
     grid-column: 2;
     justify-content: flex-start;
     text-align: left;
+  }
+
+  .request-admin-filter,
+  .request-admin-row {
+    grid-template-columns: 1fr;
+  }
+
+  .request-admin-actions {
+    justify-content: flex-start;
   }
 }
 

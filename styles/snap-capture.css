@@ -3139,14 +3139,26 @@ body {
   gap: 8px;
 }
 
-.account-form input {
+.account-form input,
+.account-form select,
+.account-form textarea {
+  background: #fff;
   border: 1px solid var(--snap-line);
   border-radius: 8px;
   min-height: 50px;
   padding: 0 14px;
+  width: 100%;
 }
 
-.account-form input:disabled {
+.account-form textarea {
+  min-height: 118px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.account-form input:disabled,
+.account-form select:disabled,
+.account-form textarea:disabled {
   background: #f7fbf5;
   color: #1f3427;
 }
@@ -3165,6 +3177,103 @@ body {
 
 .account-form button {
   justify-self: start;
+}
+
+.store-request-panel {
+  overflow: hidden;
+}
+
+.request-status {
+  align-items: center;
+  border: 1px solid #b9d8bb;
+  border-radius: 999px;
+  color: #064220;
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 900;
+  min-height: 34px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.request-status.pending {
+  background: #fff8e6;
+  border-color: #f4cc71;
+  color: #8a5a00;
+}
+
+.request-status.approved {
+  background: #eef9eb;
+}
+
+.request-status.rejected {
+  background: #fff0ed;
+  border-color: #efb7ad;
+  color: #9b2f22;
+}
+
+.request-status.cancelled,
+.request-status.new {
+  background: #f7fbf5;
+  color: #5b6a60;
+}
+
+.store-request-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.store-request-grid article,
+.request-history-card {
+  border: 1px solid #dcebdd;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.store-request-grid svg {
+  color: #338f2d;
+  font-size: 1.4rem;
+}
+
+.store-request-grid strong,
+.request-history-card strong {
+  color: #064220;
+}
+
+.store-request-grid small,
+.request-history-card small {
+  color: #5b6a60;
+  line-height: 1.5;
+}
+
+.request-history-card {
+  margin-top: 16px;
+}
+
+.request-history-card button {
+  align-items: center;
+  border: 1px solid #b9d8bb;
+  border-radius: 8px;
+  color: #064220;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  justify-self: start;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.store-request-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.store-request-form label:nth-child(2),
+.store-request-form label:nth-child(3),
+.store-request-form button {
+  grid-column: 1 / -1;
 }
 
 .account-grid {
@@ -3228,6 +3337,7 @@ body {
 }
 
 .account-list p,
+.account-list button,
 .toggle-list label,
 .security-panel p {
   align-items: center;
@@ -3236,12 +3346,14 @@ body {
 }
 
 .account-list p,
+.account-list button,
 .toggle-list label {
   border-bottom: 1px solid var(--snap-line);
   padding-bottom: 10px;
 }
 
 .account-list p:last-child,
+.account-list button:last-child,
 .toggle-list label:last-child {
   border-bottom: 0;
   padding-bottom: 0;
@@ -3259,6 +3371,34 @@ body {
 .rich-list p {
   align-items: center;
   gap: 14px;
+}
+
+.notification-list button {
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  color: inherit;
+  gap: 14px;
+  text-align: left;
+  width: 100%;
+}
+
+.notification-list button.unread strong {
+  background: #e9f7e5;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.notification-list button.read {
+  opacity: 0.72;
+}
+
+.notification-list small {
+  color: #5b6a60;
+  display: block;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .order-card-list {
@@ -7011,5 +7151,16 @@ body:has(.mobile-grocery-nav) {
   .payment-method-card img {
     height: 34px;
     width: 64px;
+  }
+}
+
+@media (max-width: 760px) {
+  .store-request-grid,
+  .store-request-form {
+    grid-template-columns: 1fr;
+  }
+
+  .request-status {
+    justify-self: start;
   }
 }

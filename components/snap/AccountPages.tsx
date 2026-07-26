@@ -12,6 +12,7 @@ import {
   FiCamera,
   FiCheck,
   FiChevronRight,
+  FiBriefcase,
   FiEdit2,
   FiHeadphones,
   FiHome,
@@ -25,11 +26,11 @@ import {
   FiX
 } from "react-icons/fi";
 import { SnapHeader } from "@/components/snap/SnapCommon";
-import { createAddress, deleteAddress, fetchAddresses, fetchCurrentUser, fetchOrderStatistics, fetchOrders, fetchVouchers, requestEmailVerification, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
+import { cancelStoreAdminRequest, createAddress, createStoreAdminRequest, deleteAddress, fetchAddresses, fetchCurrentUser, fetchMyStoreAdminRequest, fetchNotifications, fetchOrderStatistics, fetchOrders, fetchStores, fetchVouchers, markAllNotificationsRead, markNotificationRead, requestEmailVerification, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
 import { customerAccountMenus, type CustomerAccountMenuKey } from "@/lib/customer-menus";
 import { rupiah } from "@/lib/format";
-import type { Address, OrderStatistics, OrderSummary, Voucher } from "@/lib/types";
-import type { ApiUser } from "@/lib/api-contracts";
+import type { Address, OrderStatistics, OrderSummary, Store, Voucher } from "@/lib/types";
+import type { ApiNotification, ApiStoreAdminRequest, ApiUser } from "@/lib/api-contracts";
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, Legend, LinearScale, LineElement, PointElement, Tooltip);
 
@@ -407,6 +408,46 @@ export function OrdersAccountContent() {
 }
 
 export function NotificationsAccountContent() {
+  const [notifications, setNotifications] = useState<ApiNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    fetchNotifications()
+      .then((items) => {
+        if (active) setNotifications(items);
+      })
+      .catch((error) => {
+        if (active) setMessage(error instanceof Error ? error.message : "Notifikasi belum dapat dimuat.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function readOne(notification: ApiNotification) {
+    if (notification.isRead) return;
+    try {
+      await markNotificationRead(notification.id);
+      setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, isRead: true } : item));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Notifikasi belum dapat diperbarui.");
+    }
+  }
+
+  async function readAll() {
+    try {
+      await markAllNotificationsRead();
+      setNotifications((current) => current.map((item) => ({ ...item, isRead: true })));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Notifikasi belum dapat diperbarui.");
+    }
+  }
+
   return (
     <>
       <QuickPanel title="Preferensi notifikasi">
@@ -420,12 +461,21 @@ export function NotificationsAccountContent() {
       <section className="account-panel">
         <div className="account-section-title compact">
           <h2>Notifikasi terbaru</h2>
+          {notifications.some((item) => !item.isRead) && <button onClick={readAll} type="button">Tandai dibaca</button>}
         </div>
-        <div className="account-list rich-list">
-          <p><span><b>Pesanan sedang dikemas</b><small>Pesanan cabang terdekat sedang diproses.</small></span><strong>Baru</strong></p>
-          <p><span><b>Voucher aktif</b><small>Gunakan voucher untuk diskon belanja berikutnya.</small></span><strong>Promo</strong></p>
-          <p><span><b>Stok buah segar tersedia</b><small>Cabang terdekat baru restock pagi ini.</small></span><strong>Info</strong></p>
-        </div>
+        {loading ? <AccountProfileSkeleton /> : null}
+        {!loading && message ? <p className="empty-copy">{message}</p> : null}
+        {!loading && !message && notifications.length ? (
+          <div className="account-list rich-list notification-list">
+            {notifications.map((notification) => (
+              <button className={notification.isRead ? "read" : "unread"} key={notification.id} onClick={() => readOne(notification)} type="button">
+                <span><b>{notification.title}</b><small>{notification.message}</small><small>{formatDateTime(notification.createdAt)}</small></span>
+                <strong>{notification.isRead ? "Dibaca" : "Baru"}</strong>
+              </button>
+            ))}
+          </div>
+        ) : null}
+        {!loading && !message && !notifications.length ? <p className="empty-copy">Belum ada notifikasi baru.</p> : null}
       </section>
     </>
   );
@@ -484,6 +534,140 @@ export function VouchersAccountContent() {
 
 export function PaymentAccountContent() {
   return <section className="account-panel empty-account-state"><FiShield /><h2>Payment dipindahkan ke checkout</h2><p>Metode pembayaran dipilih langsung saat membuat pesanan.</p></section>;
+}
+
+export function StoreAdminRequestContent() {
+  const { loading: userLoading, user } = useAccountUser();
+  const [request, setRequest] = useState<ApiStoreAdminRequest | null>(null);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [form, setForm] = useState({ experience: "", reason: "", requestedStoreId: "" });
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      fetchMyStoreAdminRequest().catch(() => null),
+      fetchStores().catch(() => [])
+    ]).then(([requestData, storeData]) => {
+      if (!active) return;
+      setRequest(requestData);
+      setStores(storeData);
+      setForm((current) => ({ ...current, requestedStoreId: requestData?.requestedStore?.id ?? storeData[0]?.id ?? "" }));
+    }).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setMessage("");
+    try {
+      const response = await createStoreAdminRequest({
+        experience: form.experience.trim() || undefined,
+        reason: form.reason.trim(),
+        requestedStoreId: form.requestedStoreId || undefined
+      });
+      setRequest(response.data);
+      setMessage(response.message);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Pengajuan belum dapat dikirim.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function cancelRequest() {
+    if (!window.confirm("Batalkan pengajuan Store Admin?")) return;
+    setSubmitting(true);
+    setMessage("");
+    try {
+      const response = await cancelStoreAdminRequest();
+      setRequest(response.data);
+      setMessage(response.message);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Pengajuan belum dapat dibatalkan.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const latestPending = request?.status === "PENDING";
+  const latestApproved = request?.status === "APPROVED";
+  const ready = Boolean(user?.verified && user.phone);
+
+  if (loading || userLoading) {
+    return <section className="account-panel"><AccountProfileSkeleton /></section>;
+  }
+
+  return (
+    <>
+      <section className="account-panel store-request-panel">
+        <div className="account-section-title">
+          <div>
+            <span className="eyebrow">Store Admin</span>
+            <h2>Pengajuan akses cabang</h2>
+          </div>
+          <span className={`request-status ${request ? request.status.toLowerCase() : "new"}`}>{request ? requestStatusLabel(request.status) : "Belum diajukan"}</span>
+        </div>
+        <div className="store-request-grid">
+          <article>
+            <FiBriefcase />
+            <strong>Data akun</strong>
+            <span>{user?.name ?? "Customer"}</span>
+            <small>{user?.verified ? "Email terverifikasi" : "Email belum terverifikasi"} · {user?.phone ? "Nomor HP tersedia" : "Nomor HP belum diisi"}</small>
+          </article>
+          <article>
+            <FiHome />
+            <strong>Cabang pilihan</strong>
+            <span>{request?.assignedStore?.name ?? request?.requestedStore?.name ?? stores.find((store) => store.id === form.requestedStoreId)?.name ?? "Pilih cabang"}</span>
+            <small>{latestApproved ? "Akses sudah diberikan" : "Super Admin akan menentukan cabang final."}</small>
+          </article>
+        </div>
+        {request && (
+          <div className="request-history-card">
+            <strong>{requestStatusTitle(request.status)}</strong>
+            <p>{requestStatusCopy(request)}</p>
+            <small>Diajukan {formatDateTime(request.createdAt)}{request.reviewedAt ? ` · Direview ${formatDateTime(request.reviewedAt)}` : ""}</small>
+            {latestPending && <button disabled={submitting} onClick={cancelRequest} type="button"><FiX /> Batalkan pengajuan</button>}
+          </div>
+        )}
+      </section>
+      {!latestPending && !latestApproved && (
+        <section className="account-panel">
+          <div className="account-section-title compact">
+            <h2>Form pengajuan</h2>
+          </div>
+          {!ready && (
+            <p className="account-message">
+              Lengkapi {user?.verified ? "" : "verifikasi email"}{!user?.verified && !user?.phone ? " dan " : ""}{user?.phone ? "" : "nomor handphone"} di profil sebelum mengirim pengajuan.
+            </p>
+          )}
+          <form className="account-form store-request-form" onSubmit={submit}>
+            <label>Cabang yang diinginkan
+              <select onChange={(event) => setForm((current) => ({ ...current, requestedStoreId: event.target.value }))} value={form.requestedStoreId}>
+                <option value="">Biarkan Super Admin memilih</option>
+                {stores.map((store) => <option key={store.id} value={store.id}>{store.name} - {store.area}</option>)}
+              </select>
+            </label>
+            <label>Alasan pengajuan
+              <textarea minLength={20} onChange={(event) => setForm((current) => ({ ...current, reason: event.target.value }))} placeholder="Jelaskan kenapa Anda siap mengelola cabang Market Snap." required rows={5} value={form.reason} />
+            </label>
+            <label>Pengalaman terkait
+              <textarea onChange={(event) => setForm((current) => ({ ...current, experience: event.target.value }))} placeholder="Contoh: pernah mengelola stok, customer service, operasional toko." rows={4} value={form.experience} />
+            </label>
+            <button className="primary-snap" disabled={!ready || submitting} type="submit"><FiCheck /> {submitting ? "Mengirim..." : "Kirim pengajuan"}</button>
+          </form>
+        </section>
+      )}
+      {message && <p className="account-message">{message}</p>}
+    </>
+  );
 }
 
 export function StatisticsAccountContent() {
@@ -877,6 +1061,37 @@ function statusLabel(status: string) {
     Selesai: "Selesai"
   };
   return labels[status] ?? status;
+}
+
+function requestStatusLabel(status: ApiStoreAdminRequest["status"]) {
+  const labels: Record<ApiStoreAdminRequest["status"], string> = {
+    APPROVED: "Disetujui",
+    CANCELLED: "Dibatalkan",
+    PENDING: "Menunggu review",
+    REJECTED: "Ditolak"
+  };
+  return labels[status];
+}
+
+function requestStatusTitle(status: ApiStoreAdminRequest["status"]) {
+  const titles: Record<ApiStoreAdminRequest["status"], string> = {
+    APPROVED: "Pengajuan disetujui",
+    CANCELLED: "Pengajuan dibatalkan",
+    PENDING: "Pengajuan sedang direview",
+    REJECTED: "Pengajuan belum disetujui"
+  };
+  return titles[status];
+}
+
+function requestStatusCopy(request: ApiStoreAdminRequest) {
+  if (request.status === "APPROVED") return `Akses Store Admin aktif untuk ${request.assignedStore?.name ?? "cabang terpilih"}. Login ulang bila menu admin belum muncul.`;
+  if (request.status === "REJECTED") return request.rejectionReason ?? "Super Admin belum dapat menyetujui pengajuan ini.";
+  if (request.status === "CANCELLED") return "Pengajuan ini dibatalkan. Anda dapat mengirim pengajuan baru kapan saja.";
+  return "Super Admin sedang mengecek data akun, alasan pengajuan, dan cabang yang sesuai.";
+}
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString("id-ID", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "short", year: "numeric" });
 }
 
 function voucherSummary(voucher: Voucher) {
