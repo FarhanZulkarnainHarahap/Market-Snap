@@ -160,7 +160,7 @@ export type CreateOrderOptions = {
   location?: { lat: number; lng: number };
   orderNote?: string;
   paymentChannel?: string;
-  paymentMethod?: "manual_transfer" | "xendit";
+  paymentMethod?: "manual_transfer" | "midtrans";
   selectedCartItemIds?: string[];
   shippingMethod?: string;
   storeId?: string;

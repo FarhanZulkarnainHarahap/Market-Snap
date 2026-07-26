@@ -12,11 +12,11 @@ import type { Address, CartItem, CheckoutOption, Store, Voucher } from "@/lib/ty
 import { BenefitStrip, PanelSkeleton, SnapFooter, SnapHeader } from "./SnapCommon";
 
 const fallbackPaymentMethods = [
-  { id: "va-bca", label: "BCA Virtual Account", description: "Bayar dari m-BCA, ATM, atau internet banking" },
-  { id: "va-mandiri", label: "Mandiri Virtual Account", description: "Livin, ATM, dan transfer bank" },
-  { id: "va-bni", label: "BNI Virtual Account", description: "BNI Mobile, ATM, dan internet banking" },
-  { id: "va-bri", label: "BRI Virtual Account", description: "BRImo, ATM, dan transfer bank" },
-  { id: "qris", label: "QRIS", description: "Scan QR dari aplikasi pembayaran favorit" }
+  { id: "bca_va", label: "BCA Virtual Account", provider: "midtrans", channel: "bca_va", description: "Bayar dari m-BCA, ATM, atau internet banking" },
+  { id: "echannel", label: "Mandiri Bill Payment", provider: "midtrans", channel: "echannel", description: "Livin, ATM, dan transfer bank" },
+  { id: "bni_va", label: "BNI Virtual Account", provider: "midtrans", channel: "bni_va", description: "BNI Mobile, ATM, dan internet banking" },
+  { id: "bri_va", label: "BRI Virtual Account", provider: "midtrans", channel: "bri_va", description: "BRImo, ATM, dan transfer bank" },
+  { id: "qris", label: "QRIS", provider: "midtrans", channel: "qris", description: "Scan QR dari aplikasi pembayaran favorit" }
 ];
 
 const deliveryDates = [
@@ -603,7 +603,7 @@ export function SnapCheckoutPage() {
       setItems([]);
       window.sessionStorage.removeItem(CHECKOUT_STATE_KEY);
       const schedule = `${deliveryDates.find((date) => date.id === selectedDateId)?.label ?? "Hari ini"}, ${selectedTime}`;
-      setMessage(`Order ${result.data.id} berhasil dibuat untuk ${schedule}. Mengarahkan ke pembayaran ${availablePaymentMethods.find((method) => method.id === selectedPaymentId)?.label ?? "Xendit"}...`);
+      setMessage(`Order ${result.data.id} berhasil dibuat untuk ${schedule}. Mengarahkan ke pembayaran ${availablePaymentMethods.find((method) => method.id === selectedPaymentId)?.label ?? "Midtrans"}...`);
       if (result.payment?.invoiceUrl) {
         window.location.href = result.payment.invoiceUrl;
       }
@@ -697,7 +697,7 @@ export function SnapCheckoutPage() {
                   {discount > 0 && <div className="voucher-success"><strong>Voucher berhasil!</strong><span>Diskon {rupiah(discount)}</span></div>}
                 </CheckoutBlock>
                 <CheckoutBlock title="6. Metode Pembayaran">
-                  <div className="payment-row xendit-methods">
+                  <div className="payment-row gateway-methods">
                     {availablePaymentMethods.map((method) => (
                       <PaymentMethodCard active={method.id === selectedPaymentId} key={method.id} method={method} onSelect={() => setSelectedPaymentId(method.id)} />
                     ))}

@@ -6,10 +6,10 @@
   <br />
   <br />
 
-  <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=700&size=23&duration=2200&pause=700&color=15803D&center=true&vCenter=true&width=820&lines=Mobile-first+online+grocery+web+app;Nearest+branch+product+discovery;JWT+role-based+customer+and+admin+dashboards;RajaOngkir+shipping+and+Xendit+invoice+checkout" alt="Market Snap animated typing intro" />
+  <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=700&size=23&duration=2200&pause=700&color=15803D&center=true&vCenter=true&width=820&lines=Mobile-first+online+grocery+web+app;Nearest+branch+product+discovery;JWT+role-based+customer+and+admin+dashboards;RajaOngkir+shipping+and+Midtrans+checkout" alt="Market Snap animated typing intro" />
 
   <p>
-    A mobile-first grocery commerce frontend with role-based dashboards, location-aware product discovery, cart checkout, RajaOngkir shipping, and Xendit payment handoff.
+    A mobile-first grocery commerce frontend with role-based dashboards, location-aware product discovery, cart checkout, RajaOngkir shipping, and Midtrans payment handoff.
   </p>
 
   <p>
@@ -61,7 +61,7 @@ Project ini dibuat sebagai repo frontend terpisah dan terhubung ke Market Snap A
 - Product listing, product detail, store detail, and stock visibility by selected branch.
 - Authenticated cart flow using a secure httpOnly session cookie.
 - Checkout form with RajaOngkir destination ID, courier selection, and payment method.
-- Xendit invoice redirect when the API returns `payment.invoiceUrl`.
+- Midtrans payment redirect when the API returns `payment.invoiceUrl`.
 - Customer profile, address page, checkout page, and order tracking pages.
 
 ### Admin
@@ -186,7 +186,7 @@ Cookie: market_snap_session=<httpOnly>
   "total": 150000,
   "destinationId": "41068",
   "courier": "jne",
-  "paymentMethod": "xendit",
+  "paymentMethod": "midtrans",
   "location": { "lat": -6.2608, "lng": 106.8107 },
   "items": [
     { "productId": "PRODUCT_ID", "quantity": 2, "price": 50000 }
@@ -198,7 +198,7 @@ Expected API behavior:
 
 - Use `location` to select the nearest branch.
 - Use `destinationId` and `courier` to calculate shipping through RajaOngkir.
-- Use `paymentMethod: "xendit"` to create a Xendit invoice.
+- Use `paymentMethod: "midtrans"` to create a Midtrans payment.
 - Return `payment.invoiceUrl` so the web can redirect the customer to payment.
 
 ## Available Scripts
@@ -226,7 +226,7 @@ This folder can be deployed as a standalone frontend repository.
 
 - `NEXT_PUBLIC_API_URL` points to the deployed API domain.
 - API `WEB_ORIGIN` points to the deployed web domain.
-- API has valid `JWT_SECRET`, database URL, RajaOngkir key, and Xendit key.
+- API has valid `JWT_SECRET`, database URL, RajaOngkir key, and Midtrans key.
 - Customer, admin, and store admin accounts exist in the database.
 - Product, store, inventory, and category data exist before testing checkout.
 - Vercel build passes with `npm run build`.

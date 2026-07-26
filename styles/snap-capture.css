@@ -2145,7 +2145,7 @@ body {
   color: var(--snap-green);
 }
 
-.xendit-methods button {
+.gateway-methods button {
   align-content: center;
   display: grid;
   gap: 4px;
@@ -2155,13 +2155,13 @@ body {
   text-align: left;
 }
 
-.xendit-methods small {
+.gateway-methods small {
   color: #5b6a60;
   font-size: 12px;
   line-height: 1.35;
 }
 
-.xendit-methods button.active small {
+.gateway-methods button.active small {
   color: #2f6f25;
 }
 
@@ -6862,11 +6862,11 @@ body:has(.mobile-grocery-nav) {
   font-size: 22px;
 }
 
-.payment-row.xendit-methods {
+.payment-row.gateway-methods {
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 
-.payment-row.xendit-methods .payment-method-card {
+.payment-row.gateway-methods .payment-method-card {
   align-items: start;
   display: grid;
   gap: 12px;
@@ -6960,7 +6960,7 @@ body:has(.mobile-grocery-nav) {
 
   .date-row,
   .delivery-row,
-  .payment-row.xendit-methods,
+  .payment-row.gateway-methods,
   .checkout-address-modal-grid {
     grid-template-columns: 1fr;
   }
@@ -7003,7 +7003,7 @@ body:has(.mobile-grocery-nav) {
     font-size: 25px;
   }
 
-  .payment-row.xendit-methods .payment-method-card {
+  .payment-row.gateway-methods .payment-method-card {
     grid-template-columns: 68px minmax(0, 1fr);
     min-height: 104px;
   }
