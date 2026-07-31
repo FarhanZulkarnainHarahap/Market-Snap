@@ -356,29 +356,42 @@ function readCheckoutSelection(): { selectedCartItemIds: string[]; voucherCode?:
   }
 }
 
-function selectedDeliveryDate(id: string) {
-  const date = new Date();
+function selectedDeliveryDate(id: string, reference = new Date()) {
+  const date = new Date(reference);
   if (id === "tomorrow") date.setDate(date.getDate() + 1);
   if (id === "after-tomorrow") date.setDate(date.getDate() + 2);
   if (id === "weekend") {
     const day = date.getDay();
     const daysUntilSaturday = day === 6 ? 0 : (6 - day + 7) % 7;
     date.setDate(date.getDate() + daysUntilSaturday);
+    if (!availableDeliveryTimesForDate(date, reference).length) date.setDate(date.getDate() + 7);
   }
+  date.setHours(0, 0, 0, 0);
   return date;
 }
 
-function availableDeliveryTimes(dateId: string) {
-  if (dateId !== "today") return deliveryTimes;
-  const now = new Date();
-  return deliveryTimes.filter((slot) => {
-    const endHour = Number(slot.split(" - ")[1]?.split(":")[0] ?? 0);
-    return endHour > now.getHours();
-  });
+function availableDeliveryTimes(dateId: string, reference = new Date()) {
+  return availableDeliveryTimesForDate(selectedDeliveryDate(dateId, reference), reference);
+}
+
+function availableDeliveryTimesForDate(date: Date, reference = new Date()) {
+  return deliveryTimes.filter((slot) => slotEndDate(date, slot).getTime() > reference.getTime());
+}
+
+function slotEndDate(date: Date, slot: string) {
+  const end = slot.split("-").at(-1)?.trim() ?? "";
+  const [hours = "0", minutes = "0"] = end.split(":");
+  const endDate = new Date(date);
+  endDate.setHours(Number(hours), Number(minutes), 0, 0);
+  return endDate;
+}
+
+function activeDeliveryDates(reference = new Date()) {
+  return deliveryDates.filter((date) => availableDeliveryTimes(date.id, reference).length);
 }
 
 function initialDeliveryDateId() {
-  return availableDeliveryTimes("today").length ? "today" : "tomorrow";
+  return activeDeliveryDates()[0]?.id ?? "tomorrow";
 }
 
 function initialDeliveryTime() {
@@ -392,6 +405,7 @@ function shippingIcon(id: string) {
 }
 
 export function SnapCheckoutPage() {
+  const [now, setNow] = useState(() => new Date());
   const [items, setItems] = useState<CartItem[]>([]);
   const [store, setStore] = useState<Store>();
   const [stores, setStores] = useState<Store[]>([]);
@@ -418,6 +432,7 @@ export function SnapCheckoutPage() {
   const [loading, setLoading] = useState(true);
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + (item.subtotal ?? item.price * item.quantity), 0), [items]);
   const deliveryOptions = shippingMethods.length ? shippingMethods : fallbackDeliveryOptions.map(({ id, label, cost, description, eta, requiresAddress }) => ({ id, label, cost, description, eta, requiresAddress }));
+  const visibleDeliveryDates = useMemo(() => activeDeliveryDates(now), [now]);
   const selectedDelivery = useMemo(() => deliveryOptions.find((option) => option.id === selectedDeliveryId) ?? deliveryOptions[0], [deliveryOptions, selectedDeliveryId]);
   const selectedPayment = useMemo(() => paymentMethods.find((option) => option.id === selectedPaymentId) ?? paymentMethods[0], [paymentMethods, selectedPaymentId]);
   const shipping = items.length ? selectedDelivery.cost ?? 0 : 0;
@@ -430,13 +445,26 @@ export function SnapCheckoutPage() {
   const orderDisabledReason = checkoutDisabledReason({
     hasAddress: Boolean(selectedAddress),
     hasItems: Boolean(items.length),
-    hasSchedule: Boolean(selectedDateId && selectedTime),
+    hasSchedule: Boolean(selectedDateId && selectedTime && availableDeliveryTimes(selectedDateId, now).includes(selectedTime)),
     hasShipping: Boolean(selectedDeliveryId),
     hasPayment: Boolean(selectedPayment?.id),
     hasStore: Boolean(store),
     requiresAddress: selectedDelivery.requiresAddress !== false,
     submitting
   });
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const dates = activeDeliveryDates(now);
+    const nextDateId = dates.some((date) => date.id === selectedDateId) ? selectedDateId : dates[0]?.id ?? "tomorrow";
+    const slots = availableDeliveryTimes(nextDateId, now);
+    if (nextDateId !== selectedDateId) setSelectedDateId(nextDateId);
+    if (!slots.includes(selectedTime)) setSelectedTime(slots[0] ?? "");
+  }, [now, selectedDateId, selectedTime]);
 
   async function reloadAddresses(selectId?: string) {
     const fresh = await fetchAddresses();
@@ -585,7 +613,7 @@ export function SnapCheckoutPage() {
     try {
       const result = await createOrderFromCart(items, total, {
         addressId: selectedAddress?.id,
-        deliveryDate: selectedDeliveryDate(selectedDateId).toISOString(),
+        deliveryDate: selectedDeliveryDate(selectedDateId, now).toISOString(),
         deliverySlot: selectedTime,
         location: selectedAddress ? { lat: selectedAddress.lat, lng: selectedAddress.lng } : undefined,
         orderNote,
@@ -655,18 +683,18 @@ export function SnapCheckoutPage() {
                 </CheckoutBlock>
                 <CheckoutBlock title="2. Jadwal Pengiriman">
                   <div className="date-row">
-                    {deliveryDates.map((date) => (
+                    {visibleDeliveryDates.map((date) => (
                       <button className={date.id === selectedDateId ? "active" : ""} key={date.id} onClick={() => {
-                        const slots = availableDeliveryTimes(date.id);
+                        const slots = availableDeliveryTimes(date.id, now);
                         setSelectedDateId(date.id);
                         setSelectedTime((current) => slots.includes(current) ? current : slots[0]);
                       }} type="button">
-                        {date.label}<small>{selectedDeliveryDate(date.id).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}</small>
+                        {date.label}<small>{selectedDeliveryDate(date.id, now).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}</small>
                       </button>
                     ))}
                   </div>
                   <select aria-label="Pilih jam pengiriman" onChange={(event) => setSelectedTime(event.target.value)} value={selectedTime}>
-                    {availableDeliveryTimes(selectedDateId).map((time) => <option key={time}>{time}</option>)}
+                    {availableDeliveryTimes(selectedDateId, now).map((time) => <option key={time}>{time}</option>)}
                   </select>
                 </CheckoutBlock>
                 <CheckoutBlock title="3. Cabang Terdekat" action="Ubah cabang" onAction={() => setBranchModalOpen(true)}>
@@ -713,7 +741,7 @@ export function SnapCheckoutPage() {
                   <p><span>Subtotal</span><strong>{rupiah(subtotal)}</strong></p>
                   <p className="green"><span>Diskon Voucher</span><strong>- {rupiah(discount)}</strong></p>
                   <p><span>Biaya Pengiriman</span><strong>{rupiah(shipping)}</strong></p>
-                  <p><span>Jadwal</span><strong>{deliveryDates.find((date) => date.id === selectedDateId)?.label}, {selectedTime}</strong></p>
+                  <p><span>Jadwal</span><strong>{deliveryDates.find((date) => date.id === selectedDateId)?.label}, {selectedTime || "Pilih slot"}</strong></p>
                   <p><span>Opsi</span><strong>{selectedDelivery.label}</strong></p>
                   <p><span>Pembayaran</span><strong>{selectedPayment?.label ?? "Belum tersedia"}</strong></p>
                   <hr />
