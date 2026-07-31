@@ -215,7 +215,7 @@ export type CreateOrderOptions = {
 
 export type CreateOrderResponse = {
   data: { id: string; status: string };
-  payment?: { invoiceUrl?: string | null; method: string; token?: string | null };
+  payment?: { invoiceUrl?: string | null; method: string };
   shipping?: { cost: number; provider: string };
 };
 
