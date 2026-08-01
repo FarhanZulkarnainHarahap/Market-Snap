@@ -1359,6 +1359,18 @@ body {
   border-color: var(--snap-green);
 }
 
+.option-row button:disabled,
+.qty-row button:disabled,
+.product-gallery-main button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.option-note {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
 .qty-row span {
   font-size: 18px;
   font-weight: 950;
@@ -1440,6 +1452,17 @@ body {
 .tab-grid li {
   color: #4a574e;
   line-height: 1.7;
+}
+
+.tab-empty-state {
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.tab-empty-state h3 {
+  color: var(--snap-green);
+  margin-bottom: 8px;
 }
 
 .nutrition-card,
