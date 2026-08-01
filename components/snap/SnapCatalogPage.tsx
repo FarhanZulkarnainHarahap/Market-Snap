@@ -176,13 +176,15 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
   }
 
   async function addProduct(product: Product) {
-    if (!state.store) return;
+    if (!state.store) throw new Error("Cabang belum tersedia. Muat ulang katalog lalu coba lagi.");
     try {
       await addCartItem(product.id, state.store.id);
       const cart = await fetchCart();
       setState((current) => ({ ...current, cartCount: cart.summary.totalItems, message: `${product.name} masuk ke keranjang.` }));
     } catch (error) {
-      setState((current) => ({ ...current, message: error instanceof Error ? error.message : "Silakan login untuk menambahkan produk." }));
+      const message = error instanceof Error ? error.message : "Silakan login untuk menambahkan produk.";
+      setState((current) => ({ ...current, message }));
+      throw new Error(message);
     }
   }
 

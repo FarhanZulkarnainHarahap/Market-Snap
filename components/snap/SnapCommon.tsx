@@ -517,6 +517,8 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
       emitCartFly({ image: product.image, name: product.name, sourceRect });
       setAdded(true);
       window.setTimeout(() => setAdded(false), 1800);
+    } catch {
+      setAdded(false);
     } finally {
       setAdding(false);
     }
