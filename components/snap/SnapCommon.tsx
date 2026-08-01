@@ -46,6 +46,19 @@ type HeaderSession = {
   name: string;
 };
 
+type RectSnapshot = { height: number; left: number; top: number; width: number };
+
+type CartFlyPayload = {
+  image: string;
+  name: string;
+  sourceRect?: RectSnapshot;
+};
+
+type CartFlyState = CartFlyPayload & {
+  id: number;
+  targetRect: RectSnapshot;
+};
+
 const DEFAULT_LOCATION_LABEL = "Market Snap Center";
 const CUSTOMER_HOME = "/";
 const CUSTOMER_CATALOG = "/catalog";
@@ -68,8 +81,10 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
   const [locationLabel, setLocationLabel] = useState(readCachedLocationLabel);
   const [session, setSession] = useState<HeaderSession>(readSession);
   const [searchQuery, setSearchQuery] = useState("");
+  const [cartFly, setCartFly] = useState<CartFlyState>();
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const cartLinkRef = useRef<HTMLAnchorElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -100,6 +115,20 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
   }, [profileOpen]);
+
+  useEffect(() => {
+    function handleCartFly(event: Event) {
+      const detail = (event as CustomEvent<CartFlyPayload>).detail;
+      const target = cartLinkRef.current?.getBoundingClientRect();
+      if (!detail?.image || !target) return;
+      const id = Date.now();
+      setCartFly({ ...detail, id, targetRect: rectSnapshot(target) });
+      window.setTimeout(() => setCartFly((current) => current?.id === id ? undefined : current), 760);
+    }
+
+    window.addEventListener("market-snap-cart-fly", handleCartFly);
+    return () => window.removeEventListener("market-snap-cart-fly", handleCartFly);
+  }, []);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -209,8 +238,9 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
         ) : (
           <Link className="outline-action" href="/auth/login">Login</Link>
         ))}
-        {!simple && <Link className="cart-action" href={CUSTOMER_CART}><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
+        {!simple && <Link className="cart-action" data-cart-target="true" href={CUSTOMER_CART} ref={cartLinkRef}><FiShoppingCart /> Keranjang <span>{cartCount}</span></Link>}
       </div>
+      {cartFly && <CartFlyImage item={cartFly} />}
       {mobileOpen && <button aria-label="Tutup menu" className="customer-drawer-overlay" onClick={() => setMobileOpen(false)} type="button" />}
       {mobileOpen && (
         <div aria-modal="true" className="customer-mobile-drawer" ref={drawerRef} role="dialog">
@@ -472,6 +502,7 @@ export function GroceryVisual({ compact = false, variant = "hero" }: { compact?:
 export function ProductCard({ product, storeId, disabled = false, onAdd }: { product: Product; storeId?: string; disabled?: boolean; onAdd?: (product: Product) => Promise<void> | void }) {
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const pictureRef = useRef<HTMLAnchorElement>(null);
   const activeStoreId = storeId ?? Object.keys(product.stockByStore)[0] ?? "";
   const stock = product.stockByStore[activeStoreId] ?? 0;
   const productHref = `/products/${product.slug ?? product.id}`;
@@ -481,7 +512,9 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
     if (!onAdd || adding || disabled || stock < 1) return;
     setAdding(true);
     try {
+      const sourceRect = pictureRef.current ? rectSnapshot(pictureRef.current.getBoundingClientRect()) : undefined;
       await onAdd(product);
+      emitCartFly({ image: product.image, name: product.name, sourceRect });
       setAdded(true);
       window.setTimeout(() => setAdded(false), 1800);
     } finally {
@@ -491,7 +524,7 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
 
   return (
     <article className="snap-product-card">
-      <Link className="product-picture" href={productHref}>
+      <Link className="product-picture" href={productHref} ref={pictureRef}>
         <Image alt={product.name} height={220} src={product.image} width={260} />
         {product.discount && <span className="promo-dot">{product.discount}</span>}
         {stock < 1 && <span className="stock-dot">Habis</span>}
@@ -516,6 +549,43 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
       </div>
     </article>
   );
+}
+
+export function emitCartFly(payload: CartFlyPayload) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent<CartFlyPayload>("market-snap-cart-fly", { detail: payload }));
+}
+
+function CartFlyImage({ item }: { item: CartFlyState }) {
+  const source = item.sourceRect ?? {
+    height: 70,
+    left: Math.max(16, item.targetRect.left - 240),
+    top: Math.max(80, item.targetRect.top + 90),
+    width: 70
+  };
+  const startX = source.left + source.width / 2 - 32;
+  const startY = source.top + source.height / 2 - 32;
+  const endX = item.targetRect.left + item.targetRect.width / 2 - 32;
+  const endY = item.targetRect.top + item.targetRect.height / 2 - 32;
+
+  return (
+    <span
+      aria-hidden="true"
+      className="cart-fly-image"
+      style={{
+        "--cart-fly-end-x": `${endX - startX}px`,
+        "--cart-fly-end-y": `${endY - startY}px`,
+        left: startX,
+        top: startY
+      } as React.CSSProperties}
+    >
+      <Image alt={item.name} height={64} src={item.image} unoptimized width={64} />
+    </span>
+  );
+}
+
+function rectSnapshot(rect: DOMRect): RectSnapshot {
+  return { height: rect.height, left: rect.left, top: rect.top, width: rect.width };
 }
 
 export function ProductGridSkeleton({ count = 8 }: { count?: number }) {

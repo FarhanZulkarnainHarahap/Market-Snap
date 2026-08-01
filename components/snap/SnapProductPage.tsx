@@ -3,12 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FiChevronLeft, FiChevronRight, FiMapPin, FiMinus, FiPlus, FiShoppingCart, FiStar } from "react-icons/fi";
 import { addCartItem, fetchCart, fetchProductDetail, fetchProducts } from "@/lib/api";
 import { rupiah } from "@/lib/format";
 import type { Product, Store } from "@/lib/types";
-import { BenefitStrip, FeatureList, PanelSkeleton, RelatedProducts, SnapFooter, SnapHeader } from "./SnapCommon";
+import { BenefitStrip, FeatureList, PanelSkeleton, RelatedProducts, SnapFooter, SnapHeader, emitCartFly } from "./SnapCommon";
 
 const CUSTOMER_CATALOG = "/catalog";
 const CUSTOMER_CHECKOUT = "/checkout";
@@ -30,6 +30,7 @@ type ProductTabId = typeof productTabs[number]["id"];
 
 export function SnapProductPage({ productId }: { productId: string }) {
   const router = useRouter();
+  const galleryRef = useRef<HTMLDivElement>(null);
   const [product, setProduct] = useState<Product>();
   const [store, setStore] = useState<Store>();
   const [related, setRelated] = useState<Product[]>([]);
@@ -94,6 +95,11 @@ export function SnapProductPage({ productId }: { productId: string }) {
       const item = await addCartItem(product.id, store.id, quantity);
       const cart = await fetchCart();
       setCartCount(cart.summary.totalItems);
+      emitCartFly({
+        image: activeImage?.url ?? product.image,
+        name: product.name,
+        sourceRect: galleryRef.current ? rectSnapshot(galleryRef.current.getBoundingClientRect()) : undefined
+      });
       if (mode === "buy") {
         const selectedCartItemId = item.cartId ?? item.id;
         window.sessionStorage.setItem(CHECKOUT_STATE_KEY, JSON.stringify({ selectedCartItemIds: [selectedCartItemId] }));
@@ -124,7 +130,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
           <>
             <section className="product-detail-layout">
               <div>
-                <div className="product-gallery-main">
+                <div className="product-gallery-main" ref={galleryRef}>
                   <button aria-label="Gambar sebelumnya" disabled={gallery.length < 2} onClick={() => setSelectedImage((index) => (index <= 0 ? gallery.length - 1 : index - 1))} type="button"><FiChevronLeft /></button>
                   <Image alt={activeImage?.alt ?? product.name} height={420} priority src={activeImage?.url ?? product.image} width={520} />
                   <button aria-label="Gambar berikutnya" disabled={gallery.length < 2} onClick={() => setSelectedImage((index) => (index + 1) % gallery.length)} type="button"><FiChevronRight /></button>
@@ -209,6 +215,10 @@ export function SnapProductPage({ productId }: { productId: string }) {
       <SnapFooter />
     </>
   );
+}
+
+function rectSnapshot(rect: DOMRect) {
+  return { height: rect.height, left: rect.left, top: rect.top, width: rect.width };
 }
 
 function ProductDetailSkeleton() {
