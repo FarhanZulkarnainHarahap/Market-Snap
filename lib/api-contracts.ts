@@ -155,8 +155,13 @@ export type ApiOrder = {
   deliveryDate?: string | null;
   deliverySlot?: string | null;
   paymentMethod?: string | null;
+  paymentProvider?: string | null;
   paymentChannel?: string | null;
+  paymentStatus?: string | null;
+  paymentRedirectUrl?: string | null;
   paymentInvoiceUrl?: string | null;
+  midtransTransactionId?: string | null;
+  midtransTransactionStatus?: string | null;
   trackingNumber?: string | null;
   courierName?: string | null;
   estimatedArrival?: string | null;
@@ -206,7 +211,7 @@ export type CreateOrderOptions = {
   location?: { lat: number; lng: number };
   orderNote?: string;
   paymentChannel?: string;
-  paymentMethod?: "midtrans";
+  paymentMethod?: "midtrans" | "xendit";
   selectedCartItemIds?: string[];
   shippingMethod?: string;
   storeId?: string;
@@ -214,9 +219,50 @@ export type CreateOrderOptions = {
 };
 
 export type CreateOrderResponse = {
-  data: { id: string; status: string };
-  payment?: { invoiceUrl?: string | null; method: string };
+  data: {
+    id: string;
+    orderNumber: string;
+    status: string;
+    paymentStatus: string;
+  };
+  payment?: { redirectUrl?: string | null; invoiceUrl?: string | null; method: string; expiresAt?: string | null };
   shipping?: { cost: number; provider: string };
+};
+
+export type PaymentStatusResponse = {
+  data: {
+    id: string;
+    orderNumber: string;
+    orderStatus: string;
+    paymentStatus: string;
+    transactionStatus?: string | null;
+    paidAt?: string | null;
+    invoiceAvailable: boolean;
+  };
+};
+
+export type InvoiceResponse = {
+  data: {
+    invoiceNumber: string;
+    orderId: string;
+    orderNumber: string;
+    paymentStatus: string;
+    orderStatus: string;
+    customer: { email?: string | null; id?: string; name?: string | null; phone?: string | null };
+    store: { city?: string | null; id?: string; name?: string | null };
+    address: Record<string, unknown>;
+    items: Array<{ id: string; image?: string | null; name: string; productId: string; quantity: number; subtotal: number; unitPrice: number }>;
+    subtotal: number;
+    shippingCost: number;
+    serviceFee: number;
+    discount: number;
+    grandTotal: number;
+    paymentMethod?: string | null;
+    paymentChannel?: string | null;
+    transactionId?: string | null;
+    createdAt: string;
+    paidAt?: string | null;
+  };
 };
 
 export type CheckoutOptionsResponse = {

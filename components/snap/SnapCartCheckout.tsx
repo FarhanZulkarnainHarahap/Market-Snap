@@ -462,8 +462,11 @@ export function SnapCheckoutPage() {
     const dates = activeDeliveryDates(now);
     const nextDateId = dates.some((date) => date.id === selectedDateId) ? selectedDateId : dates[0]?.id ?? "tomorrow";
     const slots = availableDeliveryTimes(nextDateId, now);
-    if (nextDateId !== selectedDateId) setSelectedDateId(nextDateId);
-    if (!slots.includes(selectedTime)) setSelectedTime(slots[0] ?? "");
+    const timer = window.setTimeout(() => {
+      if (nextDateId !== selectedDateId) setSelectedDateId(nextDateId);
+      if (!slots.includes(selectedTime)) setSelectedTime(slots[0] ?? "");
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [now, selectedDateId, selectedTime]);
 
   async function reloadAddresses(selectId?: string) {
@@ -605,7 +608,7 @@ export function SnapCheckoutPage() {
       return;
     }
     if (!selectedPayment) {
-      setMessage("Metode pembayaran Midtrans belum tersedia. Periksa konfigurasi Midtrans backend.");
+      setMessage("Metode pembayaran belum tersedia. Periksa konfigurasi Xendit backend.");
       return;
     }
 
@@ -618,7 +621,7 @@ export function SnapCheckoutPage() {
         location: selectedAddress ? { lat: selectedAddress.lat, lng: selectedAddress.lng } : undefined,
         orderNote,
         paymentChannel: selectedPayment.id,
-        paymentMethod: "midtrans",
+        paymentMethod: selectedPayment.provider === "xendit" ? "xendit" : "midtrans",
         selectedCartItemIds: checkoutSelection.selectedCartItemIds.length ? checkoutSelection.selectedCartItemIds : items.map(cartItemKey),
         shippingMethod: selectedDelivery.id,
         storeId: store.id,
@@ -626,11 +629,15 @@ export function SnapCheckoutPage() {
       });
       setItems([]);
       window.sessionStorage.removeItem(CHECKOUT_STATE_KEY);
+      window.sessionStorage.setItem("market-snap-last-order-number", result.data.orderNumber);
       const schedule = `${deliveryDates.find((date) => date.id === selectedDateId)?.label ?? "Hari ini"}, ${selectedTime}`;
-      setMessage(result.payment?.invoiceUrl ? `Order ${result.data.id} berhasil dibuat untuk ${schedule}. Mengarahkan ke pembayaran...` : `Order ${result.data.id} berhasil dibuat untuk ${schedule}. Silakan lanjutkan pembayaran manual.`);
-      if (result.payment?.invoiceUrl) {
-        window.location.href = result.payment.invoiceUrl;
+      const redirectUrl = result.payment?.redirectUrl ?? result.payment?.invoiceUrl;
+      if (isSafePaymentRedirect(redirectUrl)) {
+        setMessage(`Order ${result.data.orderNumber} berhasil dibuat untuk ${schedule}. Mengarahkan ke pembayaran...`);
+        window.location.assign(redirectUrl);
+        return;
       }
+      setMessage(`Order ${result.data.orderNumber} berhasil dibuat, tetapi sesi pembayaran gagal dibuat. Buka detail pesanan untuk mencoba lagi atau hubungi bantuan.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Gagal membuat order.");
     } finally {
@@ -728,7 +735,7 @@ export function SnapCheckoutPage() {
                       </button>
                     ))}
                   </div>
-                  {!paymentMethods.length && <p className="summary-warning">Metode pembayaran Midtrans belum tersedia. Periksa environment variable Midtrans backend.</p>}
+                  {!paymentMethods.length && <p className="summary-warning">Metode pembayaran Xendit belum tersedia. Periksa environment variable Xendit backend.</p>}
                 </CheckoutBlock>
                 <CheckoutBlock title="7. Catatan Pesanan">
                   <textarea onChange={(event) => setOrderNote(event.target.value)} placeholder="Catatan untuk toko atau kurir" value={orderNote} />
@@ -907,6 +914,16 @@ function updateCheckoutAddressField(field: keyof CheckoutAddressForm, setForm: R
   return (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
   };
+}
+
+function isSafePaymentRedirect(value?: string | null): value is string {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
 }
 
 function CartRowsSkeleton() {

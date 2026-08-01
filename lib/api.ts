@@ -1,4 +1,4 @@
-import type { ApiAddress, ApiCartItem, ApiNotification, ApiOrder, ApiProduct, ApiStore, ApiStoreAdminRequest, ApiUser, ApiVoucher, CartResponse, CheckoutOptionsResponse, CreateOrderOptions, CreateOrderResponse, LoginResponse, OrderStatisticsResponse, ProductsResponse, RegisterResponse, VoucherValidationResponse } from "./api-contracts";
+import type { ApiAddress, ApiCartItem, ApiNotification, ApiOrder, ApiProduct, ApiStore, ApiStoreAdminRequest, ApiUser, ApiVoucher, CartResponse, CheckoutOptionsResponse, CreateOrderOptions, CreateOrderResponse, InvoiceResponse, LoginResponse, OrderStatisticsResponse, PaymentStatusResponse, ProductsResponse, RegisterResponse, VoucherValidationResponse } from "./api-contracts";
 import { apiUrl } from "./api-url";
 import { clearStaleCache } from "./stale-cache";
 import type { Address, CartItem, CheckoutOption, OrderStatistics, OrderSummary, Product, Store, Voucher } from "./types";
@@ -360,6 +360,20 @@ export async function fetchOrderTracking(orderId: string): Promise<OrderSummary>
   return mapOrder(payload.data);
 }
 
+export async function fetchPaymentStatus(orderNumber: string): Promise<PaymentStatusResponse["data"]> {
+  const response = await apiFetch(apiUrl(`/payments/${encodeURIComponent(orderNumber)}/status`), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Status pembayaran belum dapat dimuat"));
+  const payload = await response.json() as PaymentStatusResponse;
+  return payload.data;
+}
+
+export async function fetchInvoice(orderNumber: string): Promise<InvoiceResponse["data"]> {
+  const response = await apiFetch(apiUrl(`/orders/by-number/${encodeURIComponent(orderNumber)}/invoice`), { headers: currentUserHeaders(), cache: "no-store" });
+  if (!response.ok) throw new Error(await responseMessage(response, "Invoice belum dapat dimuat"));
+  const payload = await response.json() as InvoiceResponse;
+  return payload.data;
+}
+
 export async function fetchOrderStatistics(period = "6months"): Promise<OrderStatistics> {
   const response = await apiFetch(apiUrl(`/orders/statistics?period=${encodeURIComponent(period)}`), { headers: currentUserHeaders(), cache: "no-store" });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat statistik belanja"));
@@ -553,8 +567,11 @@ function mapOrder(order: ApiOrder): OrderSummary {
     estimatedArrival: order.estimatedArrival ?? undefined,
     histories: order.histories?.map((history) => ({ createdAt: history.createdAt, description: history.description ?? undefined, id: history.id, location: history.location ?? undefined, status: history.status })),
     paymentChannel: order.paymentChannel ?? undefined,
+    paymentRedirectUrl: order.paymentRedirectUrl ?? undefined,
     paymentInvoiceUrl: order.paymentInvoiceUrl ?? undefined,
     paymentMethod: order.paymentMethod ?? undefined,
+    paymentProvider: order.paymentProvider ?? undefined,
+    paymentStatus: order.paymentStatus ?? undefined,
     serviceFee: order.serviceFee,
     shippingCost: order.shippingCost,
     shippingMethod: order.shippingMethod ?? undefined,

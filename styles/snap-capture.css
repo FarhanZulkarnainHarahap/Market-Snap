@@ -7178,3 +7178,279 @@ body:has(.mobile-grocery-nav) {
     justify-self: start;
   }
 }
+
+.payment-return-page,
+.invoice-page {
+  min-height: 100vh;
+  background: #f7faf5;
+  padding: 48px 20px;
+}
+
+.payment-return-panel,
+.invoice-document {
+  background: #fff;
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  box-shadow: var(--snap-shadow);
+  margin: 0 auto;
+  max-width: 920px;
+  padding: 32px;
+}
+
+.payment-return-panel {
+  max-width: 620px;
+  text-align: center;
+}
+
+.payment-return-icon {
+  align-items: center;
+  background: #edf7e9;
+  border-radius: 999px;
+  color: var(--snap-green);
+  display: inline-flex;
+  font-size: 34px;
+  height: 72px;
+  justify-content: center;
+  margin-bottom: 18px;
+  width: 72px;
+}
+
+.payment-spin {
+  animation: paymentSpin 1s linear infinite;
+}
+
+.payment-return-panel h1,
+.invoice-header h1 {
+  color: var(--snap-ink);
+  font-size: 32px;
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+
+.payment-return-panel p,
+.payment-muted {
+  color: var(--snap-muted);
+  margin: 0 auto 16px;
+  max-width: 520px;
+}
+
+.payment-error,
+.payment-expired-text {
+  color: #b42318;
+  font-weight: 800;
+}
+
+.payment-actions,
+.invoice-toolbar,
+.order-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.payment-status-grid,
+.invoice-meta-grid,
+.invoice-party-grid,
+.invoice-payment-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin: 22px 0;
+}
+
+.payment-status-grid div,
+.invoice-info,
+.invoice-party-grid > div {
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: left;
+}
+
+.payment-status-grid dt,
+.invoice-info span,
+.invoice-party-grid h2 {
+  color: var(--snap-muted);
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.payment-status-grid dd,
+.invoice-info strong,
+.invoice-party-grid p {
+  color: var(--snap-ink);
+  font-weight: 800;
+  margin: 0;
+}
+
+.invoice-toolbar {
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.invoice-header {
+  align-items: flex-start;
+  border-bottom: 2px solid var(--snap-green);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+}
+
+.invoice-brand {
+  color: var(--snap-green);
+  display: block;
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.invoice-badge {
+  background: #fff4e5;
+  border: 1px solid #f59f2f;
+  border-radius: 999px;
+  color: #9a5b00;
+  font-weight: 900;
+  padding: 8px 14px;
+}
+
+.invoice-badge.paid {
+  background: #edf7e9;
+  border-color: #4b9736;
+  color: var(--snap-green);
+}
+
+.invoice-table {
+  border: 1px solid var(--snap-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.invoice-row {
+  align-items: center;
+  border-top: 1px solid var(--snap-line);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 72px 120px 120px;
+  padding: 12px 14px;
+}
+
+.invoice-row:first-child {
+  border-top: 0;
+}
+
+.invoice-row-head {
+  background: #f2f7ef;
+  color: var(--snap-muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.invoice-product {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.invoice-product img,
+.invoice-product-placeholder {
+  background: #edf7e9;
+  border-radius: 8px;
+  flex: 0 0 auto;
+  height: 44px;
+  object-fit: cover;
+  width: 44px;
+}
+
+.invoice-summary {
+  margin: 22px 0 10px auto;
+  max-width: 360px;
+}
+
+.invoice-summary p {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.invoice-summary .strong {
+  border-top: 1px solid var(--snap-line);
+  color: var(--snap-green);
+  font-size: 20px;
+  font-weight: 900;
+  padding-top: 12px;
+}
+
+.order-payment-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 8px 0 12px;
+}
+
+.payment-status-pill {
+  background: #f2f7ef;
+  border-radius: 999px;
+  color: var(--snap-green);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.payment-status-pill.failed,
+.payment-status-pill.expired,
+.payment-status-pill.cancelled {
+  background: #fff1f0;
+  color: #b42318;
+}
+
+@keyframes paymentSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 680px) {
+  .payment-return-panel,
+  .invoice-document {
+    padding: 22px;
+  }
+
+  .invoice-header,
+  .invoice-toolbar {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .invoice-row {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-row-head {
+    display: none;
+  }
+}
+
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+
+  .invoice-page {
+    background: #fff;
+    padding: 0;
+  }
+
+  .invoice-document {
+    border: 0;
+    box-shadow: none;
+    max-width: none;
+  }
+}

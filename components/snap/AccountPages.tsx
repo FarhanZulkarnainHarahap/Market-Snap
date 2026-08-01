@@ -918,6 +918,10 @@ function OrderList({ compact = false, orders }: { compact?: boolean; orders: Ord
             <span>{statusLabel(order.status)}</span>
             <strong>{rupiah(order.total)}</strong>
           </div>
+          <div className="order-payment-row">
+            <span className={`payment-status-pill ${String(order.paymentStatus ?? "PENDING").toLowerCase()}`}>Pembayaran: {paymentStatusLabel(order.paymentStatus)}</span>
+            <small>Order: {order.orderNumber}</small>
+          </div>
           <div className="order-items">
             {order.items.slice(0, compact ? 2 : 4).map((item) => (
               <div className="order-item-row" key={item.id}>
@@ -927,10 +931,30 @@ function OrderList({ compact = false, orders }: { compact?: boolean; orders: Ord
             ))}
           </div>
           {order.items.length > (compact ? 2 : 4) && <small className="order-more">+{order.items.length - (compact ? 2 : 4)} produk lainnya</small>}
+          {!compact && (
+            <div className="order-card-actions">
+              {order.paymentStatus === "PAID" && <Link className="secondary-snap" href={`/dashboard/customer/orders/${encodeURIComponent(order.orderNumber)}/invoice`}>Lihat Invoice</Link>}
+              {order.paymentStatus === "PENDING" && order.paymentRedirectUrl && <Link className="primary-snap" href={order.paymentRedirectUrl}>Lanjutkan Pembayaran</Link>}
+              {order.paymentStatus === "EXPIRED" && <span className="payment-expired-text">Pembayaran Kedaluwarsa</span>}
+              <Link className="secondary-snap" href={`/dashboard/customer/profile/orders/${order.id}`}>Detail</Link>
+            </div>
+          )}
         </article>
       ))}
     </div>
   );
+}
+
+function paymentStatusLabel(status?: string) {
+  const labels: Record<string, string> = {
+    CANCELLED: "Dibatalkan",
+    EXPIRED: "Kedaluwarsa",
+    FAILED: "Gagal",
+    PAID: "Lunas",
+    PENDING: "Menunggu",
+    REFUNDED: "Refund"
+  };
+  return labels[String(status ?? "PENDING")] ?? String(status ?? "PENDING");
 }
 
 function HelpCard({ text, title }: { text: string; title: string }) {

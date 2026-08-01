@@ -79,7 +79,10 @@ export type OrderSummary = {
   deliveryDate?: string;
   deliverySlot?: string;
   paymentMethod?: string;
+  paymentProvider?: string;
   paymentChannel?: string;
+  paymentStatus?: string;
+  paymentRedirectUrl?: string;
   paymentInvoiceUrl?: string;
   trackingNumber?: string;
   courierName?: string;
