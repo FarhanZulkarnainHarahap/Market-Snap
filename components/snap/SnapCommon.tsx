@@ -543,12 +543,6 @@ export function SnapFooter() {
         <Link href={CUSTOMER_ABOUT}>Syarat & Ketentuan</Link>
         <Link href={CUSTOMER_CONTACT}>Pusat Bantuan</Link>
       </div>
-      <div>
-        <h3>Download Our App</h3>
-        <p>Belanja lebih mudah lewat aplikasi Market Snap.</p>
-        <span className="store-badge">Get it on Google Play</span>
-        <span className="store-badge">Download on App Store</span>
-      </div>
     </footer>
   );
 }
