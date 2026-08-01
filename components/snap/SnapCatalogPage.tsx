@@ -129,7 +129,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
     router.replace(`${pathname}${catalogQueryString(params)}`, { scroll: false });
     const cacheKey = catalogCacheKey(params);
     const cached = readStaleCache<CatalogState>(cacheKey);
-    if (cached) window.setTimeout(() => setState({ ...cached, loading: false, refreshing: true }), 0);
+    if (cached) window.setTimeout(() => setState({ ...cached, locationMode: "manual", loading: false, refreshing: true }), 0);
     loadCatalog(params).then((next) => {
       writeStaleCache(cacheKey, next, 1000 * 60 * 3);
       setState(next);
@@ -403,13 +403,9 @@ async function browserLocation(): Promise<{ lat: number; lng: number } | null> {
         cacheCatalogLocation(point);
         resolve(point);
       },
-      (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          clearCatalogLocationCache();
-          resolve(null);
-          return;
-        }
-        resolve(readCachedCatalogLocation());
+      () => {
+        clearCatalogLocationCache();
+        resolve(null);
       },
       { maximumAge: 60_000, timeout: 1800 }
     );
@@ -421,16 +417,6 @@ function cacheCatalogLocation(point: { lat: number; lng: number }) {
   window.localStorage.setItem("market-snap-location-lat", String(point.lat));
   window.localStorage.setItem("market-snap-location-lng", String(point.lng));
   window.localStorage.setItem("market-snap-location-updated-at", String(Date.now()));
-}
-
-function readCachedCatalogLocation(): { lat: number; lng: number } | null {
-  if (typeof window === "undefined") return null;
-  const lat = Number(window.localStorage.getItem("market-snap-location-lat"));
-  const lng = Number(window.localStorage.getItem("market-snap-location-lng"));
-  const updatedAt = Number(window.localStorage.getItem("market-snap-location-updated-at"));
-  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(updatedAt)) return null;
-  if (Date.now() - updatedAt > 1000 * 60 * 30) return null;
-  return { lat, lng };
 }
 
 function clearCatalogLocationCache() {
