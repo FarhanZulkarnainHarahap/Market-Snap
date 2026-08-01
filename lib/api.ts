@@ -121,22 +121,30 @@ export function saveSession(payload: LoginResponse) {
   setClientCookie("market-snap-user-id", payload.user.id);
   setClientCookie("market-snap-user-name", payload.user.name);
   setClientCookie("market-snap-user-email", payload.user.email);
+  setOptionalClientCookie("market-snap-user-avatar", payload.user.avatarUrl);
+  setOptionalClientCookie("market-snap-auth-provider", payload.user.authProvider);
   window.localStorage.setItem("market-snap-user-id", payload.user.id);
   window.localStorage.setItem("market-snap-user-name", payload.user.name);
   window.localStorage.setItem("market-snap-user-email", payload.user.email);
   window.localStorage.setItem("market-snap-role", role);
+  setOptionalLocalStorage("market-snap-user-avatar", payload.user.avatarUrl);
+  setOptionalLocalStorage("market-snap-auth-provider", payload.user.authProvider);
 }
 
 export function clearSession() {
   window.localStorage.removeItem("market-snap-user-id");
   window.localStorage.removeItem("market-snap-user-name");
   window.localStorage.removeItem("market-snap-user-email");
+  window.localStorage.removeItem("market-snap-user-avatar");
+  window.localStorage.removeItem("market-snap-auth-provider");
   window.localStorage.removeItem("market-snap-role");
   clearStaleCache();
   clearClientCookie("market-snap-role");
   clearClientCookie("market-snap-user-id");
   clearClientCookie("market-snap-user-name");
   clearClientCookie("market-snap-user-email");
+  clearClientCookie("market-snap-user-avatar");
+  clearClientCookie("market-snap-auth-provider");
 }
 
 export function currentUserHeaders(): Record<string, string> {
@@ -158,6 +166,16 @@ function currentToken() {
 
 function setClientCookie(name: string, value: string) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=86400; SameSite=Lax`;
+}
+
+function setOptionalClientCookie(name: string, value?: string) {
+  if (value) setClientCookie(name, value);
+  else clearClientCookie(name);
+}
+
+function setOptionalLocalStorage(name: string, value?: string) {
+  if (value) window.localStorage.setItem(name, value);
+  else window.localStorage.removeItem(name);
 }
 
 function clearClientCookie(name: string) {
