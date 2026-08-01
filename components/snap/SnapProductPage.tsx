@@ -87,12 +87,16 @@ export function SnapProductPage({ productId }: { productId: string }) {
                 </div>
               </div>
               <article className="product-info-panel">
-                <span className="tag-soft">{product.category}</span>
+                <span className="tag-soft">{product.category}{product.brand ? ` / ${product.brand}` : ""}</span>
                 <h1>{product.name}</h1>
-                <div className="rating-line"><FiStar /> <strong>4.8</strong> (ulasan pelanggan) <span>Stok tersedia: {stock}</span></div>
+                <div className="rating-line"><FiStar /> <strong>4.8</strong> (ulasan pelanggan) <span>Stok tersedia: {stock}</span>{product.sku && <span>SKU: {product.sku}</span>}</div>
                 <p className="detail-price">{rupiah(product.price)} <small>/{product.unit}</small></p>
-                <p className="muted">{product.description ?? "Produk segar Market Snap."}</p>
+                <p className="muted">{product.shortInfo ?? product.description ?? "Produk segar Market Snap."}</p>
                 <FeatureList />
+                <div className="product-spec-grid">
+                  <span><small>Berat</small><strong>{product.weightGram ? `${product.weightGram} g` : product.unit}</strong></span>
+                  <span><small>Penyimpanan</small><strong>{product.storageInfo ?? "Ikuti instruksi pada kemasan"}</strong></span>
+                </div>
                 <h3>Pilih berat</h3>
                 <div className="option-row"><button className="active" type="button">{product.unit}</button><button type="button">Paket hemat</button><button type="button">Bundling</button></div>
                 <h3>Jumlah</h3>
@@ -117,7 +121,7 @@ export function SnapProductPage({ productId }: { productId: string }) {
             <section className="product-tabs">
               <div className="tab-head"><button className="active" type="button">Deskripsi</button><button type="button">Nutrisi</button><button type="button">Ulasan</button><button type="button">Pengiriman & Retur</button></div>
               <div className="tab-grid">
-                <div><p>{product.description}</p><ul><li>Produk mengikuti cabang aktif</li><li>Stok mengikuti cabang aktif</li><li>Diskon mengikuti promo yang berlaku</li></ul></div>
+                <div><p>{product.description}</p><ul><li>SKU: {product.sku ?? "Mengikuti data produk"}</li><li>Brand: {product.brand ?? "Market Snap"}</li><li>{product.storageInfo ?? "Produk mengikuti instruksi penyimpanan pada kemasan"}</li><li>Stok mengikuti cabang aktif</li><li>Diskon mengikuti promo yang berlaku</li></ul></div>
                 <div className="nutrition-card"><h3>Nutrisi (per 100 g)</h3><p>Energi <strong>52 kkal</strong></p><p>Karbohidrat <strong>13.8 g</strong></p><p>Serat <strong>2.4 g</strong></p><p>Vitamin C <strong>4.6 mg</strong></p></div>
                 <div className="review-card"><h3>Ulasan Pelanggan</h3><strong>4.8 <small>/5</small></strong><p>Rating dummy untuk tampilan</p><button type="button">Lihat semua ulasan</button></div>
               </div>

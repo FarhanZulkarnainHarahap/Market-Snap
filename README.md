@@ -210,6 +210,16 @@ npm run start    # Start production server
 npm run lint     # Run ESLint
 ```
 
+## Local Brand Assets
+
+Market Snap keeps stable local assets under `public/brand`, `public/banners`, `public/categories`, `public/products`, `public/illustrations`, and `public/placeholders`.
+
+Regenerate the SVG asset set after changing seed product/category names:
+
+```bash
+node scripts/generate-market-assets.mjs
+```
+
 ## Deploy to Vercel
 
 This folder can be deployed as a standalone frontend repository.

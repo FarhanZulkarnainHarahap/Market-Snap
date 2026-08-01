@@ -7454,3 +7454,339 @@ body:has(.mobile-grocery-nav) {
     max-width: none;
   }
 }
+
+/* Market Snap active customer experience overrides */
+.snap-announcement {
+  align-items: center;
+  background: linear-gradient(90deg, #0b5d35, #168a4a);
+  border-radius: 8px;
+  color: #fff;
+  display: flex;
+  font-size: 13px;
+  gap: 12px;
+  grid-column: 1 / -1;
+  justify-content: center;
+  min-height: 34px;
+  padding: 6px 12px;
+}
+
+.snap-announcement span,
+.snap-announcement a {
+  background: rgba(255, 255, 255, .16);
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 900;
+  padding: 5px 9px;
+}
+
+.snap-header-search {
+  align-items: center;
+  background: #f6faf4;
+  border: 1px solid #dfe8df;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 20px 1fr auto;
+  min-height: 44px;
+  padding: 0 8px 0 12px;
+}
+
+.snap-header-search input {
+  background: transparent;
+  border: 0;
+  color: #17211b;
+  min-width: 0;
+  outline: 0;
+}
+
+.snap-header-search button,
+.icon-action,
+.product-detail-link {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  font-weight: 900;
+  justify-content: center;
+}
+
+.snap-header-search button {
+  background: #168a4a;
+  border: 0;
+  color: #fff;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.icon-action {
+  background: #fff;
+  border: 1px solid #cfd9d0;
+  color: #0b5d35;
+  height: 40px;
+  width: 40px;
+}
+
+.home-command-bar,
+.home-newsletter,
+.shopping-flow {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1280px;
+  width: calc(100% - 40px);
+}
+
+.home-command-bar {
+  align-items: center;
+  background: #fffdf5;
+  border: 1px solid #e8eadf;
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(11, 43, 24, .06);
+  display: grid;
+  gap: 10px;
+  margin-top: -10px;
+  padding: 12px;
+}
+
+.home-command-bar a,
+.home-command-bar span,
+.home-search-link {
+  align-items: center;
+  color: #17211b;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  min-height: 42px;
+}
+
+.home-search-link {
+  background: #fff;
+  border: 1px solid #dfe8df;
+  border-radius: 8px;
+  padding: 0 14px;
+}
+
+.category-rail {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.category-rail a {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e1eadf;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  min-height: 132px;
+  padding: 14px;
+}
+
+.category-rail img {
+  height: 56px;
+  width: 56px;
+}
+
+.category-rail span {
+  color: #17211b;
+  font-weight: 950;
+}
+
+.category-rail small,
+.product-card-kicker,
+.price-stack small {
+  color: #647067;
+}
+
+.home-toast {
+  background: #e9f7e8;
+  border: 1px solid #b8ddb5;
+  border-radius: 8px;
+  color: #0b5d35;
+  font-weight: 900;
+  margin: 12px auto 0;
+  max-width: 1280px;
+  padding: 12px 16px;
+  width: calc(100% - 40px);
+}
+
+.shopping-flow {
+  display: grid;
+  gap: 12px;
+  padding: 26px 0;
+}
+
+.shopping-flow article,
+.home-newsletter {
+  background: #fff;
+  border: 1px solid #e1eadf;
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(11, 43, 24, .05);
+  padding: 18px;
+}
+
+.shopping-flow article strong {
+  background: #ff8a3d;
+  border-radius: 999px;
+  color: #fff;
+  display: inline-grid;
+  height: 34px;
+  place-items: center;
+  width: 34px;
+}
+
+.shopping-flow article h3 {
+  color: #0b5d35;
+  font-size: 20px;
+  margin-top: 12px;
+}
+
+.shopping-flow article p,
+.home-newsletter p {
+  color: #647067;
+  line-height: 1.7;
+  margin-top: 8px;
+}
+
+.home-newsletter {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.home-newsletter h2 {
+  color: #0b5d35;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 950;
+  line-height: 1.1;
+  margin-top: 6px;
+}
+
+.product-card-kicker {
+  align-items: center;
+  display: flex;
+  font-size: 11px;
+  font-weight: 900;
+  gap: 8px;
+  justify-content: space-between;
+  min-height: 16px;
+  text-transform: uppercase;
+}
+
+.product-card-kicker small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.price-stack {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.price-stack small {
+  text-decoration: line-through;
+}
+
+.stock-dot {
+  background: #dc3f3f;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+  left: 10px;
+  padding: 7px 9px;
+  position: absolute;
+  top: 10px;
+}
+
+.stock-warning {
+  color: #dc3f3f !important;
+  font-weight: 900;
+}
+
+.product-detail-link {
+  background: #fff;
+  border: 1px solid #cfd9d0;
+  color: #0b5d35;
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+.product-spec-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+  margin: 16px 0;
+}
+
+.product-spec-grid span {
+  background: #f7fbf7;
+  border: 1px solid #dfe8df;
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.product-spec-grid small {
+  color: #647067;
+  font-weight: 850;
+}
+
+.product-spec-grid strong {
+  color: #17211b;
+  font-size: 14px;
+}
+
+@media (min-width: 720px) {
+  .snap-header {
+    grid-template-columns: auto minmax(220px, 1fr) auto;
+  }
+
+  .snap-brand {
+    grid-column: 1;
+  }
+
+  .snap-nav {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .snap-header-search {
+    grid-column: 2;
+  }
+
+  .snap-actions {
+    grid-column: 3;
+  }
+
+  .home-command-bar {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .category-rail {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .shopping-flow {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .home-newsletter {
+    grid-template-columns: 1fr auto;
+  }
+
+  .product-spec-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 719px) {
+  .snap-announcement,
+  .snap-header-search,
+  .icon-action {
+    display: none;
+  }
+}

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FiChevronRight, FiSearch, FiSliders } from "react-icons/fi";
 import { addCartItem, fetchCart, fetchCategories, fetchProducts, fetchStores } from "@/lib/api";
 import { rupiah } from "@/lib/format";
@@ -92,23 +93,37 @@ export function SnapHomePage() {
 }
 
 export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [state, setState] = useState(defaultState);
-  const [query, setQuery] = useState(initialSearch);
-  const [category, setCategory] = useState("Semua");
-  const [sort, setSort] = useState("featured");
-  const [storeId, setStoreId] = useState("");
-  const [onlyStock, setOnlyStock] = useState(true);
-  const [onlyPromo, setOnlyPromo] = useState(false);
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(100000);
+  const [query, setQuery] = useState(initialSearch || searchParams.get("search") || "");
+  const [debouncedQuery, setDebouncedQuery] = useState(initialSearch || searchParams.get("search") || "");
+  const [category, setCategory] = useState(searchParams.get("category") || "Semua");
+  const [sort, setSort] = useState(searchParams.get("sort") || "featured");
+  const [storeId, setStoreId] = useState(searchParams.get("storeId") || "");
+  const [onlyStock, setOnlyStock] = useState(searchParams.get("inStock") !== "false");
+  const [onlyPromo, setOnlyPromo] = useState(searchParams.get("promo") === "true");
+  const [minPrice, setMinPrice] = useState(Number(searchParams.get("minPrice") ?? 0));
+  const [maxPrice, setMaxPrice] = useState(Number(searchParams.get("maxPrice") ?? 100000));
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
   useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(query), 320);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
     const params: Record<string, string> = { limit: "48", sort };
-    if (query.trim()) params.search = query.trim();
+    if (debouncedQuery.trim()) params.search = debouncedQuery.trim();
     if (category !== "Semua" && category !== "Semua Produk") params.category = category;
     if (storeId) params.storeId = storeId;
+    if (onlyStock) params.inStock = "true";
+    if (onlyPromo) params.promo = "true";
+    if (minPrice > 0) params.minPrice = String(minPrice);
+    if (maxPrice < 100000) params.maxPrice = String(maxPrice);
+    router.replace(`${pathname}${catalogQueryString(params)}`, { scroll: false });
     const cacheKey = catalogCacheKey(params);
     const cached = readStaleCache<CatalogState>(cacheKey);
     if (cached) window.setTimeout(() => setState({ ...cached, loading: false, refreshing: true }), 0);
@@ -116,7 +131,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
       writeStaleCache(cacheKey, next, 1000 * 60 * 3);
       setState(next);
     });
-  }, [category, query, sort, storeId]);
+  }, [category, debouncedQuery, maxPrice, minPrice, onlyPromo, onlyStock, pathname, router, sort, storeId]);
 
   const visibleProducts = useMemo(() => {
     return state.products.filter((product) => {
@@ -153,6 +168,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
     setMinPrice(0);
     setMaxPrice(100000);
     setQuery("");
+    setDebouncedQuery("");
   }
 
   async function addProduct(product: Product) {
@@ -241,7 +257,11 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
           <div className="catalog-results">
             <div className="catalog-results-head">
               <div className="filter-chips">
-                {["Semua Produk", "Promo", "Stok Tersedia"].map((chip) => <button className={chip === "Semua Produk" ? "active" : ""} key={chip} type="button">{chip}</button>)}
+                {[
+                  ["Semua Produk", () => clearFilters(), category === "Semua" && !onlyPromo && !onlyStock],
+                  ["Promo", () => setOnlyPromo((value) => !value), onlyPromo],
+                  ["Stok Tersedia", () => setOnlyStock((value) => !value), onlyStock]
+                ].map(([chip, action, active]) => <button className={active ? "active" : ""} key={String(chip)} onClick={action as () => void} type="button">{String(chip)}</button>)}
               </div>
               {state.refreshing && <span className="refreshing-copy">Memperbarui data...</span>}
               <button className="clear-filter" onClick={clearFilters} type="button"><FiSliders /> Hapus filter</button>
@@ -353,6 +373,15 @@ async function loadCatalog(extra: Record<string, string>): Promise<CatalogState>
 
 function catalogCacheKey(params: Record<string, string>): string {
   return `catalog:${Object.entries(params).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `${key}-${value}`).join(":")}`;
+}
+
+function catalogQueryString(params: Record<string, string>) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (key !== "limit" && value) query.set(key, value);
+  }
+  const text = query.toString();
+  return text ? `?${text}` : "";
 }
 
 async function browserLocation(): Promise<{ lat: number; lng: number } | null> {

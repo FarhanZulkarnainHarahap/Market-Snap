@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   FiArrowRight,
@@ -17,6 +18,7 @@ import {
   FiMenu,
   FiPackage,
   FiPlus,
+  FiSearch,
   FiUser,
   FiShield,
   FiShoppingBag,
@@ -59,8 +61,10 @@ const navItems = [
 ] as const;
 
 export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: HeaderProps) {
+  const router = useRouter();
   const [locationLabel, setLocationLabel] = useState(readCachedLocationLabel);
   const [session, setSession] = useState<HeaderSession>(readSession);
+  const [searchQuery, setSearchQuery] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -139,8 +143,15 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
     { key: "location", href: CUSTOMER_PROFILE, label: locationLabel, icon: FiMapPin },
   ] as const;
 
+  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    router.push(query ? `/catalog?search=${encodeURIComponent(query)}` : "/catalog");
+  }
+
   return (
     <header className="snap-header">
+      {!simple && <div className="snap-announcement"><span>Fresh morning sale</span><strong>Gratis ongkir pilihan untuk order mulai Rp 100.000</strong><Link href="/catalog?promo=true">Lihat promo</Link></div>}
       <Link className="snap-brand" href={CUSTOMER_HOME}><span>MARKET SNAP</span></Link>
       {!simple && (
         <button
@@ -168,8 +179,17 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
           <Link href={CUSTOMER_ABOUT}>Tentang Kami</Link>
         </nav>
       )}
+      {!simple && (
+        <form className="snap-header-search" onSubmit={submitSearch} role="search">
+          <FiSearch aria-hidden="true" />
+          <input aria-label="Cari produk Market Snap" onChange={(event) => setSearchQuery(event.target.value)} placeholder="Cari buah, sayur, susu, promo..." value={searchQuery} />
+          <button type="submit">Cari</button>
+        </form>
+      )}
       <div className="snap-actions">
         <button className="location-chip" onClick={() => refreshLocationLabel(setLocationLabel)} title="Perbarui lokasi dari GPS" type="button"><FiMapPin /> {locationLabel}</button>
+        {!simple && session.isLoggedIn && <Link aria-label="Wishlist" className="icon-action" href="/profile/wishlist"><FiHeart /></Link>}
+        {!simple && session.isLoggedIn && <Link aria-label="Notifikasi" className="icon-action" href={CUSTOMER_NOTIFICATIONS}><FiBell /></Link>}
         {!simple && (session.isLoggedIn ? (
           <div className="profile-menu-wrap">
             <button
@@ -404,24 +424,49 @@ export function GroceryVisual({ compact = false, variant = "hero" }: { compact?:
   );
 }
 
-export function ProductCard({ product, storeId, disabled = false, onAdd }: { product: Product; storeId?: string; disabled?: boolean; onAdd?: (product: Product) => void }) {
+export function ProductCard({ product, storeId, disabled = false, onAdd }: { product: Product; storeId?: string; disabled?: boolean; onAdd?: (product: Product) => Promise<void> | void }) {
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
   const activeStoreId = storeId ?? Object.keys(product.stockByStore)[0] ?? "";
   const stock = product.stockByStore[activeStoreId] ?? 0;
   const productHref = `/products/${product.slug ?? product.id}`;
+  const estimatedOriginal = product.discount ? Math.round(product.price * 1.12) : 0;
+
+  async function handleAdd() {
+    if (!onAdd || adding || disabled || stock < 1) return;
+    setAdding(true);
+    try {
+      await onAdd(product);
+      setAdded(true);
+      window.setTimeout(() => setAdded(false), 1800);
+    } finally {
+      setAdding(false);
+    }
+  }
+
   return (
     <article className="snap-product-card">
       <Link className="product-picture" href={productHref}>
         <Image alt={product.name} height={220} src={product.image} width={260} />
         {product.discount && <span className="promo-dot">{product.discount}</span>}
+        {stock < 1 && <span className="stock-dot">Habis</span>}
       </Link>
       <div className="snap-product-body">
+        <div className="product-card-kicker"><span>{product.brand ?? product.category}</span><small>{product.sku ?? product.category}</small></div>
         <Link href={productHref}><h3>{product.name}</h3></Link>
-        <p>{product.unit}</p>
-        <strong>{rupiah(product.price)}</strong>
-        <small>Stok: {stock}</small>
+        <p>{product.shortInfo ?? product.unit}</p>
+        <div className="price-stack">
+          {estimatedOriginal > 0 && <small>{rupiah(estimatedOriginal)}</small>}
+          <strong>{rupiah(product.price)}</strong>
+        </div>
+        <small className={stock < 6 ? "stock-warning" : ""}>{stock < 1 ? "Stok habis" : stock < 6 ? `Sisa ${stock}` : `Stok: ${stock}`}</small>
         <div className="product-card-bottom">
-          <span>{product.badge ?? product.category}</span>
-          <button disabled={disabled || stock < 1} onClick={() => onAdd?.(product)} type="button"><FiPlus /> Keranjang</button>
+          <span>{product.discount ? "Promo" : product.badge ?? product.category}</span>
+          {onAdd ? (
+            <button disabled={disabled || adding || stock < 1} onClick={handleAdd} type="button"><FiPlus /> {adding ? "Menambah..." : added ? "Ditambahkan" : "Keranjang"}</button>
+          ) : (
+            <Link className="product-detail-link" href={productHref}>Detail</Link>
+          )}
         </div>
       </div>
     </article>

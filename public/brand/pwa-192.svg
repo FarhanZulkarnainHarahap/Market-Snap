@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" role="img" aria-label="Market Snap">
+    <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#168A4A"/><stop offset="1" stop-color="#B7E34A"/></linearGradient></defs>
+    <rect width="400" height="400" rx="48" fill="#FFFDF5"/>
+    <circle cx="326" cy="78" r="74" fill="#B7E34A" opacity=".28"/><circle cx="74" cy="324" r="88" fill="#168A4A" opacity=".2"/>
+    
+    <rect x="76" y="104" width="248" height="164" rx="42" fill="#fff" opacity=".92"/>
+    <path d="M135 198h132l-18 48H153l-18-48Z" fill="#168A4A"/>
+    <path d="M155 196c0-44 88-44 88 0" fill="none" stroke="#0B5D35" stroke-width="14" stroke-linecap="round"/>
+    <text x="200" y="318" text-anchor="middle" fill="#17211B" font-family="Arial, sans-serif" font-size="31" font-weight="900">MARKET SNAP</text>
+  
+  </svg>

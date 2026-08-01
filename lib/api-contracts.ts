@@ -11,11 +11,16 @@ export type ApiStore = {
 export type ApiProduct = {
   id: string;
   slug?: string;
+  sku?: string | null;
   name: string;
+  brand?: string | null;
   category: string;
   price: number;
   unit: string;
   description?: string;
+  shortInfo?: string | null;
+  storageInfo?: string | null;
+  weightGram?: number | null;
   image: string;
   images?: ApiProductImage[];
   primaryImage?: ApiProductImage;
