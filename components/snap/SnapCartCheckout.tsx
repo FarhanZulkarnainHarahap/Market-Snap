@@ -621,7 +621,7 @@ export function SnapCheckoutPage() {
         location: selectedAddress ? { lat: selectedAddress.lat, lng: selectedAddress.lng } : undefined,
         orderNote,
         paymentChannel: selectedPayment.id,
-        paymentMethod: selectedPayment.provider === "xendit" ? "xendit" : "midtrans",
+        paymentMethod: "xendit",
         selectedCartItemIds: checkoutSelection.selectedCartItemIds.length ? checkoutSelection.selectedCartItemIds : items.map(cartItemKey),
         shippingMethod: selectedDelivery.id,
         storeId: store.id,

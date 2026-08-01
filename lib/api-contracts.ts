@@ -160,8 +160,6 @@ export type ApiOrder = {
   paymentStatus?: string | null;
   paymentRedirectUrl?: string | null;
   paymentInvoiceUrl?: string | null;
-  midtransTransactionId?: string | null;
-  midtransTransactionStatus?: string | null;
   trackingNumber?: string | null;
   courierName?: string | null;
   estimatedArrival?: string | null;
@@ -211,7 +209,7 @@ export type CreateOrderOptions = {
   location?: { lat: number; lng: number };
   orderNote?: string;
   paymentChannel?: string;
-  paymentMethod?: "midtrans" | "xendit";
+  paymentMethod?: "xendit";
   selectedCartItemIds?: string[];
   shippingMethod?: string;
   storeId?: string;

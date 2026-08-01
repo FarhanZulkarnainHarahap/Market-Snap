@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="144" height="72" viewBox="0 0 144 72" role="img" aria-labelledby="title">
-  <title id="title">Midtrans</title>
-  <rect width="144" height="72" rx="10" fill="#eef7ff"/>
-  <rect x="14" y="18" width="34" height="36" rx="7" fill="#1a73e8"/>
-  <rect x="23" y="27" width="16" height="18" rx="3" fill="#ffffff"/>
-  <path d="M59 26h8l7 12 7-12h8v21h-7V36l-6 11h-4l-6-11v11h-7z" fill="#243b53"/>
-  <text x="59" y="57" fill="#1a73e8" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Midtrans</text>
-</svg>
