@@ -15,6 +15,7 @@ type CatalogState = {
   categories: string[];
   stores: Store[];
   store?: Store;
+  locationMode: "gps" | "manual";
   serviceable: boolean;
   cartCount: number;
   message: string;
@@ -26,6 +27,7 @@ const defaultState: CatalogState = {
   products: [],
   categories: ["Semua"],
   stores: [],
+  locationMode: "manual",
   serviceable: true,
   cartCount: 0,
   message: "",
@@ -108,6 +110,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
   const [maxPrice, setMaxPrice] = useState(Number(searchParams.get("maxPrice") ?? 100000));
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const gpsActive = state.locationMode === "gps";
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(query), 320);
@@ -118,7 +121,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
     const params: Record<string, string> = { limit: "48", sort };
     if (debouncedQuery.trim()) params.search = debouncedQuery.trim();
     if (category !== "Semua" && category !== "Semua Produk") params.category = category;
-    if (storeId) params.storeId = storeId;
+    if (!gpsActive && storeId) params.storeId = storeId;
     if (onlyStock) params.inStock = "true";
     if (onlyPromo) params.promo = "true";
     if (minPrice > 0) params.minPrice = String(minPrice);
@@ -130,8 +133,9 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
     loadCatalog(params).then((next) => {
       writeStaleCache(cacheKey, next, 1000 * 60 * 3);
       setState(next);
+      if (next.locationMode === "gps" && storeId) setStoreId("");
     });
-  }, [category, debouncedQuery, maxPrice, minPrice, onlyPromo, onlyStock, pathname, router, sort, storeId]);
+  }, [category, debouncedQuery, gpsActive, maxPrice, minPrice, onlyPromo, onlyStock, pathname, router, sort, storeId]);
 
   const visibleProducts = useMemo(() => {
     return state.products.filter((product) => {
@@ -193,17 +197,19 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
           </div>
           <GroceryVisual compact variant="catalog" />
         </section>
-        <section className="catalog-search-card" aria-label="Filter katalog">
+        <section className={gpsActive ? "catalog-search-card gps-active" : "catalog-search-card"} aria-label="Filter katalog">
           <label className="search-box">
             <input onChange={(event) => setQuery(event.target.value)} placeholder="Cari produk segar, sehat, dan berkualitas..." value={query} />
             <FiSearch />
           </label>
-          <label>
-            <small>Cabang</small>
-            <select value={storeId || state.store?.id || ""} onChange={(event) => setStoreId(event.target.value)}>
-              {state.stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}
-            </select>
-          </label>
+          {!gpsActive && (
+            <label>
+              <small>Cabang</small>
+              <select value={storeId || state.store?.id || ""} onChange={(event) => setStoreId(event.target.value)}>
+                {state.stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}
+              </select>
+            </label>
+          )}
           <label>
             <small>Urutkan</small>
             <select onChange={(event) => setSort(event.target.value)} value={sort}>
@@ -250,7 +256,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
             <label className="switch-row">Produk Promo <input checked={onlyPromo} onChange={(event) => setOnlyPromo(event.target.checked)} type="checkbox" /></label>
             <div className="promo-panel">
               <strong>Promo aktif</strong>
-              <p>Diskon mengikuti cabang terpilih</p>
+              <p>Diskon mengikuti {gpsActive ? "cabang terdekat dari GPS" : "cabang terpilih"}</p>
               <Link href={CUSTOMER_CATALOG}>Belanja Sekarang</Link>
             </div>
           </aside>
@@ -280,7 +286,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
                     <p>Coba ubah kategori, harga, lokasi, atau filter yang digunakan.</p>
                     <div>
                       <button onClick={clearFilters} type="button">Hapus Filter</button>
-                      <button onClick={() => setFilterOpen(true)} type="button">Ganti Lokasi</button>
+                      {!gpsActive && <button onClick={() => setFilterOpen(true)} type="button">Ganti Lokasi</button>}
                       <Link href={CUSTOMER_CATALOG}>Lihat Semua Produk</Link>
                     </div>
                   </div>
@@ -299,12 +305,14 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
           <section aria-modal="true" className="mobile-bottom-sheet" role="dialog">
             <header><span /> <h2>Filter produk</h2><button aria-label="Tutup filter" onClick={() => setFilterOpen(false)} type="button">X</button></header>
             <div className="sheet-content">
-              <label>
-                <small>Cabang</small>
-                <select value={storeId || state.store?.id || ""} onChange={(event) => setStoreId(event.target.value)}>
-                  {state.stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}
-                </select>
-              </label>
+              {!gpsActive && (
+                <label>
+                  <small>Cabang</small>
+                  <select value={storeId || state.store?.id || ""} onChange={(event) => setStoreId(event.target.value)}>
+                    {state.stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}
+                  </select>
+                </label>
+              )}
               <div className="sheet-chip-grid">
                 {["Semua Produk", ...state.categories.filter((item) => item !== "Semua")].map((item) => (
                   <button className={item === category || (item === "Semua Produk" && category === "Semua") ? "active" : ""} key={item} onClick={() => setCategory(item === "Semua Produk" ? "Semua" : item)} type="button">{item}</button>
@@ -344,6 +352,7 @@ async function loadCatalog(extra: Record<string, string>): Promise<CatalogState>
   const params = new URLSearchParams(extra);
   const point = await browserLocation();
   if (point) {
+    params.delete("storeId");
     params.set("lat", String(point.lat));
     params.set("lng", String(point.lng));
   }
@@ -360,6 +369,7 @@ async function loadCatalog(extra: Record<string, string>): Promise<CatalogState>
       categories,
       stores: stores.length ? stores : [catalog.store],
       store: catalog.store,
+      locationMode: point ? "gps" : "manual",
       serviceable: catalog.serviceable,
       cartCount: cart.summary.totalItems,
       message: "",
@@ -388,9 +398,45 @@ async function browserLocation(): Promise<{ lat: number; lng: number } | null> {
   if (typeof navigator === "undefined" || !navigator.geolocation) return null;
   return new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
-      (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
-      () => resolve(null),
+      (position) => {
+        const point = { lat: position.coords.latitude, lng: position.coords.longitude };
+        cacheCatalogLocation(point);
+        resolve(point);
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          clearCatalogLocationCache();
+          resolve(null);
+          return;
+        }
+        resolve(readCachedCatalogLocation());
+      },
       { maximumAge: 60_000, timeout: 1800 }
     );
   });
+}
+
+function cacheCatalogLocation(point: { lat: number; lng: number }) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem("market-snap-location-lat", String(point.lat));
+  window.localStorage.setItem("market-snap-location-lng", String(point.lng));
+  window.localStorage.setItem("market-snap-location-updated-at", String(Date.now()));
+}
+
+function readCachedCatalogLocation(): { lat: number; lng: number } | null {
+  if (typeof window === "undefined") return null;
+  const lat = Number(window.localStorage.getItem("market-snap-location-lat"));
+  const lng = Number(window.localStorage.getItem("market-snap-location-lng"));
+  const updatedAt = Number(window.localStorage.getItem("market-snap-location-updated-at"));
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(updatedAt)) return null;
+  if (Date.now() - updatedAt > 1000 * 60 * 30) return null;
+  return { lat, lng };
+}
+
+function clearCatalogLocationCache() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem("market-snap-location-label");
+  window.localStorage.removeItem("market-snap-location-lat");
+  window.localStorage.removeItem("market-snap-location-lng");
+  window.localStorage.removeItem("market-snap-location-updated-at");
 }

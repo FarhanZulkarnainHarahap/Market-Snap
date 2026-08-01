@@ -650,6 +650,10 @@ body {
   gap: 6px;
 }
 
+.catalog-search-card.gps-active {
+  grid-template-columns: 1fr;
+}
+
 .catalog-search-card input,
 .catalog-search-card select {
   background: #fff;
@@ -5028,6 +5032,18 @@ body {
 
 .line-chart {
   height: 210px;
+}
+
+@media (min-width: 760px) {
+  .catalog-search-card.gps-active {
+    grid-template-columns: minmax(0, 1fr) 190px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .catalog-search-card.gps-active {
+    grid-template-columns: minmax(0, 1fr) 210px;
+  }
 }
 
 @media (min-width: 760px) {
