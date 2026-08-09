@@ -97,7 +97,10 @@ export function SnapHeader({ active = "home", simple = false, cartCount = 0 }: H
           saveSession({ token: "", user });
           setSession(sessionFromUser(user));
         })
-        .catch(() => undefined);
+        .catch(() => {
+          clearBrowserSession();
+          setSession({ email: "", isLoggedIn: false, name: "" });
+        });
     }
     refreshLocationLabel(setLocationLabel);
     fetchStores()
@@ -352,6 +355,14 @@ function readSession(): HeaderSession {
     isLoggedIn: Boolean(role || name),
     name
   };
+}
+
+function clearBrowserSession() {
+  if (typeof window === "undefined") return;
+  for (const key of ["market-snap-role", "market-snap-user-id", "market-snap-user-name", "market-snap-user-email", "market-snap-user-avatar", "market-snap-auth-provider"]) {
+    window.localStorage.removeItem(key);
+    document.cookie = `${key}=; path=/; max-age=0; SameSite=Lax`;
+  }
 }
 
 function sessionFromUser(user: ApiUser): HeaderSession {
