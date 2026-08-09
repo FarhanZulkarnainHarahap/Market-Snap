@@ -3,11 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiAlertCircle, FiCheck, FiCheckCircle, FiClock, FiEdit2, FiHome, FiLock, FiMinus, FiPlus, FiRefreshCcw, FiShoppingCart, FiTag, FiTrash2, FiTruck, FiX, FiZap } from "react-icons/fi";
+import { toast as sonnerToast } from "sonner";
 import { createAddress, createOrderFromCart, deleteAddress, deleteCartItem, deleteSelectedCartItems, fetchAddresses, fetchCart, fetchCheckoutOptions, fetchNearestStore, fetchStores, fetchVouchers, updateAddress, updateCartItem, validateCartVoucher } from "@/lib/api";
 import { rupiah } from "@/lib/format";
 import type { Address, CartItem, CheckoutOption, Store, Voucher } from "@/lib/types";
+import { useCheckoutDraftStore } from "@/stores/checkout-store";
 import { BenefitStrip, PanelSkeleton, SnapFooter, SnapHeader } from "./SnapCommon";
 
 const deliveryDates = [
@@ -47,6 +50,7 @@ const CHECKOUT_STATE_KEY = "market-snap-checkout-selection";
 
 export function SnapCartPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [items, setItems] = useState<CartItem[]>([]);
   const [store, setStore] = useState<Store>();
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
@@ -58,6 +62,8 @@ export function SnapCartPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [busyAction, setBusyAction] = useState("");
   const selectedItems = useMemo(() => items.filter((item) => selectedIds.has(cartItemKey(item))), [items, selectedIds]);
+  const vouchersQuery = useQuery({ queryKey: ["cart", "vouchers"], queryFn: fetchVouchers, enabled: status === "success" });
+  const availableVouchers = vouchersQuery.data ?? vouchers;
   const subtotal = useMemo(() => selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0), [selectedItems]);
   const discount = Math.min(voucherDiscount, subtotal);
   const shipping = selectedItems.length ? 10000 : 0;
@@ -131,10 +137,13 @@ export function SnapCartPage() {
         await updateCartItem(item.cartId, normalizedQuantity);
       }
       await loadCart();
+      await queryClient.invalidateQueries({ queryKey: ["cart"] });
       setToast(quantity < 1 ? "Produk berhasil dihapus." : "Jumlah produk diperbarui.");
+      sonnerToast.success(quantity < 1 ? "Produk berhasil dihapus." : "Jumlah produk diperbarui.");
     } catch (error) {
       setItems(previousItems);
       setMessage(error instanceof Error ? error.message : "Gagal memperbarui cart.");
+      sonnerToast.error(error instanceof Error ? error.message : "Gagal memperbarui cart.");
     } finally {
       setBusyAction("");
     }
@@ -167,9 +176,12 @@ export function SnapCartPage() {
     try {
       await deleteSelectedCartItems(ids);
       setToast("Produk terpilih berhasil dihapus.");
+      sonnerToast.success("Produk terpilih berhasil dihapus.");
       await loadCart();
+      await queryClient.invalidateQueries({ queryKey: ["cart"] });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Gagal menghapus produk terpilih.");
+      sonnerToast.error(error instanceof Error ? error.message : "Gagal menghapus produk terpilih.");
     } finally {
       setBusyAction("");
     }
@@ -187,10 +199,12 @@ export function SnapCartPage() {
       setVoucherCode(result.voucher.code);
       setVoucherDiscount(result.discount);
       setToast(result.message);
+      sonnerToast.success(result.message);
       setMessage("");
     } catch (error) {
       setVoucherDiscount(0);
       setMessage(error instanceof Error ? error.message : "Voucher tidak dapat digunakan.");
+      sonnerToast.error(error instanceof Error ? error.message : "Voucher tidak dapat digunakan.");
     } finally {
       setBusyAction("");
     }
@@ -279,10 +293,10 @@ export function SnapCartPage() {
                     aria-label="Pilih voucher tersedia"
                     disabled={!selectedItems.length}
                     onChange={(event) => setVoucherCode(event.target.value)}
-                    value={vouchers.some((voucher) => voucher.code === voucherCode) ? voucherCode : ""}
+                    value={availableVouchers.some((voucher) => voucher.code === voucherCode) ? voucherCode : ""}
                   >
                     <option value="">Pilih voucher tersedia</option>
-                    {vouchers.map((voucher) => (
+                    {availableVouchers.map((voucher) => (
                       <option key={voucher.id} value={voucher.code}>
                         {voucher.code} - {voucher.title}
                       </option>
@@ -405,6 +419,7 @@ function shippingIcon(id: string) {
 }
 
 export function SnapCheckoutPage() {
+  const updateCheckoutDraft = useCheckoutDraftStore((state) => state.updateDraft);
   const [now, setNow] = useState(() => new Date());
   const [items, setItems] = useState<CartItem[]>([]);
   const [store, setStore] = useState<Store>();
@@ -578,6 +593,16 @@ export function SnapCheckoutPage() {
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
   }, [addressModalOpen, branchModalOpen]);
+
+  useEffect(() => {
+    updateCheckoutDraft({
+      addressId: selectedAddressId,
+      deliveryId: selectedDeliveryId,
+      paymentId: selectedPaymentId,
+      storeId: store?.id ?? "",
+      voucherCode
+    });
+  }, [selectedAddressId, selectedDeliveryId, selectedPaymentId, store?.id, updateCheckoutDraft, voucherCode]);
 
   async function syncNearestStore() {
     setMessage("");

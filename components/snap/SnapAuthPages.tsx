@@ -2,8 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { FiAlertCircle, FiArrowLeft, FiCheck, FiCheckCircle, FiEye, FiEyeOff, FiLock, FiLogIn, FiMail, FiShoppingBag, FiTag, FiTruck, FiUser, FiUserPlus, FiX } from "react-icons/fi";
+import { toast } from "sonner";
+import { z } from "zod";
 import { facebookAuthUrl, googleAuthUrl, loginUser, registerUser, webRole } from "@/lib/api";
 import { GroceryVisual } from "./SnapCommon";
 
@@ -15,6 +19,13 @@ type AuthModal = {
 };
 
 type RegisterStep = 1 | 2 | 3;
+
+const loginSchema = z.object({
+  email: z.string().email("Masukkan email yang valid."),
+  password: z.string().min(8, "Password minimal 8 karakter.")
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
 
 type RegisterForm = {
   name: string;
@@ -29,6 +40,10 @@ export function SnapLoginPage() {
   const [busy, setBusy] = useState(false);
   const [modal, setModal] = useState<AuthModal | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const { formState: { errors }, handleSubmit, register } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" }
+  });
 
   useEffect(() => {
     if (!modal?.redirectTo) return;
@@ -36,14 +51,13 @@ export function SnapLoginPage() {
     return () => window.clearTimeout(timeout);
   }, [modal, router]);
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
+  const submit = handleSubmit(async (values) => {
     setBusy(true);
     try {
-      const payload = await loginUser(String(form.get("email")), String(form.get("password")));
+      const payload = await loginUser(values.email, values.password);
       const role = webRole(payload.user.role);
       const redirectTo = role === "admin" ? "/super-admin" : role === "adminStore" ? "/store-admin" : "/";
+      toast.success("Login berhasil");
       setModal({
         variant: "success",
         title: "Login berhasil",
@@ -51,6 +65,7 @@ export function SnapLoginPage() {
         redirectTo
       });
     } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Email atau password belum sesuai.");
       setModal({
         variant: "error",
         title: "Login gagal",
@@ -59,7 +74,7 @@ export function SnapLoginPage() {
     } finally {
       setBusy(false);
     }
-  }
+  });
 
   function closeModal() {
     const redirectTo = modal?.redirectTo;
@@ -75,12 +90,13 @@ export function SnapLoginPage() {
           <h1>Login ke Market Snap</h1>
           <p>Login untuk melanjutkan belanja kebutuhan harian atau mengelola tokomu dengan mudah.</p>
           <form className="capture-form" onSubmit={submit}>
-            <label>Email <span><FiMail /><input name="email" placeholder="your@email.com" required type="email" /></span></label>
+            <label>Email <span><FiMail /><input {...register("email")} placeholder="your@email.com" type="email" /></span>{errors.email && <small className="auth-field-error">{errors.email.message}</small>}</label>
             <PasswordInput
               autoComplete="current-password"
-              name="password"
+              error={errors.password?.message}
               onToggle={() => setShowPassword((current) => !current)}
               placeholder="password123"
+              registration={register("password")}
               show={showPassword}
             />
             <div className="form-between"><label><input defaultChecked type="checkbox" /> Ingat saya</label><Link href="/auth/forgot-password">Lupa password?</Link></div>
@@ -268,20 +284,24 @@ function registerStepCopy(step: RegisterStep) {
 
 function PasswordInput({
   autoComplete,
+  error,
   label = "Password",
   name,
   onChange,
   onToggle,
   placeholder,
+  registration,
   show,
   value
 }: {
   autoComplete: string;
+  error?: string;
   label?: string;
   name?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onToggle: () => void;
   placeholder: string;
+  registration?: UseFormRegisterReturn;
   show: boolean;
   value?: string;
 }) {
@@ -296,14 +316,15 @@ function PasswordInput({
           name={name}
           onChange={onChange}
           placeholder={placeholder}
-          required
           type={show ? "text" : "password"}
           value={value}
+          {...registration}
         />
         <button aria-label={show ? `Sembunyikan ${label}` : `Lihat ${label}`} onClick={onToggle} type="button">
           <Icon />
         </button>
       </span>
+      {error && <small className="auth-field-error">{error}</small>}
     </label>
   );
 }

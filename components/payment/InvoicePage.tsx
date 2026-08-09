@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 import { useEffect, useState } from "react";
 import { FiArrowLeft, FiPrinter } from "react-icons/fi";
 import { fetchInvoice } from "@/lib/api";
@@ -94,7 +96,7 @@ export function InvoicePage() {
                 <b>{item.name}</b>
               </span>
               <span>{item.quantity}</span>
-              <span>{rupiah(item.unitPrice)}</span>
+              <span>{rupiah(item.unitPrice ?? item.finalPrice ?? item.price ?? 0)}</span>
               <span>{rupiah(item.subtotal)}</span>
             </div>
           ))}
@@ -137,5 +139,5 @@ function rupiah(value: number) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  return format(new Date(value), "dd MMM yyyy, HH:mm", { locale: idLocale });
 }

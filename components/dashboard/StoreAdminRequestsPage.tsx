@@ -1,5 +1,6 @@
 "use client";
 
+import { createColumnHelper } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { FiCheck, FiRefreshCw, FiSearch, FiUserCheck, FiX } from "react-icons/fi";
 import { approveStoreAdminRequest, fetchAdminStoreAdminRequests, fetchStores, rejectStoreAdminRequest } from "@/lib/api";
@@ -14,6 +15,8 @@ const statusOptions = [
   { label: "Ditolak", value: "REJECTED" },
   { label: "Dibatalkan", value: "CANCELLED" }
 ];
+
+const requestColumn = createColumnHelper<never, ApiStoreAdminRequest>();
 
 export function StoreAdminRequestsPage() {
   const [requests, setRequests] = useState<ApiStoreAdminRequest[]>([]);
@@ -91,6 +94,13 @@ export function StoreAdminRequestsPage() {
     { label: "Ditolak", value: counts.REJECTED ?? requests.filter((item) => item.status === "REJECTED").length },
     { label: "Total tampil", value: requests.length }
   ], [counts, requests]);
+  const columns = useMemo(() => [
+    requestColumn.accessor((request) => request.user.name, { id: "name" }),
+    requestColumn.accessor("status", { id: "status" }),
+    requestColumn.accessor((request) => request.requestedStore?.name ?? "", { id: "store" }),
+    requestColumn.accessor("createdAt", { id: "createdAt" })
+  ], []);
+  const tableRows = useMemo(() => requests.map((request) => ({ id: request.id, original: request, columnCount: columns.length })), [columns.length, requests]);
 
   return (
     <>
@@ -127,7 +137,9 @@ export function StoreAdminRequestsPage() {
           {message && <p className="account-message">{message}</p>}
           {requests.length ? (
             <div className="request-admin-list">
-              {requests.map((request) => (
+              {tableRows.map((row) => {
+                const request = row.original;
+                return (
                 <article className="request-admin-row" key={request.id}>
                   <div>
                     <span className={`request-status ${request.status.toLowerCase()}`}>{requestStatusLabel(request.status)}</span>
@@ -147,7 +159,8 @@ export function StoreAdminRequestsPage() {
                     ) : <strong>{request.assignedStore?.name ?? request.reviewedBy?.name ?? "Selesai direview"}</strong>}
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="management-empty-panel">

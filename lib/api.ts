@@ -469,7 +469,7 @@ export async function validateCartVoucher(code: string, selectedCartItemIds: str
   return { ...payload.data, voucher: mapVoucher(payload.data.voucher), message: payload.message };
 }
 
-export async function createOrderFromCart(items: CartItem[], total: number, options: CreateOrderOptions = {}) {
+export async function createOrderFromCart(items: CartItem[], _displayTotal: number, options: CreateOrderOptions = {}) {
   const response = await apiFetch(apiUrl("/orders"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
@@ -482,7 +482,6 @@ export async function createOrderFromCart(items: CartItem[], total: number, opti
       selectedCartItemIds: options.selectedCartItemIds ?? items.map((item) => item.cartId).filter(Boolean),
       shippingMethod: options.shippingMethod ?? options.courier,
       storeId: options.storeId,
-      total,
       items: items.map((item) => ({ productId: item.productId ?? item.id, quantity: item.quantity })),
       location: options.location,
       courier: options.courier,
@@ -605,9 +604,9 @@ function mapOrder(order: ApiOrder): OrderSummary {
       const product = item.product;
       return {
         id: item.id,
-        image: product?.images?.[0]?.url ?? product?.image ?? "/product.png",
-        name: product?.name ?? "Produk",
-        price: item.price,
+        image: item.imageUrl ?? product?.images?.[0]?.url ?? product?.image ?? "/product.png",
+        name: item.productName ?? product?.name ?? "Produk",
+        price: item.finalPrice ?? item.price,
         productId: item.productId,
         quantity: item.quantity
       };

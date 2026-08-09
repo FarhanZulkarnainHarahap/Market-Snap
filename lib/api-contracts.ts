@@ -143,6 +143,12 @@ export type ApiOrderItem = {
   productId: string;
   quantity: number;
   price: number;
+  productName?: string;
+  sku?: string | null;
+  discount?: number;
+  finalPrice?: number;
+  subtotal?: number;
+  imageUrl?: string | null;
   product?: ApiProduct & { images?: { url: string }[] };
 };
 
@@ -254,7 +260,7 @@ export type InvoiceResponse = {
     customer: { email?: string | null; id?: string; name?: string | null; phone?: string | null };
     store: { city?: string | null; id?: string; name?: string | null };
     address: Record<string, unknown>;
-    items: Array<{ id: string; image?: string | null; name: string; productId: string; quantity: number; subtotal: number; unitPrice: number }>;
+    items: Array<{ discount?: number; finalPrice?: number; id: string; image?: string | null; name: string; productId: string; quantity: number; subtotal: number; unitPrice?: number; price?: number }>;
     subtotal: number;
     shippingCost: number;
     serviceFee: number;
