@@ -1,4 +1,4 @@
-const defaultApiUrl = "http://127.0.0.1:4100";
+const defaultApiUrl = "https://api-node.market-snap.web.id";
 
 export function apiUrl(path = ""): string {
   const baseUrl = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? defaultApiUrl);

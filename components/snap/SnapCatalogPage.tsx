@@ -37,6 +37,7 @@ const defaultState: CatalogState = {
 
 const CUSTOMER_CATALOG = "/catalog";
 const CUSTOMER_ABOUT = "/about";
+const DEFAULT_MAX_PRICE = 1_000_000;
 
 export function SnapHomePage() {
   const [state, setState] = useState<CatalogState>(() => {
@@ -104,10 +105,10 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
   const [category, setCategory] = useState(searchParams.get("category") || "Semua");
   const [sort, setSort] = useState(searchParams.get("sort") || "featured");
   const [storeId, setStoreId] = useState(searchParams.get("storeId") || "");
-  const [onlyStock, setOnlyStock] = useState(searchParams.get("inStock") !== "false");
+  const [onlyStock, setOnlyStock] = useState(searchParams.get("inStock") === "true");
   const [onlyPromo, setOnlyPromo] = useState(searchParams.get("promo") === "true");
   const [minPrice, setMinPrice] = useState(Number(searchParams.get("minPrice") ?? 0));
-  const [maxPrice, setMaxPrice] = useState(Number(searchParams.get("maxPrice") ?? 100000));
+  const [maxPrice, setMaxPrice] = useState(Number(searchParams.get("maxPrice") ?? DEFAULT_MAX_PRICE));
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const gpsActive = state.locationMode === "gps";
@@ -125,7 +126,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
     if (onlyStock) params.inStock = "true";
     if (onlyPromo) params.promo = "true";
     if (minPrice > 0) params.minPrice = String(minPrice);
-    if (maxPrice < 100000) params.maxPrice = String(maxPrice);
+    if (maxPrice < DEFAULT_MAX_PRICE) params.maxPrice = String(maxPrice);
     router.replace(`${pathname}${catalogQueryString(params)}`, { scroll: false });
     const cacheKey = catalogCacheKey(params);
     const cached = readStaleCache<CatalogState>(cacheKey);
@@ -170,7 +171,7 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
     setOnlyPromo(false);
     setOnlyStock(false);
     setMinPrice(0);
-    setMaxPrice(100000);
+    setMaxPrice(DEFAULT_MAX_PRICE);
     setQuery("");
     setDebouncedQuery("");
   }
@@ -245,14 +246,14 @@ export function SnapCatalogPage({ initialSearch = "" }: { initialSearch?: string
             <div className="price-slider">
               <input
                 aria-label="Harga maksimum"
-                max="100000"
+                max={DEFAULT_MAX_PRICE}
                 min="0"
                 onChange={(event) => setMaxPrice(Number(event.target.value))}
                 step="5000"
                 type="range"
                 value={maxPrice}
               />
-              <div className="price-pills"><span>{rupiah(minPrice)}</span><span>{maxPrice >= 100000 ? "Rp 100.000+" : rupiah(maxPrice)}</span></div>
+              <div className="price-pills"><span>{rupiah(minPrice)}</span><span>{maxPrice >= DEFAULT_MAX_PRICE ? `${rupiah(DEFAULT_MAX_PRICE)}+` : rupiah(maxPrice)}</span></div>
             </div>
             <label className="switch-row">Stok Tersedia <input checked={onlyStock} onChange={(event) => setOnlyStock(event.target.checked)} type="checkbox" /></label>
             <label className="switch-row">Produk Promo <input checked={onlyPromo} onChange={(event) => setOnlyPromo(event.target.checked)} type="checkbox" /></label>
