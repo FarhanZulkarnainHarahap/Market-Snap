@@ -370,6 +370,10 @@ function readCheckoutSelection(): { selectedCartItemIds: string[]; voucherCode?:
   }
 }
 
+function checkoutAddressParams(address: Pick<Address, "lat" | "lng">) {
+  return new URLSearchParams({ lat: String(address.lat), lng: String(address.lng) });
+}
+
 function selectedDeliveryDate(id: string, reference = new Date()) {
   const date = new Date(reference);
   if (id === "tomorrow") date.setDate(date.getDate() + 1);
@@ -595,6 +599,19 @@ export function SnapCheckoutPage() {
   }, [addressModalOpen, branchModalOpen]);
 
   useEffect(() => {
+    if (!selectedAddress || selectedDelivery.requiresAddress === false) return;
+    let cancelled = false;
+    fetchNearestStore(checkoutAddressParams(selectedAddress))
+      .then((nearest) => {
+        if (!cancelled) setStore(nearest.store);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAddress?.id, selectedAddress?.lat, selectedAddress?.lng, selectedDelivery.requiresAddress]);
+
+  useEffect(() => {
     updateCheckoutDraft({
       addressId: selectedAddressId,
       deliveryId: selectedDeliveryId,
@@ -607,7 +624,7 @@ export function SnapCheckoutPage() {
   async function syncNearestStore() {
     setMessage("");
     try {
-      const nearest = await fetchNearestStore();
+      const nearest = await fetchNearestStore(selectedAddress ? checkoutAddressParams(selectedAddress) : undefined);
       setStore(nearest.store);
       setMessage(`Cabang terdekat diperbarui: ${nearest.store.name}.`);
     } catch (error) {
@@ -624,10 +641,6 @@ export function SnapCheckoutPage() {
       setMessage("Tambahkan alamat pengiriman dari profil sebelum membuat pesanan.");
       return;
     }
-    if (!store) {
-      setMessage("Pilih cabang terlebih dahulu.");
-      return;
-    }
     if (!selectedDateId || !selectedTime || !selectedDeliveryId) {
       setMessage("Lengkapi jadwal dan opsi pengiriman.");
       return;
@@ -639,6 +652,18 @@ export function SnapCheckoutPage() {
 
     setSubmitting(true);
     try {
+      let checkoutStore = store;
+      if (selectedDelivery.requiresAddress !== false && selectedAddress) {
+        const nearest = await fetchNearestStore(checkoutAddressParams(selectedAddress)).catch(() => null);
+        if (nearest?.store) {
+          checkoutStore = nearest.store;
+          setStore(nearest.store);
+        }
+      }
+      if (!checkoutStore) {
+        setMessage("Pilih cabang terlebih dahulu.");
+        return;
+      }
       const result = await createOrderFromCart(items, total, {
         addressId: selectedAddress?.id,
         deliveryDate: selectedDeliveryDate(selectedDateId, now).toISOString(),
@@ -649,7 +674,7 @@ export function SnapCheckoutPage() {
         paymentMethod: "xendit",
         selectedCartItemIds: checkoutSelection.selectedCartItemIds.length ? checkoutSelection.selectedCartItemIds : items.map(cartItemKey),
         shippingMethod: selectedDelivery.id,
-        storeId: store.id,
+        storeId: checkoutStore.id,
         voucherCode: voucherCode.trim() || undefined
       });
       setItems([]);
