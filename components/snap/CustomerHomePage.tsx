@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { FiArrowRight, FiClock, FiGift, FiMapPin, FiSearch, FiShoppingBag, FiTruck, FiZap } from "react-icons/fi";
+import { FiArrowRight, FiClock, FiGift, FiLock, FiMapPin, FiSearch, FiZap } from "react-icons/fi";
 import { BenefitStrip, GroceryVisual, ProductCard, ProductGridSkeleton, SnapFooter, SnapHeader } from "@/components/snap/SnapCommon";
 import { addCartItem, fetchCart, fetchCategories, fetchProducts, fetchStores } from "@/lib/api";
 import type { Product, Store } from "@/lib/types";
@@ -25,6 +25,38 @@ const homeSections = [
   { key: "family", title: "Paket hemat keluarga", category: "Promo Hari Ini", limit: 4 }
 ];
 
+const preferredCategories = [
+  "Buah",
+  "Sayur",
+  "Dairy & Telur",
+  "Kebersihan",
+  "Minuman",
+  "Roti & Bakery",
+  "Sembako"
+];
+
+const categoryImageMap: Record<string, string> = {
+  buah: "/categories/buah.png",
+  fruit: "/categories/buah.png",
+  sayur: "/categories/sayur.png",
+  vegetables: "/categories/sayur.png",
+  "dairy-telur": "/categories/daly-telur.png",
+  "dairy-and-telur": "/categories/daly-telur.png",
+  "susu-dan-dairy": "/categories/daly-telur.png",
+  telur: "/categories/daly-telur.png",
+  kebersihan: "/categories/kebersihan.png",
+  "home-care": "/categories/kebersihan.png",
+  "personal-care": "/categories/kebersihan.png",
+  minuman: "/categories/minuman.png",
+  drinks: "/categories/minuman.png",
+  "roti-bakery": "/categories/roti-bakery.png",
+  roti: "/categories/roti-bakery.png",
+  bakery: "/categories/roti-bakery.png",
+  sembako: "/categories/sembako.png",
+  "beras-dan-bahan-pokok": "/categories/sembako.png",
+  "bahan-pokok": "/categories/sembako.png"
+};
+
 export function CustomerHomePage() {
   const [state, setState] = useState<HomeState>({
     products: [],
@@ -40,6 +72,19 @@ export function CustomerHomePage() {
       return { ...section, products: products.slice(0, section.limit) };
     }).filter((section) => section.products.length);
   }, [state.products]);
+  const categoryCards = useMemo(() => {
+    const apiCategories = state.categories.filter((item) => item !== "Semua");
+    const merged = [...preferredCategories, ...apiCategories].filter((category, index, all) => {
+      const key = normalizeCategoryKey(category);
+      return all.findIndex((item) => normalizeCategoryKey(item) === key) === index;
+    });
+
+    return merged.slice(0, 14).map((category) => ({
+      name: category,
+      image: getCategoryImage(category),
+      count: state.products.filter((product) => categoryMatches(product.category, category)).length
+    }));
+  }, [state.categories, state.products]);
 
   useEffect(() => {
     loadHome().then(setState);
@@ -62,18 +107,17 @@ export function CustomerHomePage() {
       <main>
         <section className="home-hero">
           <div>
-            <span className="eyebrow">Welcome back</span>
-            <h1>Fresh groceries from your nearest branch.</h1>
-            <p>Belanja kebutuhan harian lebih cepat, praktis, dan segar langsung dari cabang terdekat Market Snap.</p>
+            <span className="eyebrow">Fresh check</span>
+            <h1>Belanja segar dari cabang <mark>terdekat.</mark></h1>
+            <p>Produk harian pilihan, dikirim cepat 20-30 menit langsung ke rumahmu.</p>
             <div className="hero-buttons">
-              <Link className="primary-snap" href="/catalog">Mulai belanja <FiArrowRight /></Link>
+              <Link className="primary-snap" href="/catalog">Belanja sekarang <FiArrowRight /></Link>
               <button className="secondary-snap" onClick={() => requestLocation(setState)} type="button">Gunakan lokasi saya</button>
             </div>
             <div className="feature-row dashboard-features">
-              <span><FiTruck /> Delivery 20-30 menit</span>
-              <span><FiMapPin /> {state.store?.name ?? "Market Snap"}</span>
-              <span><FiShoppingBag /> Belanja lebih cepat</span>
               <span><FiClock /> Fresh setiap hari</span>
+              <span><FiMapPin /> Cabang terdekat</span>
+              <span><FiLock /> Checkout aman</span>
             </div>
           </div>
           <GroceryVisual variant="hero" />
@@ -94,11 +138,13 @@ export function CustomerHomePage() {
             <Link href="/catalog">Semua kategori <FiArrowRight /></Link>
           </div>
           <div className="category-rail">
-            {state.categories.filter((item) => item !== "Semua").slice(0, 20).map((category, index) => (
-              <Link href={`/catalog?category=${encodeURIComponent(category)}`} key={category}>
-                <Image alt="" height={56} src={`/categories/${slugify(category)}.svg`} width={56} />
-                <span>{category}</span>
-                <small>{index < 4 ? "Populer" : "Fresh"}</small>
+            {categoryCards.map((category) => (
+              <Link href={`/catalog?category=${encodeURIComponent(category.name)}`} key={category.name}>
+                <span className="category-image-wrap">
+                  <Image alt={category.name} height={112} src={category.image} width={112} />
+                </span>
+                <span className="category-card-row"><strong>{category.name}</strong><FiArrowRight /></span>
+                <small>{category.count ? `${category.count} produk` : "Rak pilihan"}</small>
               </Link>
             ))}
           </div>
@@ -110,7 +156,8 @@ export function CustomerHomePage() {
           <div className="snap-section-title inline">
             <div>
               <span className="eyebrow">Produk Pilihan</span>
-              <h2>Fresh products near you</h2>
+              <h2>Produk segar di dekatmu</h2>
+              <p>Stok pilihan dari cabang terdekat hari ini.</p>
             </div>
             <Link href="/catalog">Lihat catalog <FiArrowRight /></Link>
           </div>
@@ -140,7 +187,7 @@ export function CustomerHomePage() {
               <Link className="primary-snap" href="/catalog">Belanja sekarang <FiArrowRight /></Link>
             </div>
             <div className="promo-visual-wrap">
-              <GroceryVisual compact variant="promo" />
+              <Image alt="Promo gratis ongkir Market Snap" className="promo-banner-image" height={540} src="/banners/promo-gratis-ongkir.png" width={760} />
               <div className="promo-progress" aria-hidden="true"><span /><span /><span /></div>
             </div>
           </div>
@@ -228,11 +275,30 @@ function requestLocation(setState: React.Dispatch<React.SetStateAction<HomeState
   );
 }
 
-function slugify(value: string) {
+function getCategoryImage(category: string) {
+  const key = normalizeCategoryKey(category);
+  return categoryImageMap[key] ?? categoryImageMap[key.replace(/^dairy-/, "dairy-and-")] ?? "/categories/sembako.png";
+}
+
+function categoryMatches(productCategory: string, selectedCategory: string) {
+  const productKey = normalizeCategoryKey(productCategory);
+  const selectedKey = normalizeCategoryKey(selectedCategory);
+  if (productKey === selectedKey) return true;
+  if (selectedKey === "dairy-telur") return productKey.includes("dairy") || productKey.includes("telur") || productKey.includes("susu");
+  if (selectedKey === "roti-bakery") return productKey.includes("roti") || productKey.includes("bakery");
+  if (selectedKey === "sembako") return productKey.includes("beras") || productKey.includes("bahan-pokok") || productKey.includes("sembako");
+  if (selectedKey === "kebersihan") return productKey.includes("care") || productKey.includes("kebersihan");
+  return productKey.includes(selectedKey) || selectedKey.includes(productKey);
+}
+
+function normalizeCategoryKey(value: string) {
   return value
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/\+/g, " and ")
+    .replace(/\bdan\b/g, "and")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }

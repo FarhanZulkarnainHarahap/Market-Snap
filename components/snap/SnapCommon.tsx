@@ -460,16 +460,16 @@ type GroceryVisualVariant = "hero" | "promo" | "catalog" | "storefront";
 
 const groceryVisuals: Record<GroceryVisualVariant, { alt: string; height: number; src: string; width: number }> = {
   hero: {
-    alt: "Tas belanja Market Snap berisi produk segar",
-    height: 900,
-    src: "/market-snap-hero-v2.png",
-    width: 1350
+    alt: "Produk grocery segar Market Snap",
+    height: 760,
+    src: "/banners/hero-grocery.png",
+    width: 960
   },
   promo: {
-    alt: "Voucher promo Market Snap dengan perlengkapan pengiriman",
-    height: 720,
-    src: "/market-snap-promo-v2.png",
-    width: 1350
+    alt: "Promo gratis ongkir Market Snap",
+    height: 540,
+    src: "/banners/promo-gratis-ongkir.png",
+    width: 760
   },
   catalog: {
     alt: "Kumpulan produk katalog Market Snap",
@@ -490,7 +490,6 @@ export function GroceryVisual({ compact = false, variant = "hero" }: { compact?:
 
   return (
     <div className={`grocery-visual variant-${variant}${compact ? " compact" : ""}`}>
-      <div className="visual-halo" />
       <div className="grocery-stage">
         {variant === "hero" && <div className="freshness-card">
           <FiShield />
@@ -518,6 +517,7 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
   const stock = product.stockByStore[activeStoreId] ?? 0;
   const productHref = `/products/${product.slug ?? product.id}`;
   const estimatedOriginal = product.discount ? Math.round(product.price * 1.12) : 0;
+  const discountLabel = discountText(product.discount);
 
   async function handleAdd() {
     if (!onAdd || adding || disabled || stock < 1) return;
@@ -539,22 +539,21 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
     <article className="snap-product-card">
       <Link className="product-picture" href={productHref} ref={pictureRef}>
         <Image alt={product.name} height={220} src={product.image} width={260} />
-        {product.discount && <span className="promo-dot">{product.discount}</span>}
+        {discountLabel && <span className="promo-dot">{discountLabel}</span>}
         {stock < 1 && <span className="stock-dot">Habis</span>}
       </Link>
       <div className="snap-product-body">
-        <div className="product-card-kicker"><span>{product.brand ?? product.category}</span><small>{product.sku ?? product.category}</small></div>
+        <span className="product-category-label">{product.category}</span>
         <Link href={productHref}><h3>{product.name}</h3></Link>
         <p>{product.shortInfo ?? product.unit}</p>
         <div className="price-stack">
           {estimatedOriginal > 0 && <small>{rupiah(estimatedOriginal)}</small>}
           <strong>{rupiah(product.price)}</strong>
         </div>
-        <small className={stock < 6 ? "stock-warning" : ""}>{stock < 1 ? "Stok habis" : stock < 6 ? `Sisa ${stock}` : `Stok: ${stock}`}</small>
+        <small className={stock < 6 ? "stock-warning stock-copy" : "stock-copy"}>{stock < 1 ? "Stok habis" : stock < 6 ? `Sisa ${stock} ${product.unit}` : `Stok tersedia: ${stock} ${product.unit}`}</small>
         <div className="product-card-bottom">
-          <span>{product.discount ? "Promo" : product.badge ?? product.category}</span>
           {onAdd ? (
-            <button disabled={disabled || adding || stock < 1} onClick={handleAdd} type="button"><FiPlus /> {adding ? "Menambah..." : added ? "Ditambahkan" : "Keranjang"}</button>
+            <button disabled={disabled || adding || stock < 1} onClick={handleAdd} type="button"><FiPlus /> {adding ? "Menambah..." : added ? "Ditambahkan" : "Tambah"}</button>
           ) : (
             <Link className="product-detail-link" href={productHref}>Detail</Link>
           )}
@@ -562,6 +561,12 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
       </div>
     </article>
   );
+}
+
+function discountText(value?: string) {
+  if (!value) return "";
+  const number = value.match(/\d+/)?.[0];
+  return number ? `-${number}%` : value;
 }
 
 export function emitCartFly(payload: CartFlyPayload) {
