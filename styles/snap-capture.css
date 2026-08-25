@@ -9503,3 +9503,109 @@ body {
     height: clamp(280px, 76vw, 320px);
   }
 }
+
+/* Product add action */
+.product-card-bottom .product-add-button {
+  align-items: center;
+  background: #0f7a42;
+  border: 1px solid #0f7a42;
+  border-radius: 11px;
+  box-shadow: 0 8px 18px rgba(6, 78, 43, .14);
+  color: #fff;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 850;
+  gap: 8px;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 16px;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  width: 100%;
+}
+
+.product-card-bottom .product-add-button span {
+  color: inherit;
+  display: inline;
+}
+
+.product-card-bottom .product-add-button svg {
+  background: rgba(255, 255, 255, .14);
+  border-radius: 6px;
+  box-sizing: content-box;
+  flex: 0 0 auto;
+  font-size: 15px;
+  padding: 3px;
+}
+
+.product-card-bottom .product-add-button:hover:not(:disabled) {
+  background: #096737;
+  border-color: #096737;
+  box-shadow: 0 10px 22px rgba(6, 78, 43, .2);
+  transform: translateY(-1px);
+}
+
+.product-card-bottom .product-add-button:active:not(:disabled) {
+  box-shadow: 0 5px 12px rgba(6, 78, 43, .16);
+  transform: translateY(0);
+}
+
+.product-card-bottom .product-add-button:focus-visible {
+  outline: 3px solid rgba(21, 128, 61, .22);
+  outline-offset: 2px;
+}
+
+.product-card-bottom .product-add-button.is-added {
+  background: #edf8ee;
+  border-color: #9bcda4;
+  box-shadow: none;
+  color: #075c34;
+}
+
+.product-card-bottom .product-add-button:disabled {
+  background: #eef2ed;
+  border-color: #dce5dc;
+  box-shadow: none;
+  color: #89958d;
+  cursor: not-allowed;
+}
+
+.product-card-bottom .product-add-button.is-loading:disabled {
+  background: #0f6f3d;
+  border-color: #0f6f3d;
+  color: #fff;
+  cursor: progress;
+}
+
+.product-card-bottom .product-add-button.is-loading svg {
+  animation: product-add-spin .8s linear infinite;
+}
+
+@keyframes product-add-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 719px) {
+  .snap-section .product-card-bottom .product-add-button,
+  .catalog-results .product-card-bottom .product-add-button {
+    font-size: 12px;
+    min-height: 40px;
+    padding: 0 8px;
+  }
+
+  .snap-section .product-card-bottom .product-add-button span,
+  .catalog-results .product-card-bottom .product-add-button span {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card-bottom .product-add-button {
+    transition: none;
+  }
+
+  .product-card-bottom .product-add-button.is-loading svg {
+    animation: none;
+  }
+}

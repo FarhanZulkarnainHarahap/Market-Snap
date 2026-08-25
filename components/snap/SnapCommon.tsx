@@ -7,12 +7,14 @@ import { useEffect, useRef, useState } from "react";
 import {
   FiArrowRight,
   FiBell,
+  FiCheck,
   FiClock,
   FiChevronDown,
   FiHeadphones,
   FiHeart,
   FiHome,
   FiLock,
+  FiLoader,
   FiLogOut,
   FiMapPin,
   FiMenu,
@@ -546,6 +548,7 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
   const productHref = `/products/${product.slug ?? product.id}`;
   const estimatedOriginal = product.discount ? Math.round(product.price * 1.12) : 0;
   const discountLabel = discountText(product.discount);
+  const addButtonLabel = adding ? "Menambah" : added ? "Ditambahkan" : "Tambah";
 
   async function handleAdd() {
     if (!onAdd || adding || disabled || stock < 1) return;
@@ -581,7 +584,16 @@ export function ProductCard({ product, storeId, disabled = false, onAdd }: { pro
         <small className={stock < 6 ? "stock-warning stock-copy" : "stock-copy"}>{stock < 1 ? "Stok habis" : stock < 6 ? `Sisa ${stock} ${product.unit}` : `Stok tersedia: ${stock} ${product.unit}`}</small>
         <div className="product-card-bottom">
           {onAdd ? (
-            <button disabled={disabled || adding || stock < 1} onClick={handleAdd} type="button"><FiPlus /> {adding ? "Menambah..." : added ? "Ditambahkan" : "Tambah"}</button>
+            <button
+              aria-label={`${addButtonLabel} ${product.name}`}
+              className={`product-add-button${adding ? " is-loading" : ""}${added ? " is-added" : ""}`}
+              disabled={disabled || adding || stock < 1}
+              onClick={handleAdd}
+              type="button"
+            >
+              {adding ? <FiLoader aria-hidden="true" /> : added ? <FiCheck aria-hidden="true" /> : <FiPlus aria-hidden="true" />}
+              <span>{addButtonLabel}</span>
+            </button>
           ) : (
             <Link className="product-detail-link" href={productHref}>Detail</Link>
           )}
