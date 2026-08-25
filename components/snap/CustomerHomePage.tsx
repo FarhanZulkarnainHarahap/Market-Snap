@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { FiArrowRight, FiClock, FiGift, FiLock, FiMapPin, FiSearch, FiZap } from "react-icons/fi";
+import { FiArrowRight, FiGift, FiMapPin, FiSearch, FiZap } from "react-icons/fi";
+import { LuLeaf, LuShieldCheck } from "react-icons/lu";
 import { BenefitStrip, GroceryVisual, ProductCard, ProductGridSkeleton, SnapFooter, SnapHeader } from "@/components/snap/SnapCommon";
 import { addCartItem, fetchCart, fetchCategories, fetchProducts, fetchStores } from "@/lib/api";
 import type { Product, Store } from "@/lib/types";
@@ -105,19 +106,19 @@ export function CustomerHomePage() {
     <>
       <SnapHeader active="home" cartCount={state.cartCount} />
       <main>
-        <section className="home-hero">
-          <div>
-            <span className="eyebrow">Fresh check</span>
-            <h1>Belanja segar dari cabang <mark>terdekat.</mark></h1>
+        <section className="home-hero market-home-hero">
+          <div className="market-hero-copy">
+            <span className="hero-fresh-badge"><LuLeaf /><span><strong>Fresh check</strong><small>Dipilih pagi ini</small></span></span>
+            <h1><span>Belanja segar dari</span>{" "}<span>cabang <mark>terdekat.</mark></span></h1>
             <p>Produk harian pilihan, dikirim cepat 20-30 menit langsung ke rumahmu.</p>
+            <div className="feature-row dashboard-features">
+              <span><LuLeaf /> Fresh setiap hari</span>
+              <span><FiMapPin /> Cabang terdekat</span>
+              <span><LuShieldCheck /> Checkout aman</span>
+            </div>
             <div className="hero-buttons">
               <Link className="primary-snap" href="/catalog">Belanja sekarang <FiArrowRight /></Link>
               <button className="secondary-snap" onClick={() => requestLocation(setState)} type="button">Gunakan lokasi saya</button>
-            </div>
-            <div className="feature-row dashboard-features">
-              <span><FiClock /> Fresh setiap hari</span>
-              <span><FiMapPin /> Cabang terdekat</span>
-              <span><FiLock /> Checkout aman</span>
             </div>
           </div>
           <GroceryVisual variant="hero" />
@@ -174,21 +175,20 @@ export function CustomerHomePage() {
         </section>
 
         <section className="snap-section">
-          <div className="promo-banner">
+          <div className="promo-banner market-promo-banner">
             <div className="promo-copy">
               <span className="eyebrow">Promo Hari Ini</span>
-              <h2>Gratis ongkir untuk pembelian di atas Rp 100.000</h2>
+              <h2>Gratis ongkir untuk <span>pembelian di atas</span> <strong>Rp 100.000</strong></h2>
               <p>Nikmati pengiriman cepat dan promo menarik dari Market Snap.</p>
               <div className="promo-perks">
                 <span><FiZap /> Flash sale aktif</span>
-                <span>Fresh stock pagi</span>
-                <span>Checkout Xendit aman</span>
+                <span><LuLeaf /> Fresh stock pagi</span>
+                <span><LuShieldCheck /> Checkout Xendit aman</span>
               </div>
               <Link className="primary-snap" href="/catalog">Belanja sekarang <FiArrowRight /></Link>
             </div>
             <div className="promo-visual-wrap">
               <GroceryVisual compact variant="promo" />
-              <div className="promo-progress" aria-hidden="true"><span /><span /><span /></div>
             </div>
           </div>
         </section>

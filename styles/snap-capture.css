@@ -8954,3 +8954,552 @@ body {
     width: 24%;
   }
 }
+
+/* Homepage banners */
+.home-hero.market-home-hero {
+  align-items: center;
+  background:
+    radial-gradient(circle at 78% 22%, rgba(190, 235, 124, .34), transparent 32%),
+    radial-gradient(circle at 92% 88%, rgba(255, 220, 126, .24), transparent 24%),
+    linear-gradient(135deg, #f7fbf3 0%, #eef8e8 55%, #e4f4db 100%);
+  border: 1px solid rgba(203, 226, 190, .72);
+  border-radius: 30px;
+  box-shadow: 0 24px 70px rgba(26, 82, 45, .1);
+  gap: clamp(32px, 4vw, 56px);
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+  height: clamp(520px, 38vw, 560px);
+  margin-top: 28px;
+  max-width: 1440px;
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(40px, 3.5vw, 52px);
+  width: calc(100% - 64px);
+}
+
+.market-hero-copy {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.hero-fresh-badge {
+  align-items: center;
+  background: rgba(255, 255, 255, .76);
+  border: 1px solid rgba(68, 137, 64, .16);
+  border-radius: 999px;
+  color: #178a42;
+  display: inline-flex;
+  gap: 9px;
+  min-height: 42px;
+  padding: 7px 14px 7px 11px;
+}
+
+.hero-fresh-badge > svg {
+  font-size: 19px;
+}
+
+.hero-fresh-badge > span {
+  display: grid;
+  line-height: 1.05;
+}
+
+.hero-fresh-badge strong {
+  color: #073b24;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.hero-fresh-badge small {
+  color: #5e7468;
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+.home-hero.market-home-hero h1 {
+  color: #073b24;
+  font-size: clamp(46px, 3.6vw, 58px);
+  line-height: 1.01;
+  margin: 18px 0 0;
+  max-width: 650px;
+}
+
+.home-hero.market-home-hero h1 > span {
+  display: block;
+}
+
+.home-hero.market-home-hero h1 mark {
+  color: #178a42;
+  display: inline;
+}
+
+.home-hero.market-home-hero p {
+  color: #5e7468;
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 1.55;
+  margin-top: 18px;
+  max-width: 560px;
+}
+
+.market-home-hero .feature-row.dashboard-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+.market-home-hero .feature-row.dashboard-features span {
+  align-items: center;
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(38, 120, 59, .15);
+  border-radius: 999px;
+  color: #174b30;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 7px;
+  height: 44px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.market-home-hero .feature-row svg {
+  color: #178a42;
+  flex: 0 0 auto;
+}
+
+.market-home-hero .hero-buttons {
+  margin-top: 22px;
+}
+
+.market-home-hero .hero-buttons .primary-snap,
+.market-home-hero .hero-buttons .secondary-snap {
+  border-radius: 15px;
+  height: 54px;
+}
+
+.market-home-hero .hero-buttons .primary-snap {
+  background: #073b24;
+}
+
+.market-home-hero .hero-buttons .primary-snap:hover {
+  background: #052f1d;
+}
+
+.market-home-hero .primary-snap svg,
+.market-promo-banner .primary-snap svg {
+  transition: transform .2s ease;
+}
+
+.market-home-hero .primary-snap:hover svg,
+.market-promo-banner .primary-snap:hover svg {
+  transform: translateX(2px);
+}
+
+.banner-artwork.grocery-visual,
+.banner-artwork .banner-artwork-stage {
+  min-height: 0;
+  width: 100%;
+}
+
+.banner-artwork .banner-artwork-stage {
+  aspect-ratio: 1.08 / 1;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 255, 255, .92) 0 30%, rgba(224, 244, 208, .58) 31% 58%, transparent 59%),
+    radial-gradient(circle at 78% 22%, rgba(188, 232, 104, .26), transparent 22%);
+  border: 0;
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+}
+
+.banner-artwork-image {
+  filter: drop-shadow(0 24px 28px rgba(17, 79, 42, .16));
+  object-fit: contain;
+  padding: 3%;
+  position: relative;
+  z-index: 3;
+}
+
+.banner-artwork-fallback {
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
+.banner-artwork-fallback::before {
+  background: rgba(255, 255, 255, .58);
+  border-radius: 50%;
+  content: "";
+  inset: 16% 12%;
+  position: absolute;
+}
+
+.banner-artwork-fallback span {
+  background: rgba(103, 171, 72, .16);
+  border-radius: 60% 40% 64% 36%;
+  height: 34%;
+  position: absolute;
+  width: 23%;
+}
+
+.banner-artwork-fallback span:nth-child(1) {
+  left: 16%;
+  top: 17%;
+  transform: rotate(-28deg);
+}
+
+.banner-artwork-fallback span:nth-child(2) {
+  bottom: 13%;
+  right: 16%;
+  transform: rotate(35deg);
+}
+
+.banner-artwork-fallback span:nth-child(3) {
+  background: rgba(243, 164, 59, .12);
+  bottom: 8%;
+  left: 37%;
+  transform: rotate(8deg);
+}
+
+.banner-artwork .freshness-card,
+.banner-artwork .delivery-chip {
+  align-items: center;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, .9);
+  border: 1px solid rgba(255, 255, 255, .92);
+  border-radius: 14px;
+  box-shadow: 0 14px 34px rgba(22, 74, 40, .13);
+  color: #073b24;
+  display: flex;
+  gap: 9px;
+  padding: 10px 13px;
+  position: absolute;
+  z-index: 5;
+}
+
+.banner-artwork .freshness-card {
+  left: 4%;
+  top: 8%;
+}
+
+.banner-artwork .freshness-card svg,
+.banner-artwork .delivery-chip svg {
+  color: #178a42;
+  font-size: 18px;
+}
+
+.banner-artwork .freshness-card span {
+  display: grid;
+}
+
+.banner-artwork .freshness-card strong,
+.banner-artwork .delivery-chip span {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.banner-artwork .freshness-card small {
+  color: #6a7d70;
+  font-size: 10px;
+}
+
+.banner-artwork .delivery-chip {
+  bottom: 8%;
+  left: auto;
+  right: 4%;
+  top: auto;
+}
+
+.promo-banner.market-promo-banner {
+  background: linear-gradient(120deg, #075c34 0%, #168a48 58%, #d98a35 132%);
+  border: 0;
+  border-radius: 30px;
+  box-shadow: 0 24px 64px rgba(5, 64, 34, .16);
+  gap: clamp(26px, 4vw, 54px);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  height: clamp(440px, 33vw, 460px);
+  min-height: 0;
+  padding: clamp(32px, 3vw, 44px);
+}
+
+.market-promo-banner .promo-copy {
+  max-width: 650px;
+}
+
+.market-promo-banner .eyebrow {
+  color: #ffe08b;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.promo-banner.market-promo-banner h2 {
+  font-size: clamp(52px, 3.8vw, 58px);
+  line-height: 1.02;
+  margin: 14px 0 16px;
+  max-width: 640px;
+}
+
+.market-promo-banner h2 span,
+.market-promo-banner h2 strong {
+  display: block;
+}
+
+.market-promo-banner h2 strong {
+  color: #ffe08b;
+}
+
+.promo-banner.market-promo-banner p {
+  font-size: 17px;
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+
+.market-promo-banner .promo-perks {
+  margin-bottom: 20px;
+}
+
+.market-promo-banner .promo-perks span {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  min-height: 38px;
+}
+
+.market-promo-banner .primary-snap {
+  border-radius: 15px;
+  height: 54px;
+}
+
+.market-promo-banner .promo-visual-wrap,
+.market-promo-banner .banner-artwork,
+.market-promo-banner .banner-artwork-stage {
+  min-height: 0;
+  width: 100%;
+}
+
+.market-promo-banner .promo-visual-wrap {
+  align-self: center;
+}
+
+.market-promo-banner .banner-artwork-stage {
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(circle at 52% 48%, rgba(255, 225, 142, .2), transparent 60%);
+  overflow: hidden;
+}
+
+.market-promo-banner .banner-artwork-image {
+  filter: drop-shadow(0 24px 26px rgba(0, 0, 0, .2));
+  padding: 0;
+}
+
+.market-promo-banner .banner-artwork-fallback::before {
+  background: rgba(255, 255, 255, .08);
+}
+
+.market-promo-banner .banner-artwork-fallback span {
+  background: rgba(255, 224, 139, .16);
+}
+
+.market-promo-banner .delivery-chip {
+  bottom: 4%;
+  right: 2%;
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .home-hero.market-home-hero {
+    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 32px;
+  }
+
+  .home-hero.market-home-hero h1 {
+    font-size: 42px;
+    margin-top: 14px;
+  }
+
+  .home-hero.market-home-hero h1 > span {
+    display: inline;
+  }
+
+  .home-hero.market-home-hero p {
+    font-size: 16px;
+    line-height: 1.48;
+    margin-top: 14px;
+  }
+
+  .market-home-hero .feature-row.dashboard-features {
+    gap: 7px;
+    margin-top: 14px;
+  }
+
+  .market-home-hero .feature-row.dashboard-features span {
+    font-size: 12px;
+    height: 40px;
+    padding: 0 10px;
+  }
+
+  .market-home-hero .hero-buttons {
+    margin-top: 14px;
+  }
+
+  .promo-banner.market-promo-banner {
+    gap: 26px;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+    padding: 32px;
+  }
+
+  .promo-banner.market-promo-banner h2 {
+    font-size: 44px;
+    margin: 10px 0 12px;
+  }
+
+  .promo-banner.market-promo-banner p {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .market-promo-banner .promo-perks {
+    gap: 7px;
+    margin-bottom: 12px;
+  }
+
+  .market-promo-banner .promo-perks span {
+    font-size: 11px;
+    min-height: 34px;
+    padding: 6px 9px;
+  }
+
+  .market-promo-banner .primary-snap {
+    height: 50px;
+  }
+}
+
+@media (max-width: 899px) {
+  .home-hero.market-home-hero,
+  .promo-banner.market-promo-banner {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+
+  .home-hero.market-home-hero {
+    padding: 40px;
+  }
+
+  .market-home-hero .banner-artwork {
+    justify-self: center;
+    max-width: 560px;
+  }
+
+  .promo-banner.market-promo-banner {
+    padding: 40px;
+  }
+
+  .market-promo-banner .promo-visual-wrap {
+    justify-self: center;
+    max-width: 520px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .home-hero.market-home-hero {
+    border-radius: 24px;
+    gap: 22px;
+    margin-top: 12px;
+    padding: 24px;
+    width: calc(100% - 24px);
+  }
+
+  .home-hero.market-home-hero h1 {
+    font-size: clamp(38px, 9.8vw, 42px);
+    line-height: 1.03;
+    margin-top: 16px;
+  }
+
+  .home-hero.market-home-hero h1 > span {
+    display: inline;
+  }
+
+  .home-hero.market-home-hero p {
+    font-size: 16px;
+    margin-top: 14px;
+  }
+
+  .market-home-hero .feature-row.dashboard-features {
+    flex-wrap: nowrap;
+    margin-right: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    padding-right: 0;
+    scrollbar-width: none;
+    width: 100%;
+  }
+
+  .market-home-hero .feature-row.dashboard-features::-webkit-scrollbar {
+    display: none;
+  }
+
+  .market-home-hero .hero-buttons {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 16px;
+    width: 100%;
+  }
+
+  .market-home-hero .hero-buttons .primary-snap,
+  .market-home-hero .hero-buttons .secondary-snap {
+    width: 100%;
+  }
+
+  .market-home-hero .banner-artwork-stage {
+    height: clamp(280px, 76vw, 320px);
+  }
+
+  .banner-artwork .freshness-card {
+    left: 2%;
+    top: 4%;
+  }
+
+  .banner-artwork .delivery-chip {
+    bottom: 4%;
+    right: 2%;
+  }
+
+  .promo-banner.market-promo-banner {
+    border-radius: 24px;
+    gap: 18px;
+    padding: 26px 24px 20px;
+  }
+
+  .promo-banner.market-promo-banner h2 {
+    font-size: clamp(36px, 10vw, 44px);
+  }
+
+  .promo-banner.market-promo-banner p {
+    font-size: 16px;
+  }
+
+  .market-promo-banner .promo-perks {
+    flex-wrap: nowrap;
+    margin-right: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    padding-right: 0;
+    scrollbar-width: none;
+    width: 100%;
+  }
+
+  .market-promo-banner .promo-perks span {
+    flex: 0 0 auto;
+  }
+
+  .market-promo-banner .promo-visual-wrap,
+  .market-promo-banner .banner-artwork-stage {
+    height: clamp(280px, 76vw, 320px);
+  }
+}

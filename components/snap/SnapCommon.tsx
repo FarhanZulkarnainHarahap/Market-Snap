@@ -26,6 +26,7 @@ import {
   FiTruck,
   FiX
 } from "react-icons/fi";
+import { LuLeaf } from "react-icons/lu";
 import { rupiah } from "@/lib/format";
 import { fetchCurrentUser, fetchStores, logoutUser, saveSession } from "@/lib/api";
 import { customerAccountMenus } from "@/lib/customer-menus";
@@ -474,8 +475,7 @@ const groceryVisuals: Record<Exclude<GroceryVisualVariant, "hero" | "promo">, { 
 };
 
 export function GroceryVisual({ compact = false, variant = "hero" }: { compact?: boolean; variant?: GroceryVisualVariant }) {
-  if (variant === "hero") return <HeroGroceryArtwork compact={compact} />;
-  if (variant === "promo") return <PromoGroceryArtwork compact={compact} />;
+  if (variant === "hero" || variant === "promo") return <BannerArtwork compact={compact} variant={variant} />;
 
   const visual = groceryVisuals[variant];
 
@@ -492,65 +492,43 @@ export function GroceryVisual({ compact = false, variant = "hero" }: { compact?:
   );
 }
 
-function HeroGroceryArtwork({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className={`grocery-visual variant-hero custom-art${compact ? " compact" : ""}`} aria-label="Ilustrasi produk grocery Market Snap">
-      <div className="grocery-stage">
-        <div className="freshness-card">
-          <FiShield />
-          <span><strong>Fresh Check</strong><small>Dipilih pagi ini</small></span>
-        </div>
-        <div className="custom-grocery-art hero-art" aria-hidden="true">
-          <span className="art-leaf leaf-a" />
-          <span className="art-leaf leaf-b" />
-          <span className="art-leaf leaf-c" />
-          <span className="art-bag paper-bag" />
-          <span className="art-bag market-bag"><strong>MARKET<br />SNAP</strong></span>
-          <span className="art-produce lettuce" />
-          <span className="art-produce broccoli" />
-          <span className="art-produce tomato tomato-a" />
-          <span className="art-produce tomato tomato-b" />
-          <span className="art-produce pepper" />
-          <span className="art-produce orange" />
-          <span className="art-produce apple" />
-          <span className="art-produce banana banana-a" />
-          <span className="art-produce banana banana-b" />
-          <span className="art-bottle milk" />
-          <span className="art-bread bread" />
-          <span className="art-egg egg-a" />
-          <span className="art-egg egg-b" />
-          <span className="art-egg egg-c" />
-        </div>
-        <div className="brand-tote">
-          <span>MARKET SNAP</span>
-          <small>nearest branch</small>
-        </div>
-        <div className="delivery-chip">
-          <FiTruck />
-          <span>20-30 min</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+const bannerArtwork = {
+  hero: {
+    alt: "Belanja kebutuhan grocery segar Market Snap",
+    src: "/images/market-snap/banners/hero-grocery-artwork.webp"
+  },
+  promo: {
+    alt: "Promo gratis ongkir kebutuhan grocery Market Snap",
+    src: "/images/market-snap/banners/free-shipping-artwork.webp"
+  }
+} as const;
 
-function PromoGroceryArtwork({ compact = false }: { compact?: boolean }) {
+function BannerArtwork({ compact = false, variant }: { compact?: boolean; variant: "hero" | "promo" }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const artwork = bannerArtwork[variant];
+
   return (
-    <div className={`grocery-visual variant-promo custom-art${compact ? " compact" : ""}`} aria-label="Ilustrasi promo gratis ongkir Market Snap">
-      <div className="grocery-stage promo-art-stage">
-        <div className="custom-grocery-art promo-art" aria-hidden="true">
-          <span className="promo-ticket"><strong>GRATIS<br />ONGKIR</strong></span>
-          <span className="promo-cooler"><FiTruck /></span>
-          <span className="promo-helmet" />
-          <span className="art-produce broccoli promo-broccoli" />
-          <span className="art-produce tomato promo-tomato" />
-          <span className="art-produce pepper promo-pepper" />
-          <span className="art-produce orange promo-orange" />
-          <span className="art-bottle promo-milk" />
-          <span className="art-leaf promo-leaf-a" />
-          <span className="art-leaf promo-leaf-b" />
-        </div>
-        <div className="delivery-chip promo-delivery">
+    <div className={`grocery-visual banner-artwork variant-${variant}${compact ? " compact" : ""}`}>
+      <div className="grocery-stage banner-artwork-stage">
+        <div className="banner-artwork-fallback" aria-hidden="true"><span /><span /><span /></div>
+        {!imageFailed && (
+          <Image
+            alt={artwork.alt}
+            className="banner-artwork-image"
+            fill
+            onError={() => setImageFailed(true)}
+            priority={variant === "hero"}
+            sizes={variant === "hero" ? "(max-width: 767px) 100vw, 56vw" : "(max-width: 767px) 100vw, 45vw"}
+            src={artwork.src}
+          />
+        )}
+        {variant === "hero" && (
+          <div className="freshness-card">
+            <LuLeaf />
+            <span><strong>Fresh Check</strong><small>Dipilih pagi ini</small></span>
+          </div>
+        )}
+        <div className="delivery-chip">
           <FiTruck />
           <span>20-30 min</span>
         </div>
