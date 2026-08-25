@@ -8117,6 +8117,7 @@ body {
   border: 0;
   box-shadow: none;
   min-height: clamp(320px, 42vw, 520px);
+  overflow: hidden;
 }
 
 .product-stack-image {
@@ -8124,6 +8125,21 @@ body {
   height: auto;
   object-fit: contain;
   width: min(100%, 680px);
+}
+
+.variant-hero .grocery-stage {
+  border-radius: 28px;
+  min-height: clamp(340px, 40vw, 520px);
+}
+
+.variant-hero .product-stack-image {
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 82% 50%;
+  padding: 0;
+  transform: translateX(-34%) scale(1.02);
+  width: 158%;
 }
 
 .freshness-card,
@@ -8354,15 +8370,30 @@ body {
   align-items: center;
   display: flex;
   justify-content: center;
+  min-height: 320px;
+  overflow: hidden;
+  position: relative;
+}
+
+.promo-art-crop {
+  aspect-ratio: 1.25 / 1;
+  border-radius: 28px;
+  height: min(330px, 30vw);
+  min-height: 250px;
+  overflow: hidden;
+  position: relative;
+  width: min(520px, 100%);
 }
 
 .promo-banner-image {
-  border-radius: 26px;
   filter: drop-shadow(0 24px 34px rgba(0, 0, 0, .18));
-  height: auto;
-  max-height: 330px;
-  object-fit: contain;
-  width: min(100%, 560px);
+  height: 100%;
+  max-height: none;
+  max-width: none;
+  object-fit: cover;
+  object-position: 86% 52%;
+  transform: translateX(-37%) scale(1.08);
+  width: 170%;
 }
 
 .shopping-flow article,
@@ -8428,6 +8459,15 @@ body {
     min-height: 260px;
   }
 
+  .variant-hero .grocery-stage {
+    min-height: 270px;
+  }
+
+  .variant-hero .product-stack-image {
+    transform: translateX(-37%) scale(1.04);
+    width: 170%;
+  }
+
   .home-command-bar {
     border-radius: 18px;
     margin-top: 14px;
@@ -8476,7 +8516,18 @@ body {
     border-radius: 24px;
   }
 
+  .promo-visual-wrap {
+    min-height: 220px;
+  }
+
+  .promo-art-crop {
+    height: 230px;
+    min-height: 220px;
+    width: 100%;
+  }
+
   .promo-banner-image {
-    max-height: 230px;
+    transform: translateX(-39%) scale(1.08);
+    width: 178%;
   }
 }

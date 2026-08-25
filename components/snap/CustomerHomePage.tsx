@@ -187,7 +187,9 @@ export function CustomerHomePage() {
               <Link className="primary-snap" href="/catalog">Belanja sekarang <FiArrowRight /></Link>
             </div>
             <div className="promo-visual-wrap">
-              <Image alt="Promo gratis ongkir Market Snap" className="promo-banner-image" height={540} src="/banners/promo-gratis-ongkir.png" width={760} />
+              <div className="promo-art-crop" aria-hidden="true">
+                <Image alt="" className="promo-banner-image" height={540} src="/banners/promo-gratis-ongkir.png" width={760} />
+              </div>
               <div className="promo-progress" aria-hidden="true"><span /><span /><span /></div>
             </div>
           </div>
