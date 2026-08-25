@@ -458,19 +458,7 @@ function labelFromCoordinates(lat: number, lng: number) {
 
 type GroceryVisualVariant = "hero" | "promo" | "catalog" | "storefront";
 
-const groceryVisuals: Record<GroceryVisualVariant, { alt: string; height: number; src: string; width: number }> = {
-  hero: {
-    alt: "Produk grocery segar Market Snap",
-    height: 760,
-    src: "/banners/hero-grocery.png",
-    width: 960
-  },
-  promo: {
-    alt: "Promo gratis ongkir Market Snap",
-    height: 540,
-    src: "/banners/promo-gratis-ongkir.png",
-    width: 760
-  },
+const groceryVisuals: Record<Exclude<GroceryVisualVariant, "hero" | "promo">, { alt: string; height: number; src: string; width: number }> = {
   catalog: {
     alt: "Kumpulan produk katalog Market Snap",
     height: 675,
@@ -486,24 +474,86 @@ const groceryVisuals: Record<GroceryVisualVariant, { alt: string; height: number
 };
 
 export function GroceryVisual({ compact = false, variant = "hero" }: { compact?: boolean; variant?: GroceryVisualVariant }) {
+  if (variant === "hero") return <HeroGroceryArtwork compact={compact} />;
+  if (variant === "promo") return <PromoGroceryArtwork compact={compact} />;
+
   const visual = groceryVisuals[variant];
 
   return (
     <div className={`grocery-visual variant-${variant}${compact ? " compact" : ""}`}>
       <div className="grocery-stage">
-        {variant === "hero" && <div className="freshness-card">
+        <Image alt={visual.alt} className="product-stack-image" height={visual.height} priority src={visual.src} width={visual.width} />
+        {variant === "storefront" && <div className="delivery-chip">
+          <FiTruck />
+          <span>Cabang aktif</span>
+        </div>}
+      </div>
+    </div>
+  );
+}
+
+function HeroGroceryArtwork({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className={`grocery-visual variant-hero custom-art${compact ? " compact" : ""}`} aria-label="Ilustrasi produk grocery Market Snap">
+      <div className="grocery-stage">
+        <div className="freshness-card">
           <FiShield />
           <span><strong>Fresh Check</strong><small>Dipilih pagi ini</small></span>
-        </div>}
-        <Image alt={visual.alt} className="product-stack-image" height={visual.height} priority src={visual.src} width={visual.width} />
-        {variant === "hero" && <div className="brand-tote">
+        </div>
+        <div className="custom-grocery-art hero-art" aria-hidden="true">
+          <span className="art-leaf leaf-a" />
+          <span className="art-leaf leaf-b" />
+          <span className="art-leaf leaf-c" />
+          <span className="art-bag paper-bag" />
+          <span className="art-bag market-bag"><strong>MARKET<br />SNAP</strong></span>
+          <span className="art-produce lettuce" />
+          <span className="art-produce broccoli" />
+          <span className="art-produce tomato tomato-a" />
+          <span className="art-produce tomato tomato-b" />
+          <span className="art-produce pepper" />
+          <span className="art-produce orange" />
+          <span className="art-produce apple" />
+          <span className="art-produce banana banana-a" />
+          <span className="art-produce banana banana-b" />
+          <span className="art-bottle milk" />
+          <span className="art-bread bread" />
+          <span className="art-egg egg-a" />
+          <span className="art-egg egg-b" />
+          <span className="art-egg egg-c" />
+        </div>
+        <div className="brand-tote">
           <span>MARKET SNAP</span>
           <small>nearest branch</small>
-        </div>}
-        {variant !== "catalog" && <div className="delivery-chip">
+        </div>
+        <div className="delivery-chip">
           <FiTruck />
-          <span>{variant === "storefront" ? "Cabang aktif" : "20-30 min"}</span>
-        </div>}
+          <span>20-30 min</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PromoGroceryArtwork({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className={`grocery-visual variant-promo custom-art${compact ? " compact" : ""}`} aria-label="Ilustrasi promo gratis ongkir Market Snap">
+      <div className="grocery-stage promo-art-stage">
+        <div className="custom-grocery-art promo-art" aria-hidden="true">
+          <span className="promo-ticket"><strong>GRATIS<br />ONGKIR</strong></span>
+          <span className="promo-cooler"><FiTruck /></span>
+          <span className="promo-helmet" />
+          <span className="art-produce broccoli promo-broccoli" />
+          <span className="art-produce tomato promo-tomato" />
+          <span className="art-produce pepper promo-pepper" />
+          <span className="art-produce orange promo-orange" />
+          <span className="art-bottle promo-milk" />
+          <span className="art-leaf promo-leaf-a" />
+          <span className="art-leaf promo-leaf-b" />
+        </div>
+        <div className="delivery-chip promo-delivery">
+          <FiTruck />
+          <span>20-30 min</span>
+        </div>
       </div>
     </div>
   );

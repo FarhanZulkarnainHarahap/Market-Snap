@@ -8375,27 +8375,6 @@ body {
   position: relative;
 }
 
-.promo-art-crop {
-  aspect-ratio: 1.25 / 1;
-  border-radius: 28px;
-  height: min(330px, 30vw);
-  min-height: 250px;
-  overflow: hidden;
-  position: relative;
-  width: min(520px, 100%);
-}
-
-.promo-banner-image {
-  filter: drop-shadow(0 24px 34px rgba(0, 0, 0, .18));
-  height: 100%;
-  max-height: none;
-  max-width: none;
-  object-fit: cover;
-  object-position: 86% 52%;
-  transform: translateX(-37%) scale(1.08);
-  width: 170%;
-}
-
 .shopping-flow article,
 .home-newsletter {
   border-color: var(--ms-line);
@@ -8520,14 +8499,458 @@ body {
     min-height: 220px;
   }
 
-  .promo-art-crop {
-    height: 230px;
-    min-height: 220px;
-    width: 100%;
+}
+
+/* Custom banner-style artwork built in CSS, without importing public banner images */
+.custom-art .grocery-stage {
+  background:
+    radial-gradient(circle at 22% 20%, rgba(163, 230, 53, .22), transparent 22%),
+    linear-gradient(135deg, #f8fff2 0%, #e9f6d7 52%, #fff5cf 100%);
+  border: 1px solid rgba(214, 232, 202, .9);
+  border-radius: 30px;
+  box-shadow: 0 24px 55px rgba(6, 78, 43, .13);
+  min-height: clamp(340px, 40vw, 520px);
+  overflow: hidden;
+  position: relative;
+}
+
+.custom-grocery-art,
+.custom-grocery-art span {
+  position: absolute;
+}
+
+.custom-grocery-art {
+  inset: 0;
+}
+
+.art-leaf {
+  background: linear-gradient(135deg, #9bd650, #2f8a39);
+  border-radius: 100% 0 100% 0;
+  box-shadow: inset -5px -5px 12px rgba(6, 78, 43, .14);
+  height: 36px;
+  transform: rotate(-32deg);
+  width: 20px;
+}
+
+.leaf-a {
+  right: 12%;
+  top: 9%;
+}
+
+.leaf-b {
+  left: 11%;
+  top: 20%;
+  transform: rotate(38deg);
+}
+
+.leaf-c {
+  bottom: 11%;
+  right: 23%;
+  transform: rotate(22deg);
+}
+
+.art-bag {
+  bottom: 15%;
+  box-shadow: 0 24px 35px rgba(6, 78, 43, .22);
+}
+
+.market-bag {
+  background: linear-gradient(160deg, #064e2b, #0f7a3e);
+  border-radius: 18px 18px 24px 24px;
+  color: #fff;
+  display: grid;
+  font-size: clamp(18px, 2vw, 27px);
+  font-weight: 950;
+  height: 48%;
+  left: 31%;
+  letter-spacing: .12em;
+  place-items: center;
+  text-align: center;
+  width: 30%;
+  z-index: 4;
+}
+
+.market-bag::before,
+.paper-bag::before {
+  border: 7px solid rgba(255, 255, 255, .45);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  content: "";
+  height: 28%;
+  left: 25%;
+  position: absolute;
+  top: -19%;
+  width: 50%;
+}
+
+.paper-bag {
+  background: linear-gradient(160deg, #d6a76f, #f2d09a);
+  border-radius: 14px 14px 20px 20px;
+  height: 52%;
+  right: 12%;
+  transform: rotate(4deg);
+  width: 27%;
+  z-index: 2;
+}
+
+.paper-bag::before {
+  border-color: rgba(112, 74, 32, .24);
+}
+
+.art-produce {
+  border-radius: 999px;
+  box-shadow: inset -10px -12px 18px rgba(6, 78, 43, .18), 0 16px 22px rgba(6, 78, 43, .12);
+  z-index: 6;
+}
+
+.lettuce {
+  background:
+    radial-gradient(circle at 35% 35%, #d9ff8f 0 14%, transparent 15%),
+    radial-gradient(circle at 62% 26%, #a8dc45 0 18%, transparent 19%),
+    radial-gradient(circle at 48% 58%, #78b82d 0 38%, #4f9a25 39% 100%);
+  height: 35%;
+  left: 20%;
+  top: 22%;
+  width: 28%;
+  z-index: 3;
+}
+
+.broccoli,
+.promo-broccoli {
+  background:
+    radial-gradient(circle at 28% 35%, #b9ef6e 0 20%, transparent 21%),
+    radial-gradient(circle at 55% 28%, #7bbd35 0 27%, transparent 28%),
+    radial-gradient(circle at 64% 58%, #538f26 0 34%, #3f7b22 35% 100%);
+}
+
+.broccoli {
+  height: 25%;
+  left: 43%;
+  top: 28%;
+  width: 20%;
+}
+
+.tomato {
+  background: radial-gradient(circle at 34% 27%, #ffb199 0 12%, #f44732 13% 55%, #bd251c 100%);
+}
+
+.tomato-a {
+  bottom: 20%;
+  height: 16%;
+  left: 23%;
+  width: 13%;
+}
+
+.tomato-b {
+  bottom: 17%;
+  height: 14%;
+  right: 25%;
+  width: 12%;
+}
+
+.pepper {
+  background: radial-gradient(circle at 34% 24%, #ffe67a 0 13%, #f7c724 14% 58%, #ce8f0b 100%);
+  bottom: 29%;
+  height: 17%;
+  left: 51%;
+  width: 13%;
+}
+
+.orange {
+  background:
+    radial-gradient(circle at 34% 30%, #ffd27b 0 13%, #f97316 14% 62%, #c94f0a 100%);
+  bottom: 11%;
+  height: 18%;
+  right: 14%;
+  width: 14%;
+}
+
+.apple {
+  background: radial-gradient(circle at 34% 28%, #f5ff9b 0 12%, #8fcf36 13% 60%, #4e9c27 100%);
+  bottom: 15%;
+  height: 17%;
+  right: 5%;
+  width: 13%;
+}
+
+.banana {
+  background: #ffd84d;
+  border-radius: 100% 15% 100% 15%;
+  box-shadow: inset -10px -5px 0 #eba90f, 0 12px 18px rgba(6, 78, 43, .1);
+  height: 11%;
+  width: 28%;
+  z-index: 5;
+}
+
+.banana-a {
+  right: 17%;
+  top: 25%;
+  transform: rotate(-58deg);
+}
+
+.banana-b {
+  right: 13%;
+  top: 28%;
+  transform: rotate(-50deg);
+}
+
+.art-bottle {
+  background: linear-gradient(90deg, #eaf8da, #fff, #d7edc8);
+  border-radius: 20px 20px 26px 26px;
+  box-shadow: 0 18px 28px rgba(6, 78, 43, .12);
+  height: 38%;
+  right: 31%;
+  top: 14%;
+  width: 10%;
+  z-index: 3;
+}
+
+.art-bottle::before {
+  background: #15803d;
+  border-radius: 8px 8px 3px 3px;
+  content: "";
+  height: 13%;
+  left: 28%;
+  position: absolute;
+  top: -10%;
+  width: 44%;
+}
+
+.art-bread {
+  background: linear-gradient(135deg, #d88b38, #f7c173);
+  border-radius: 999px 999px 40% 40%;
+  box-shadow: inset -9px -9px 0 rgba(136, 75, 18, .14), 0 14px 22px rgba(6, 78, 43, .1);
+  height: 30%;
+  right: 20%;
+  top: 13%;
+  transform: rotate(18deg);
+  width: 9%;
+  z-index: 3;
+}
+
+.art-egg {
+  background: linear-gradient(135deg, #fff5db, #d9a765);
+  border-radius: 50% 50% 45% 45%;
+  bottom: 9%;
+  box-shadow: 0 10px 14px rgba(6, 78, 43, .08);
+  height: 10%;
+  width: 7%;
+  z-index: 8;
+}
+
+.egg-a {
+  left: 39%;
+}
+
+.egg-b {
+  left: 47%;
+}
+
+.egg-c {
+  left: 55%;
+}
+
+.custom-art .brand-tote {
+  bottom: 16%;
+  right: 13%;
+  z-index: 10;
+}
+
+.custom-art .delivery-chip {
+  right: 8%;
+  top: 56%;
+  z-index: 10;
+}
+
+.variant-promo.custom-art .grocery-stage {
+  background: radial-gradient(circle at 18% 20%, rgba(163, 230, 53, .2), transparent 27%), linear-gradient(135deg, #08713a 0%, #16803e 46%, #f49a2f 100%);
+  min-height: min(350px, 34vw);
+}
+
+.promo-ticket {
+  background: linear-gradient(135deg, #fff1c7, #ffd885);
+  border: 2px solid rgba(103, 70, 10, .16);
+  border-radius: 24px;
+  box-shadow: 0 22px 35px rgba(32, 45, 14, .18);
+  color: #0f5a30;
+  display: grid;
+  font-size: clamp(25px, 3vw, 44px);
+  font-weight: 950;
+  height: 34%;
+  line-height: .94;
+  place-items: center;
+  right: 24%;
+  text-align: center;
+  top: 18%;
+  transform: rotate(-6deg);
+  width: 34%;
+  z-index: 4;
+}
+
+.promo-ticket::before,
+.promo-ticket::after {
+  background: #13833f;
+  border-radius: 999px;
+  content: "";
+  height: 34px;
+  position: absolute;
+  top: calc(50% - 17px);
+  width: 34px;
+}
+
+.promo-ticket::before {
+  left: -19px;
+}
+
+.promo-ticket::after {
+  right: -19px;
+}
+
+.promo-cooler {
+  align-items: center;
+  background: linear-gradient(150deg, #0a6939, #0d8d4a);
+  border: 5px solid rgba(255, 255, 255, .28);
+  border-radius: 18px 18px 24px 24px;
+  bottom: 17%;
+  box-shadow: 0 24px 35px rgba(0, 0, 0, .18);
+  color: #d9f99d;
+  display: flex;
+  font-size: 46px;
+  height: 37%;
+  justify-content: center;
+  right: 9%;
+  width: 24%;
+  z-index: 6;
+}
+
+.promo-cooler::before {
+  background: #064e2b;
+  border-radius: 999px;
+  content: "";
+  height: 14%;
+  left: 26%;
+  position: absolute;
+  top: -16%;
+  width: 48%;
+}
+
+.promo-helmet {
+  background:
+    radial-gradient(circle at 34% 38%, rgba(255,255,255,.45) 0 14%, transparent 15%),
+    linear-gradient(135deg, #11683d, #0b4228);
+  border-radius: 100% 100% 42% 42%;
+  bottom: 24%;
+  box-shadow: 0 18px 30px rgba(0,0,0,.18);
+  height: 28%;
+  right: 31%;
+  transform: rotate(10deg);
+  width: 20%;
+  z-index: 7;
+}
+
+.promo-broccoli {
+  bottom: 13%;
+  height: 24%;
+  right: 22%;
+  width: 18%;
+  z-index: 8;
+}
+
+.promo-tomato {
+  bottom: 11%;
+  height: 18%;
+  right: 6%;
+  width: 14%;
+  z-index: 8;
+}
+
+.promo-pepper {
+  bottom: 12%;
+  height: 16%;
+  right: 38%;
+  width: 12%;
+  z-index: 8;
+}
+
+.promo-orange {
+  bottom: 8%;
+  height: 18%;
+  right: 47%;
+  width: 14%;
+  z-index: 8;
+}
+
+.promo-milk {
+  bottom: 15%;
+  height: 32%;
+  right: 1%;
+  top: auto;
+  width: 8%;
+  z-index: 7;
+}
+
+.promo-leaf-a {
+  left: 18%;
+  top: 17%;
+}
+
+.promo-leaf-b {
+  bottom: 18%;
+  left: 34%;
+  transform: rotate(42deg);
+}
+
+.promo-delivery {
+  left: 9%;
+  right: auto !important;
+  top: 28% !important;
+}
+
+@media (max-width: 719px) {
+  .custom-art .grocery-stage {
+    min-height: 300px;
   }
 
-  .promo-banner-image {
-    transform: translateX(-39%) scale(1.08);
-    width: 178%;
+  .market-bag {
+    left: 25%;
+    width: 34%;
+  }
+
+  .paper-bag {
+    right: 5%;
+    width: 32%;
+  }
+
+  .custom-art .brand-tote {
+    bottom: 10%;
+    right: 7%;
+  }
+
+  .custom-art .delivery-chip {
+    right: 5%;
+    top: 55%;
+  }
+
+  .variant-promo.custom-art .grocery-stage {
+    min-height: 260px;
+  }
+
+  .promo-ticket {
+    font-size: 24px;
+    height: 33%;
+    right: 25%;
+    top: 12%;
+    width: 44%;
+  }
+
+  .promo-cooler {
+    height: 36%;
+    right: 8%;
+    width: 29%;
+  }
+
+  .promo-helmet {
+    right: 34%;
+    width: 24%;
   }
 }
