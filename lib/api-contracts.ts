@@ -171,11 +171,13 @@ export type ApiOrder = {
   paymentStatus?: string | null;
   paymentRedirectUrl?: string | null;
   paymentInvoiceUrl?: string | null;
+  paymentDeadline?: string | null;
   trackingNumber?: string | null;
   courierName?: string | null;
   estimatedArrival?: string | null;
   orderNote?: string | null;
   addressSnapshot?: Record<string, unknown> | null;
+  store?: { id: string; name: string; city?: string | null } | null;
   createdAt: string;
   items?: ApiOrderItem[];
   histories?: ApiOrderStatusHistory[];
@@ -247,6 +249,11 @@ export type PaymentStatusResponse = {
     transactionStatus?: string | null;
     paidAt?: string | null;
     invoiceAvailable: boolean;
+    paymentRedirectUrl?: string | null;
+    paymentDeadline?: string | null;
+    paymentMethod?: string | null;
+    paymentChannel?: string | null;
+    total: number;
   };
 };
 

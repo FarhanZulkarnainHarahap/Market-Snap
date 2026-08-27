@@ -26,9 +26,10 @@ import {
   FiX
 } from "react-icons/fi";
 import { SnapHeader } from "@/components/snap/SnapCommon";
-import { cancelStoreAdminRequest, createAddress, createStoreAdminRequest, deleteAddress, fetchAddresses, fetchCurrentUser, fetchMyStoreAdminRequest, fetchNotifications, fetchOrderStatistics, fetchOrders, fetchStores, fetchVouchers, markAllNotificationsRead, markNotificationRead, requestEmailVerification, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
+import { cancelStoreAdminRequest, createAddress, createStoreAdminRequest, deleteAddress, fetchAddresses, fetchCurrentUser, fetchMyStoreAdminRequest, fetchNotifications, fetchOrder, fetchOrderStatistics, fetchOrders, fetchStores, fetchVouchers, markAllNotificationsRead, markNotificationRead, requestEmailVerification, requestPasswordReset, updateAddress, updateCurrentUser, uploadProfileAvatar } from "@/lib/api";
 import { customerAccountMenus, type CustomerAccountMenuKey } from "@/lib/customer-menus";
 import { rupiah } from "@/lib/format";
+import { formatPaymentDeadline, isSafePaymentRedirect } from "@/lib/payment-security.mjs";
 import type { Address, OrderStatistics, OrderSummary, Store, Voucher } from "@/lib/types";
 import type { ApiNotification, ApiStoreAdminRequest, ApiUser } from "@/lib/api-contracts";
 
@@ -404,6 +405,94 @@ export function OrdersAccountContent() {
       </div>
       {message ? <p className="empty-copy">{message}</p> : <OrderList orders={orders} />}
     </section>
+  );
+}
+
+export function OrderDetailAccountContent({ orderId }: { orderId: string }) {
+  const [order, setOrder] = useState<OrderSummary | null>(null);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    fetchOrder(orderId)
+      .then(setOrder)
+      .catch((error) => setMessage(error instanceof Error ? error.message : "Detail pesanan belum dapat dimuat."));
+  }, [orderId]);
+
+  if (!order) return <section className="account-panel"><p className="empty-copy">{message || "Memuat detail pesanan..."}</p></section>;
+
+  const subtotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deadline = formatPaymentDeadline(order.paymentDeadline);
+  const paymentRedirectUrl = isSafePaymentRedirect(order.paymentRedirectUrl) ? order.paymentRedirectUrl : null;
+  const address = order.addressSnapshot ?? {};
+
+  return (
+    <>
+      <section className="account-panel">
+        <div className="account-section-title">
+          <div><span className="eyebrow">Order</span><h2>{order.orderNumber}</h2></div>
+          <span className={`payment-status-pill ${String(order.paymentStatus ?? "PENDING").toLowerCase()}`}>{paymentStatusLabel(order.paymentStatus)}</span>
+        </div>
+        <div className="account-read-grid">
+          <p><span>Tanggal order</span><strong>{formatOrderDate(order.createdAt)}</strong></p>
+          <p><span>Status pesanan</span><strong>{statusLabel(order.status)}</strong></p>
+          <p><span>Metode pembayaran</span><strong>{order.paymentChannel || order.paymentMethod || "Xendit"}</strong></p>
+          <p><span>Cabang fulfillment</span><strong>{order.store?.name ?? "Market Snap"}</strong></p>
+          <p><span>Jadwal pengiriman</span><strong>{[order.deliveryDate ? formatOrderDate(order.deliveryDate) : "", order.deliverySlot].filter(Boolean).join(" - ") || "Belum tersedia"}</strong></p>
+          {deadline && order.paymentStatus === "PENDING" && <p><span>Deadline pembayaran</span><strong>{deadline}</strong></p>}
+        </div>
+        <div className="order-card-actions">
+          {order.paymentStatus === "PENDING" && paymentRedirectUrl && <a className="primary-snap" href={paymentRedirectUrl}>Lanjutkan Pembayaran</a>}
+          {order.paymentStatus === "PAID" && <Link className="primary-snap" href={`/dashboard/customer/orders/${encodeURIComponent(order.orderNumber)}/invoice`}>Lihat Invoice</Link>}
+          <Link className="secondary-snap" href={`/dashboard/customer/tracking/${encodeURIComponent(order.id)}`}>Lacak Pesanan</Link>
+          <Link className="secondary-snap" href="/dashboard/customer/profile/orders">Kembali ke Riwayat</Link>
+        </div>
+      </section>
+
+      <section className="account-grid">
+        <article className="account-panel">
+          <h2>Produk</h2>
+          <div className="order-items">
+            {order.items.map((item) => (
+              <div className="order-item-row" key={item.id}>
+                <Image alt={item.name} height={48} src={item.image} width={48} />
+                <span><b>{item.name}</b><small>{item.quantity} x {rupiah(item.price)}</small></span>
+                <strong>{rupiah(item.quantity * item.price)}</strong>
+              </div>
+            ))}
+          </div>
+        </article>
+        <article className="account-panel">
+          <h2>Ringkasan pembayaran</h2>
+          <div className="account-read-grid">
+            <p><span>Subtotal</span><strong>{rupiah(subtotal)}</strong></p>
+            <p><span>Diskon/voucher</span><strong>- {rupiah(order.discountTotal ?? 0)}</strong></p>
+            <p><span>Biaya pengiriman</span><strong>{rupiah(order.shippingCost ?? 0)}</strong></p>
+            <p><span>Biaya layanan</span><strong>{rupiah(order.serviceFee ?? 0)}</strong></p>
+            <p><span>Total</span><strong>{rupiah(order.total)}</strong></p>
+          </div>
+        </article>
+      </section>
+
+      <section className="account-panel">
+        <h2>Pengiriman</h2>
+        <div className="account-read-grid">
+          <p><span>Alamat</span><strong>{orderAddress(address)}</strong></p>
+          <p><span>Metode</span><strong>{order.shippingMethod ?? "Belum tersedia"}</strong></p>
+          <p><span>Kurir</span><strong>{order.courierName ?? order.shippingProvider ?? "Market Snap"}</strong></p>
+          <p><span>Nomor resi</span><strong>{order.trackingNumber ?? "Belum tersedia"}</strong></p>
+        </div>
+        {Boolean(order.histories?.length) && (
+          <div className="order-card-list">
+            {order.histories?.map((history) => (
+              <article className="order-card compact" key={history.id}>
+                <div className="order-card-head"><span>{statusLabel(history.status)}</span><small>{formatOrderDate(history.createdAt)}</small></div>
+                {history.description && <p>{history.description}</p>}
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </>
   );
 }
 
@@ -921,6 +1010,7 @@ function OrderList({ compact = false, orders }: { compact?: boolean; orders: Ord
           <div className="order-payment-row">
             <span className={`payment-status-pill ${String(order.paymentStatus ?? "PENDING").toLowerCase()}`}>Pembayaran: {paymentStatusLabel(order.paymentStatus)}</span>
             <small>Order: {order.orderNumber}</small>
+            {order.paymentStatus === "PENDING" && formatPaymentDeadline(order.paymentDeadline) && <small>Bayar sebelum {formatPaymentDeadline(order.paymentDeadline)}</small>}
           </div>
           <div className="order-items">
             {order.items.slice(0, compact ? 2 : 4).map((item) => (
@@ -934,7 +1024,7 @@ function OrderList({ compact = false, orders }: { compact?: boolean; orders: Ord
           {!compact && (
             <div className="order-card-actions">
               {order.paymentStatus === "PAID" && <Link className="secondary-snap" href={`/dashboard/customer/orders/${encodeURIComponent(order.orderNumber)}/invoice`}>Lihat Invoice</Link>}
-              {order.paymentStatus === "PENDING" && order.paymentRedirectUrl && <Link className="primary-snap" href={order.paymentRedirectUrl}>Lanjutkan Pembayaran</Link>}
+              {order.paymentStatus === "PENDING" && isSafePaymentRedirect(order.paymentRedirectUrl) && <a className="primary-snap" href={order.paymentRedirectUrl}>Lanjutkan Pembayaran</a>}
               {order.paymentStatus === "EXPIRED" && <span className="payment-expired-text">Pembayaran Kedaluwarsa</span>}
               <Link className="secondary-snap" href={`/dashboard/customer/profile/orders/${order.id}`}>Detail</Link>
             </div>
@@ -951,7 +1041,8 @@ function paymentStatusLabel(status?: string) {
     EXPIRED: "Kedaluwarsa",
     FAILED: "Gagal",
     PAID: "Lunas",
-    PENDING: "Menunggu",
+    PENDING: "Belum Bayar",
+    UNPAID: "Belum Bayar",
     REFUNDED: "Refund"
   };
   return labels[String(status ?? "PENDING")] ?? String(status ?? "PENDING");
@@ -1075,8 +1166,16 @@ function memberSince(date?: string) {
 function statusLabel(status: string) {
   const labels: Record<string, string> = {
     CANCELLED: "Dibatalkan",
+    COMPLETED: "Selesai",
     CONFIRMED: "Dikonfirmasi",
+    DELIVERED: "Sampai",
+    OUT_FOR_DELIVERY: "Dalam Pengiriman",
+    PACKED: "Dikemas",
+    PAID: "Pembayaran Berhasil",
+    PENDING_PAYMENT: "Belum Bayar",
+    PICKING: "Disiapkan",
     PROCESSING: "Diproses",
+    READY: "Siap Dikirim",
     SHIPPED: "Dikirim",
     WAITING_PAYMENT: "Menunggu pembayaran",
     WAITING_PAYMENT_CONFIRMATION: "Menunggu konfirmasi",
@@ -1085,6 +1184,16 @@ function statusLabel(status: string) {
     Selesai: "Selesai"
   };
   return labels[status] ?? status;
+}
+
+function formatOrderDate(value: string) {
+  return new Date(value).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function orderAddress(address: Record<string, unknown>) {
+  const parts = [address.recipientName, address.detail, address.district, address.city, address.province, address.postalCode]
+    .filter((value): value is string => typeof value === "string" && Boolean(value.trim()));
+  return parts.join(", ") || "Alamat tidak tersedia";
 }
 
 function requestStatusLabel(status: ApiStoreAdminRequest["status"]) {

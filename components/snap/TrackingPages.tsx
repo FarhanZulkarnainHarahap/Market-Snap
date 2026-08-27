@@ -12,14 +12,15 @@ import { SnapFooter, SnapHeader } from "./SnapCommon";
 const statusFilters = ["Semua", "Diproses", "Dikemas", "Dikirim", "Dalam Perjalanan", "Sampai Tujuan", "Selesai", "Dibatalkan"];
 
 const trackingSteps = [
-  { status: "WAITING_PAYMENT", label: "Pesanan dibuat", text: "Pesanan dibuat dan menunggu pembayaran.", icon: FiShoppingBag },
-  { status: "WAITING_PAYMENT_CONFIRMATION", label: "Pembayaran diterima", text: "Pembayaran diterima atau menunggu konfirmasi.", icon: FiCheckCircle },
+  { status: "PENDING_PAYMENT", label: "Menunggu pembayaran", text: "Pesanan dibuat dan menunggu pembayaran.", icon: FiShoppingBag },
+  { status: "PAID", label: "Pembayaran berhasil", text: "Pembayaran sudah diverifikasi.", icon: FiCheckCircle },
   { status: "PROCESSING", label: "Pesanan diproses", text: "Cabang mulai memproses pesanan.", icon: FiClock },
-  { status: "PROCESSING", label: "Pesanan dikemas", text: "Produk disiapkan untuk pengiriman.", icon: FiPackage },
-  { status: "SHIPPED", label: "Diserahkan ke kurir", text: "Pesanan sudah diserahkan ke kurir.", icon: FiTruck },
-  { status: "SHIPPED", label: "Dalam perjalanan", text: "Kurir sedang membawa pesanan.", icon: FiMapPin },
-  { status: "SHIPPED", label: "Sedang diantar", text: "Pesanan sedang menuju alamat penerima.", icon: FiTruck },
-  { status: "CONFIRMED", label: "Pesanan diterima", text: "Pesanan sudah diterima pelanggan.", icon: FiCheckCircle }
+  { status: "PICKING", label: "Produk disiapkan", text: "Produk sedang diambil dari rak.", icon: FiPackage },
+  { status: "PACKED", label: "Pesanan dikemas", text: "Produk sudah selesai dikemas.", icon: FiPackage },
+  { status: "READY", label: "Siap dikirim", text: "Pesanan siap diserahkan ke kurir.", icon: FiTruck },
+  { status: "OUT_FOR_DELIVERY", label: "Dalam perjalanan", text: "Pesanan sedang menuju alamat penerima.", icon: FiMapPin },
+  { status: "DELIVERED", label: "Pesanan sampai", text: "Pesanan sudah diterima di alamat tujuan.", icon: FiCheckCircle },
+  { status: "COMPLETED", label: "Selesai", text: "Pesanan telah selesai.", icon: FiCheckCircle }
 ];
 
 export function TrackingListPage() {
@@ -36,7 +37,7 @@ export function TrackingListPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const activeOrders = useMemo(() => orders.filter((order) => order.status !== "CONFIRMED" && order.status !== "CANCELLED"), [orders]);
+  const activeOrders = useMemo(() => orders.filter((order) => !["COMPLETED", "CONFIRMED", "CANCELLED"].includes(order.status)), [orders]);
   const visibleOrders = useMemo(() => {
     const keyword = query.trim().toLowerCase();
     return activeOrders.filter((order) => {
@@ -131,7 +132,7 @@ function TrackingCard({ order }: { order: OrderSummary }) {
       <p><span>Estimasi tiba</span><strong>{order.estimatedArrival ? formatDate(order.estimatedArrival) : "Menunggu update"}</strong></p>
       <div className="tracking-actions">
         <Link className="primary-snap" href={`/tracking/${order.id}`}>Lacak Paket</Link>
-        <Link className="secondary-snap" href={`/profile/orders/${order.id}`}>Lihat Detail Pesanan</Link>
+        <Link className="secondary-snap" href={`/dashboard/customer/profile/orders/${order.id}`}>Lihat Detail Pesanan</Link>
       </div>
     </article>
   );
@@ -158,15 +159,38 @@ function TrackingTimeline({ histories, status }: { histories: OrderStatusHistory
 }
 
 function statusRank(status: string) {
-  const ranks: Record<string, number> = { WAITING_PAYMENT: 1, WAITING_PAYMENT_CONFIRMATION: 2, PROCESSING: 4, SHIPPED: 7, CONFIRMED: 8, CANCELLED: 0 };
+  const ranks: Record<string, number> = {
+    CANCELLED: 0,
+    WAITING_PAYMENT: 1,
+    PENDING_PAYMENT: 1,
+    WAITING_PAYMENT_CONFIRMATION: 1,
+    PAID: 2,
+    PROCESSING: 3,
+    PICKING: 4,
+    PACKED: 5,
+    READY: 6,
+    SHIPPED: 7,
+    OUT_FOR_DELIVERY: 7,
+    DELIVERED: 8,
+    CONFIRMED: 9,
+    COMPLETED: 9
+  };
   return ranks[status] ?? ranks[statusText(status)] ?? 0;
 }
 
 function statusText(status: string) {
   const labels: Record<string, string> = {
     CANCELLED: "Dibatalkan",
+    COMPLETED: "Selesai",
     CONFIRMED: "Selesai",
+    DELIVERED: "Sampai",
+    OUT_FOR_DELIVERY: "Dalam Pengiriman",
+    PACKED: "Dikemas",
+    PAID: "Pembayaran Berhasil",
+    PENDING_PAYMENT: "Menunggu Pembayaran",
+    PICKING: "Disiapkan",
     PROCESSING: "Diproses",
+    READY: "Siap Dikirim",
     SHIPPED: "Dikirim",
     WAITING_PAYMENT: "Menunggu Pembayaran",
     WAITING_PAYMENT_CONFIRMATION: "Menunggu Konfirmasi Pembayaran"

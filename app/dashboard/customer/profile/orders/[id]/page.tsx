@@ -1,13 +1,16 @@
-import { AccountLayout, OrdersAccountContent } from "@/components/snap/AccountPages";
+import { AccountLayout, OrderDetailAccountContent } from "@/components/snap/AccountPages";
 
-export default function CustomerProfileOrderDetailPage() {
+type Props = { params: Promise<{ id: string }> };
+
+export default async function CustomerProfileOrderDetailPage({ params }: Props) {
+  const { id } = await params;
   return (
     <AccountLayout
       active="orders"
       description="Detail pesanan, status pembayaran, pengiriman, dan invoice."
       title="Detail pesanan."
     >
-      <OrdersAccountContent />
+      <OrderDetailAccountContent orderId={id} />
     </AccountLayout>
   );
 }

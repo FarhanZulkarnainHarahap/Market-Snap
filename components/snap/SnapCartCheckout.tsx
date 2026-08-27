@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiAlertCircle, FiCheck, FiCheckCircle, FiClock, FiEdit2, FiHome, FiLock, FiMinus, FiPlus, FiRefreshCcw, FiShoppingCart, FiTag, FiTrash2, FiTruck, FiX, FiZap } from "react-icons/fi";
 import { toast as sonnerToast } from "sonner";
 import { createAddress, createOrderFromCart, deleteAddress, deleteCartItem, deleteSelectedCartItems, fetchAddresses, fetchCart, fetchCheckoutOptions, fetchNearestStore, fetchStores, fetchVouchers, updateAddress, updateCartItem, validateCartVoucher } from "@/lib/api";
+import { isSafePaymentRedirect } from "@/lib/payment-security.mjs";
 import { rupiah } from "@/lib/format";
 import type { Address, CartItem, CheckoutOption, Store, Voucher } from "@/lib/types";
 import { useCheckoutDraftStore } from "@/stores/checkout-store";
@@ -448,6 +449,7 @@ export function SnapCheckoutPage() {
   const [branchModalOpen, setBranchModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [recoveryOrder, setRecoveryOrder] = useState<{ id: string; orderNumber: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + (item.subtotal ?? item.price * item.quantity), 0), [items]);
   const deliveryOptions = shippingMethods.length ? shippingMethods : fallbackDeliveryOptions.map(({ id, label, cost, description, eta, requiresAddress }) => ({ id, label, cost, description, eta, requiresAddress }));
@@ -609,7 +611,7 @@ export function SnapCheckoutPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedAddress?.id, selectedAddress?.lat, selectedAddress?.lng, selectedDelivery.requiresAddress]);
+  }, [selectedAddress, selectedDelivery.requiresAddress]);
 
   useEffect(() => {
     updateCheckoutDraft({
@@ -651,6 +653,7 @@ export function SnapCheckoutPage() {
     }
 
     setSubmitting(true);
+    setRecoveryOrder(null);
     try {
       let checkoutStore = store;
       if (selectedDelivery.requiresAddress !== false && selectedAddress) {
@@ -677,17 +680,18 @@ export function SnapCheckoutPage() {
         storeId: checkoutStore.id,
         voucherCode: voucherCode.trim() || undefined
       });
-      setItems([]);
-      window.sessionStorage.removeItem(CHECKOUT_STATE_KEY);
       window.sessionStorage.setItem("market-snap-last-order-number", result.data.orderNumber);
       const schedule = `${deliveryDates.find((date) => date.id === selectedDateId)?.label ?? "Hari ini"}, ${selectedTime}`;
       const redirectUrl = result.payment?.redirectUrl ?? result.payment?.invoiceUrl;
       if (isSafePaymentRedirect(redirectUrl)) {
+        setItems([]);
+        window.sessionStorage.removeItem(CHECKOUT_STATE_KEY);
         setMessage(`Order ${result.data.orderNumber} berhasil dibuat untuk ${schedule}. Mengarahkan ke pembayaran...`);
         window.location.assign(redirectUrl);
         return;
       }
-      setMessage(`Order ${result.data.orderNumber} berhasil dibuat, tetapi sesi pembayaran gagal dibuat. Buka detail pesanan untuk mencoba lagi atau hubungi bantuan.`);
+      setRecoveryOrder({ id: result.data.id, orderNumber: result.data.orderNumber });
+      setMessage(`Order ${result.data.orderNumber} berhasil dibuat, tetapi tautan pembayaran tidak lolos validasi keamanan. State checkout tetap dipertahankan.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Gagal membuat order.");
     } finally {
@@ -711,6 +715,12 @@ export function SnapCheckoutPage() {
         {loading ? <CheckoutSkeleton /> : (
           <>
             {message && <p className="catalog-message">{message}</p>}
+            {recoveryOrder && (
+              <div className="payment-actions">
+                <Link className="primary-snap" href={`/dashboard/customer/profile/orders/${encodeURIComponent(recoveryOrder.id)}`}>Lihat Pesanan</Link>
+                <Link className="secondary-snap" href="/dashboard/customer/profile/orders">Riwayat Pesanan</Link>
+              </div>
+            )}
             <section className="checkout-page-grid">
               <div className="checkout-forms">
                 <CheckoutBlock title="1. Alamat Pengiriman" action="Ubah Alamat" onAction={() => setAddressModalOpen(true)}>
@@ -964,16 +974,6 @@ function updateCheckoutAddressField(field: keyof CheckoutAddressForm, setForm: R
   return (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
   };
-}
-
-function isSafePaymentRedirect(value?: string | null): value is string {
-  if (!value) return false;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:";
-  } catch {
-    return false;
-  }
 }
 
 function CartRowsSkeleton() {

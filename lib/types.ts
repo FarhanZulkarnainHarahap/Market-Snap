@@ -89,10 +89,12 @@ export type OrderSummary = {
   paymentStatus?: string;
   paymentRedirectUrl?: string;
   paymentInvoiceUrl?: string;
+  paymentDeadline?: string;
   trackingNumber?: string;
   courierName?: string;
   estimatedArrival?: string;
   addressSnapshot?: Record<string, unknown>;
+  store?: { id: string; name: string; city?: string };
   createdAt: string;
   items: OrderItemSummary[];
   histories?: OrderStatusHistory[];
