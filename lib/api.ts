@@ -3,7 +3,17 @@ import { apiUrl } from "./api-url";
 import { clearStaleCache } from "./stale-cache";
 import type { Address, CartItem, CheckoutOption, OrderStatistics, OrderSummary, Product, Store, Voucher } from "./types";
 
-export function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+let refreshRequest: Promise<boolean> | null = null;
+
+export async function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  const response = await fetch(input, { ...init, credentials: "include" });
+  if (response.status !== 401 || typeof window === "undefined" || isAuthBootstrapRequest(input)) return response;
+
+  refreshRequest ??= fetch(apiUrl("/api/auth/refresh"), { method: "POST", credentials: "include" })
+    .then((refreshResponse) => refreshResponse.ok)
+    .catch(() => false)
+    .finally(() => { refreshRequest = null; });
+  if (!await refreshRequest) return response;
   return fetch(input, { ...init, credentials: "include" });
 }
 
@@ -20,11 +30,11 @@ export async function loginUser(email: string, password: string) {
 }
 
 export function googleAuthUrl() {
-  return apiUrl("/auth/google");
+  return apiUrl("/api/auth/google");
 }
 
 export function facebookAuthUrl() {
-  return apiUrl("/auth/facebook");
+  return apiUrl("/api/auth/facebook");
 }
 
 export async function logoutUser() {
@@ -180,6 +190,16 @@ function setOptionalLocalStorage(name: string, value?: string) {
 
 function clearClientCookie(name: string) {
   document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+}
+
+function isAuthBootstrapRequest(input: RequestInfo | URL) {
+  const value = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+  try {
+    const path = new URL(value, window.location.origin).pathname;
+    return path.endsWith("/auth/login") || path.endsWith("/auth/register") || path.endsWith("/auth/refresh");
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchCategories(): Promise<string[]> {

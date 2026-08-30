@@ -22,7 +22,7 @@ type RegisterStep = 1 | 2 | 3;
 
 const loginSchema = z.object({
   email: z.string().email("Masukkan email yang valid."),
-  password: z.string().min(8, "Password minimal 8 karakter.")
+  password: z.string().min(1, "Password wajib diisi.")
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -155,8 +155,8 @@ export function SnapRegisterPage() {
     }
 
     if (step === 2) {
-      if (formState.password.length < 6) {
-        setError("Password minimal 6 karakter.");
+      if (formState.password.length < 8) {
+        setError("Password minimal 8 karakter.");
         return;
       }
       if (formState.password !== formState.confirmPassword) {

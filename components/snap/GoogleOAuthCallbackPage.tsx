@@ -11,7 +11,8 @@ export function GoogleOAuthCallbackPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
-  const provider = pathname.includes("/facebook/") ? "Facebook" : "Google";
+  const providerParam = searchParams.get("provider");
+  const provider = providerParam === "facebook" || pathname.includes("/facebook/") ? "Facebook" : "Google";
   const immediateError = searchParams.get("error") ?? "";
 
   useEffect(() => {
