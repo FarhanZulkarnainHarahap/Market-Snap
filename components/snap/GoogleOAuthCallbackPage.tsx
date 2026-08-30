@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiAlertCircle, FiCheckCircle } from "react-icons/fi";
-import { fetchCurrentUser, saveSession, webRole } from "@/lib/api";
+import { fetchCurrentUser, saveSession } from "@/lib/api";
 
 export function GoogleOAuthCallbackPage() {
   const router = useRouter();
@@ -21,8 +21,7 @@ export function GoogleOAuthCallbackPage() {
     fetchCurrentUser()
       .then((user) => {
         saveSession({ token: "", user });
-        const role = webRole(user.role);
-        router.replace(role === "admin" ? "/super-admin" : role === "adminStore" ? "/store-admin" : "/");
+        router.replace("/");
       })
       .catch((fetchError) => {
         setError(fetchError instanceof Error ? fetchError.message : `Login ${provider} gagal.`);
