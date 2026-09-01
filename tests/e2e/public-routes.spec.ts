@@ -61,7 +61,6 @@ test("guest can add a product and cart survives refresh", async ({ page }) => {
     const url = new URL(route.request().url());
     if (url.origin === "http://127.0.0.1:3300") return route.continue();
     if (!url.hostname.includes("market-snap") && !url.hostname.includes("localhost") && url.hostname !== "127.0.0.1") return route.continue();
-    if (url.pathname.endsWith("/auth/refresh")) return route.fulfill({ status: 401, json: { message: "No session" } });
     if (url.pathname.endsWith("/cart") || url.pathname.endsWith("/cart/items")) return route.fulfill({ status: 401, json: { message: "Login required" } });
     if (url.pathname.endsWith(`/products/${product.id}`)) return route.fulfill({ json: { data: product, store } });
     if (url.pathname.endsWith("/products")) return route.fulfill({ json: { data: [product], store, serviceable: true, meta: { page: 1, limit: 48, total: 1, totalPages: 1 } } });

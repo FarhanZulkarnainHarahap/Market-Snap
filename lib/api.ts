@@ -3,18 +3,9 @@ import { apiUrl } from "./api-url";
 import { clearStaleCache } from "./stale-cache";
 import type { Address, CartItem, CheckoutOption, OrderStatistics, OrderSummary, Product, Store, Voucher } from "./types";
 
-let refreshRequest: Promise<boolean> | null = null;
 const guestCartStorageKey = "market-snap-guest-cart-v1";
 
-export async function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
-  const response = await fetch(input, { ...init, credentials: "include" });
-  if (response.status !== 401 || typeof window === "undefined" || isAuthBootstrapRequest(input)) return response;
-
-  refreshRequest ??= fetch(apiUrl("/api/auth/refresh"), { method: "POST", credentials: "include" })
-    .then((refreshResponse) => refreshResponse.ok)
-    .catch(() => false)
-    .finally(() => { refreshRequest = null; });
-  if (!await refreshRequest) return response;
+export function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
   return fetch(input, { ...init, credentials: "include" });
 }
 
@@ -202,16 +193,6 @@ function setOptionalLocalStorage(name: string, value?: string) {
 
 function clearClientCookie(name: string) {
   document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
-}
-
-function isAuthBootstrapRequest(input: RequestInfo | URL) {
-  const value = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
-  try {
-    const path = new URL(value, window.location.origin).pathname;
-    return path.endsWith("/auth/login") || path.endsWith("/auth/register") || path.endsWith("/auth/refresh");
-  } catch {
-    return false;
-  }
 }
 
 export async function fetchCategories(): Promise<string[]> {

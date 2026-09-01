@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiAlertCircle, FiCheckCircle } from "react-icons/fi";
-import { fetchCurrentUser, mergeGuestCart, saveSession } from "@/lib/api";
+import { fetchCurrentUser, mergeGuestCart, saveSession, webRole } from "@/lib/api";
 
 export function GoogleOAuthCallbackPage() {
   const router = useRouter();
@@ -22,7 +22,8 @@ export function GoogleOAuthCallbackPage() {
       .then(async (user) => {
         saveSession({ token: "", user });
         await mergeGuestCart().catch(() => undefined);
-        router.replace("/");
+        const role = webRole(user.role);
+        router.replace(role === "admin" ? "/super-admin" : role === "adminStore" ? "/store-admin" : "/");
       })
       .catch((fetchError) => {
         setError(fetchError instanceof Error ? fetchError.message : `Login ${provider} gagal.`);

@@ -92,7 +92,7 @@ Project ini dibuat sebagai repo frontend terpisah dan terhubung ke Market Snap A
 
 ## User Roles
 
-Login response dari API menentukan dashboard tujuan user. Access dan refresh credential hanya berada di cookie HttpOnly milik API; local storage hanya menyimpan profil non-sensitif untuk tampilan, sedangkan cookie `market-snap-role` dipakai sebagai guard UI optimistis. Semua otorisasi sensitif tetap diverifikasi backend.
+Login response dari API menentukan dashboard tujuan user. JWT sesi hanya berada di cookie HttpOnly milik API; local storage menyimpan profil non-sensitif untuk tampilan, sedangkan cookie `market-snap-role` dipakai sebagai guard UI optimistis. Semua otorisasi sensitif tetap diverifikasi backend.
 
 | API Role | Web Role | Redirect |
 | --- | --- | --- |
