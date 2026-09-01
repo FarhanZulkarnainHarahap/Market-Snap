@@ -441,6 +441,7 @@ export function SnapCheckoutPage() {
   const [voucherCode, setVoucherCode] = useState(() => readCheckoutSelection().voucherCode ?? "");
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [orderNote, setOrderNote] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [addressEditingId, setAddressEditingId] = useState<string | null>(null);
   const [addressForm, setAddressForm] = useState<CheckoutAddressForm>(() => emptyCheckoutAddressForm());
@@ -471,6 +472,7 @@ export function SnapCheckoutPage() {
     hasPayment: Boolean(selectedPayment?.id),
     hasStore: Boolean(store),
     requiresAddress: selectedDelivery.requiresAddress !== false,
+    termsAccepted,
     submitting
   });
 
@@ -678,6 +680,7 @@ export function SnapCheckoutPage() {
         selectedCartItemIds: checkoutSelection.selectedCartItemIds.length ? checkoutSelection.selectedCartItemIds : items.map(cartItemKey),
         shippingMethod: selectedDelivery.id,
         storeId: checkoutStore.id,
+        termsAccepted,
         voucherCode: voucherCode.trim() || undefined
       });
       window.sessionStorage.setItem("market-snap-last-order-number", result.data.orderNumber);
@@ -811,6 +814,10 @@ export function SnapCheckoutPage() {
                   <p><span>Jadwal</span><strong>{deliveryDates.find((date) => date.id === selectedDateId)?.label}, {selectedTime || "Pilih slot"}</strong></p>
                   <p><span>Opsi</span><strong>{selectedDelivery.label}</strong></p>
                   <p><span>Pembayaran</span><strong>{selectedPayment?.label ?? "Belum tersedia"}</strong></p>
+                  <label className="account-check checkout-consent">
+                    <input checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} type="checkbox" />
+                    <span>Saya menyetujui <Link href="/terms">Syarat & Ketentuan</Link> dan <Link href="/privacy">Kebijakan Privasi</Link>.</span>
+                  </label>
                   <hr />
                   <p className="total"><span>Total Pembayaran</span><strong>{rupiah(total)}</strong></p>
                   {orderDisabledReason && <p className="summary-warning">{orderDisabledReason}</p>}
@@ -908,7 +915,7 @@ function CheckoutBlock({ title, action, actionHref, children, onAction }: { titl
   );
 }
 
-function checkoutDisabledReason(input: { hasAddress: boolean; hasItems: boolean; hasPayment: boolean; hasSchedule: boolean; hasShipping: boolean; hasStore: boolean; requiresAddress: boolean; submitting: boolean }) {
+function checkoutDisabledReason(input: { hasAddress: boolean; hasItems: boolean; hasPayment: boolean; hasSchedule: boolean; hasShipping: boolean; hasStore: boolean; requiresAddress: boolean; termsAccepted: boolean; submitting: boolean }) {
   if (input.submitting) return "Pesanan sedang diproses.";
   if (!input.hasItems) return "Checkout membutuhkan minimal satu produk.";
   if (input.requiresAddress && !input.hasAddress) return "Pilih atau tambahkan alamat pengiriman.";
@@ -916,6 +923,7 @@ function checkoutDisabledReason(input: { hasAddress: boolean; hasItems: boolean;
   if (!input.hasSchedule) return "Pilih jadwal dan slot pengiriman.";
   if (!input.hasShipping) return "Pilih metode pengiriman.";
   if (!input.hasPayment) return "Pilih metode pembayaran.";
+  if (!input.termsAccepted) return "Setujui Syarat & Ketentuan dan Kebijakan Privasi.";
   return "";
 }
 

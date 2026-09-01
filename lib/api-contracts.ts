@@ -226,6 +226,7 @@ export type CreateOrderOptions = {
   selectedCartItemIds?: string[];
   shippingMethod?: string;
   storeId?: string;
+  termsAccepted?: boolean;
   voucherCode?: string;
 };
 

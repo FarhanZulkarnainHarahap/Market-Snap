@@ -155,8 +155,8 @@ export function SnapRegisterPage() {
     }
 
     if (step === 2) {
-      if (formState.password.length < 8) {
-        setError("Password minimal 8 karakter.");
+      if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,128}$/.test(formState.password)) {
+        setError("Password minimal 8 karakter dan wajib memiliki huruf besar, huruf kecil, serta angka.");
         return;
       }
       if (formState.password !== formState.confirmPassword) {
@@ -221,14 +221,15 @@ export function SnapRegisterPage() {
           <form className="capture-form compact" onSubmit={submit}>
             {step === 1 && (
               <>
-                <label>Nama lengkap<input autoComplete="name" onChange={updateField("name")} placeholder="Masukkan nama lengkap Anda" required value={formState.name} /></label>
-                <label>Email<input autoComplete="email" onChange={updateField("email")} placeholder="Masukkan email Anda" required type="email" value={formState.email} /></label>
+                <label>Nama lengkap<input autoComplete="name" name="name" onChange={updateField("name")} placeholder="Masukkan nama lengkap Anda" required value={formState.name} /></label>
+                <label>Email<input autoComplete="email" name="email" onChange={updateField("email")} placeholder="Masukkan email Anda" required type="email" value={formState.email} /></label>
               </>
             )}
             {step === 2 && (
               <>
                 <PasswordInput
                   autoComplete="new-password"
+                  name="password"
                   onChange={updateField("password")}
                   onToggle={() => setShowPassword((current) => !current)}
                   placeholder="Buat password"
@@ -238,6 +239,7 @@ export function SnapRegisterPage() {
                 <PasswordInput
                   autoComplete="new-password"
                   label="Konfirmasi Password"
+                  name="confirmPassword"
                   onChange={updateField("confirmPassword")}
                   onToggle={() => setShowConfirmPassword((current) => !current)}
                   placeholder="Ulangi password"
@@ -247,7 +249,7 @@ export function SnapRegisterPage() {
               </>
             )}
             {step === 3 && (
-              <label>Kode referral <small>Opsional, boleh dikosongkan</small><input onChange={updateField("referralCode")} placeholder="Masukkan kode referral jika ada" value={formState.referralCode} /></label>
+              <label>Kode referral <small>Opsional, boleh dikosongkan</small><input name="referralCode" onChange={updateField("referralCode")} placeholder="Masukkan kode referral jika ada" value={formState.referralCode} /></label>
             )}
             {error && <p className="auth-step-error">{error}</p>}
             <div className="auth-step-actions">

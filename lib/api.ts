@@ -4,6 +4,7 @@ import { clearStaleCache } from "./stale-cache";
 import type { Address, CartItem, CheckoutOption, OrderStatistics, OrderSummary, Product, Store, Voucher } from "./types";
 
 let refreshRequest: Promise<boolean> | null = null;
+const guestCartStorageKey = "market-snap-guest-cart-v1";
 
 export async function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
   const response = await fetch(input, { ...init, credentials: "include" });
@@ -26,6 +27,7 @@ export async function loginUser(email: string, password: string) {
   if (!response.ok) throw new Error(await responseMessage(response, "Login gagal"));
   const payload = await response.json() as LoginResponse;
   saveSession(payload);
+  await mergeGuestCart().catch(() => undefined);
   return payload;
 }
 
@@ -123,6 +125,16 @@ export async function confirmEmailVerification(token: string) {
   });
   if (!response.ok) throw new Error(await responseMessage(response, "Verifikasi belum dapat diproses"));
   return response.json() as Promise<{ data: ApiUser; message: string }>;
+}
+
+export async function submitContactMessage(payload: { email: string; message: string; name: string; subject: string; website?: string }) {
+  const response = await apiFetch(apiUrl("/contact"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) throw new Error(await responseMessage(response, "Pesan belum dapat dikirim"));
+  return response.json() as Promise<{ data?: { id: string; createdAt: string }; message: string }>;
 }
 
 export function saveSession(payload: LoginResponse) {
@@ -314,7 +326,7 @@ export async function fetchProductDetail(productId: string, params: URLSearchPar
 
 export async function fetchCart() {
   const response = await apiFetch(apiUrl("/cart"), { headers: currentUserHeaders(), cache: "no-store" });
-  if (response.status === 401) throw new Error("AUTH_REQUIRED");
+  if (response.status === 401) return guestCartPayload();
   if (response.status === 403) throw new Error("VERIFICATION_REQUIRED");
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal memuat cart"));
   const payload = await response.json() as CartResponse;
@@ -442,12 +454,14 @@ export async function addCartItem(productId: string, storeId: string, quantity =
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
     body: JSON.stringify({ productId, storeId, quantity })
   });
+  if (response.status === 401) return addGuestCartItem(productId, storeId, quantity);
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal menambahkan cart"));
   const payload = await response.json() as { data: ApiCartItem };
   return mapCartItem(payload.data);
 }
 
 export async function updateCartItem(cartId: string, quantity: number) {
+  if (cartId.startsWith("guest:")) return updateGuestCartItem(cartId, quantity);
   const response = await apiFetch(apiUrl(`/cart/items/${cartId}`), {
     method: "PATCH",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
@@ -459,11 +473,21 @@ export async function updateCartItem(cartId: string, quantity: number) {
 }
 
 export async function deleteCartItem(cartId: string) {
+  if (cartId.startsWith("guest:")) {
+    writeGuestCart(readGuestCart().filter((item) => item.cartId !== cartId));
+    return;
+  }
   const response = await apiFetch(apiUrl(`/cart/items/${cartId}`), { method: "DELETE", headers: currentUserHeaders() });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal hapus cart"));
 }
 
 export async function deleteSelectedCartItems(ids: string[]) {
+  if (ids.some((id) => id.startsWith("guest:"))) {
+    const selected = new Set(ids);
+    const before = readGuestCart();
+    writeGuestCart(before.filter((item) => !selected.has(String(item.cartId))));
+    return { message: "Produk terpilih berhasil dihapus dari cart", removed: before.length - readGuestCart().length };
+  }
   const response = await apiFetch(apiUrl("/cart/items/delete-selected"), {
     method: "POST",
     headers: { ...currentUserHeaders(), "Content-Type": "application/json" },
@@ -508,10 +532,107 @@ export async function createOrderFromCart(items: CartItem[], _displayTotal: numb
       destinationId: options.destinationId,
       paymentMethod: options.paymentMethod,
       voucherCode: options.voucherCode
+      ,termsAccepted: options.termsAccepted === true
     })
   });
   if (!response.ok) throw new Error(await responseMessage(response, "Gagal membuat order"));
   return response.json() as Promise<CreateOrderResponse>;
+}
+
+export async function mergeGuestCart() {
+  const guestItems = readGuestCart();
+  if (!guestItems.length) return;
+  const idMap = new Map<string, string>();
+  for (const item of guestItems) {
+    const response = await apiFetch(apiUrl("/cart/items"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId: item.productId ?? item.id, storeId: item.storeId, quantity: item.quantity })
+    });
+    if (!response.ok) throw new Error(await responseMessage(response, `Gagal menggabungkan ${item.name}`));
+    const payload = await response.json() as { data: ApiCartItem };
+    if (item.cartId) idMap.set(item.cartId, payload.data.id);
+  }
+  remapCheckoutSelection(idMap);
+  writeGuestCart([]);
+}
+
+function remapCheckoutSelection(idMap: Map<string, string>) {
+  if (typeof window === "undefined") return;
+  const key = "market-snap-checkout-selection";
+  try {
+    const current = JSON.parse(window.sessionStorage.getItem(key) ?? "{}") as { selectedCartItemIds?: unknown[]; voucherCode?: string };
+    if (!Array.isArray(current.selectedCartItemIds)) return;
+    window.sessionStorage.setItem(key, JSON.stringify({
+      ...current,
+      selectedCartItemIds: current.selectedCartItemIds.map(String).map((id) => idMap.get(id) ?? id)
+    }));
+  } catch {
+    window.sessionStorage.removeItem(key);
+  }
+}
+
+async function addGuestCartItem(productId: string, storeId: string, quantity: number): Promise<CartItem> {
+  const items = readGuestCart();
+  const existing = items.find((item) => item.productId === productId && item.storeId === storeId);
+  const detail = await fetchProductDetail(productId, new URLSearchParams({ storeId }));
+  const stock = detail.product.stockByStore[storeId] ?? 0;
+  const nextQuantity = (existing?.quantity ?? 0) + quantity;
+  if (nextQuantity > stock) throw new Error("Stok tidak mencukupi untuk cart");
+  const next: CartItem = {
+    ...detail.product,
+    cartId: `guest:${storeId}:${productId}`,
+    productId,
+    quantity: nextQuantity,
+    stock,
+    storeId,
+    subtotal: detail.product.price * nextQuantity
+  };
+  writeGuestCart(existing ? items.map((item) => item.cartId === next.cartId ? next : item) : [...items, next]);
+  return next;
+}
+
+function updateGuestCartItem(cartId: string, quantity: number): CartItem {
+  const items = readGuestCart();
+  const existing = items.find((item) => item.cartId === cartId);
+  if (!existing) throw new Error("Cart item tidak ditemukan");
+  if (quantity > (existing.stock ?? 0)) throw new Error("Stok tidak mencukupi untuk cart");
+  const next = { ...existing, quantity, subtotal: existing.price * quantity };
+  writeGuestCart(items.map((item) => item.cartId === cartId ? next : item));
+  return next;
+}
+
+function guestCartPayload() {
+  const items = readGuestCart();
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  return {
+    discount: 0,
+    estimatedShipping: items.length ? 10000 : 0,
+    itemCount,
+    items,
+    store: null,
+    subtotal,
+    summary: { totalItems: itemCount, total: subtotal },
+    total: subtotal
+  };
+}
+
+function readGuestCart(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const value = JSON.parse(window.localStorage.getItem(guestCartStorageKey) ?? "[]") as CartItem[];
+    return Array.isArray(value) ? value.filter((item) => item && typeof item.id === "string" && Number.isInteger(item.quantity) && item.quantity > 0) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeGuestCart(items: CartItem[]) {
+  if (typeof window === "undefined") return;
+  if (items.length) window.localStorage.setItem(guestCartStorageKey, JSON.stringify(items));
+  else window.localStorage.removeItem(guestCartStorageKey);
+  window.dispatchEvent(new CustomEvent("market-snap-guest-cart-updated"));
 }
 
 function mapStore(store: ApiStore): Store {

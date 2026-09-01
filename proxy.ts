@@ -92,6 +92,7 @@ function isLegacyCustomerPath(path: string) {
 function isPublicCustomerPath(path: string) {
   return path === "/" ||
     path === "/about" ||
+    path === "/cart" ||
     path === "/catalog" ||
     path === "/contact" ||
     path === "/dashboard/customer" ||
@@ -104,8 +105,7 @@ function isPublicCustomerPath(path: string) {
 }
 
 function isProtectedCustomerPath(path: string) {
-  return path === "/cart" ||
-    path === "/checkout" ||
+  return path === "/checkout" ||
     path.startsWith("/checkout/") ||
     path === "/profile" ||
     path.startsWith("/profile/") ||

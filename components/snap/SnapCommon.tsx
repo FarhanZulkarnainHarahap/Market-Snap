@@ -30,6 +30,7 @@ import {
 } from "react-icons/fi";
 import { LuLeaf } from "react-icons/lu";
 import { rupiah } from "@/lib/format";
+import { siteConfig, whatsappUrl } from "@/lib/site-config";
 import { fetchCurrentUser, fetchStores, logoutUser, saveSession } from "@/lib/api";
 import { customerAccountMenus } from "@/lib/customer-menus";
 import type { ApiUser } from "@/lib/api-contracts";
@@ -677,10 +678,10 @@ export function PanelSkeleton({ rows = 4 }: { rows?: number }) {
 
 export function BenefitStrip() {
   const items = [
-    { icon: FiShield, title: "100% Produk Segar", text: "Kualitas terjaga setiap hari" },
+    { icon: FiShield, title: "Produk Terkurasi", text: "Kualitas diperiksa oleh cabang" },
     { icon: FiTruck, title: "Pengantaran Cepat", text: "Sampai di hari yang sama" },
     { icon: FiLock, title: "Transaksi Aman", text: "Pembayaran terenkripsi" },
-    { icon: FiHeadphones, title: "Layanan 24/7", text: "Kami siap membantu" }
+    { icon: FiHeadphones, title: "Layanan Bantuan", text: "Sesuai jam layanan tertera" }
   ];
 
   return (
@@ -696,24 +697,30 @@ export function BenefitStrip() {
 }
 
 export function SnapFooter() {
+  const whatsapp = whatsappUrl();
   return (
     <footer className="snap-footer">
       <div>
         <h3>Welcome</h3>
         <p>Market Snap hadir untuk membuat belanja harian lebih mudah, hemat, dan menyenangkan. Dari cabang terdekat ke rumahmu.</p>
         <strong className="footer-brand">MARKET SNAP</strong>
-        <small>(c) 2025 Market Snap. All rights reserved.</small>
+        <small>© {new Date().getFullYear()} {siteConfig.legalName}. All rights reserved.</small>
+        {siteConfig.demoMode && <small className="demo-label">Mode Demo — lengkapi identitas bisnis sebelum peluncuran.</small>}
       </div>
       <div>
         <h3>Connect With Us</h3>
-        <p>@marketsnap.id</p>
-        <p>Market Snap</p>
-        <p>0812-3456-7890</p>
+        {siteConfig.instagram && <a href={siteConfig.instagram} rel="noreferrer" target="_blank">Instagram</a>}
+        <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>
+        {whatsapp ? <a href={whatsapp} rel="noreferrer" target="_blank">{siteConfig.phone}</a> : <p>{siteConfig.phone}</p>}
+        <p>{siteConfig.address}</p>
       </div>
       <div>
         <h3>Useful Link</h3>
         <Link href={CUSTOMER_CATALOG}>Cara Belanja</Link>
-        <Link href={CUSTOMER_ABOUT}>Syarat & Ketentuan</Link>
+        <Link href="/terms">Syarat & Ketentuan</Link>
+        <Link href="/privacy">Kebijakan Privasi</Link>
+        <Link href="/shipping-policy">Kebijakan Pengiriman</Link>
+        <Link href="/refund-policy">Refund & Retur</Link>
         <Link href={CUSTOMER_CONTACT}>Pusat Bantuan</Link>
       </div>
     </footer>

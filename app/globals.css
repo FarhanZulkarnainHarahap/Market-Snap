@@ -13,3 +13,22 @@
 @import "../styles/footer.css";
 @import "../styles/snap-capture.css";
 @import "../styles/management.css";
+/* Production utility states and policy pages */
+.skip-link { position: fixed; left: 1rem; top: -5rem; z-index: 9999; border-radius: .6rem; background: #fff; color: #07582c; padding: .75rem 1rem; box-shadow: 0 8px 30px #0003; }
+.skip-link:focus { top: 1rem; }
+.offline-indicator { position: sticky; top: 0; z-index: 9998; margin: 0; background: #8a3b12; color: #fff; padding: .55rem 1rem; text-align: center; font-weight: 700; }
+.legal-page { min-height: 60vh; background: #f6fbf4; padding: 2rem max(1rem, calc((100vw - 980px) / 2)); }
+.legal-page > nav { margin-bottom: 1rem; color: #557060; font-size: .9rem; }
+.legal-page > article { border: 1px solid #d9e7da; border-radius: 1.25rem; background: #fff; padding: clamp(1.25rem, 4vw, 3rem); box-shadow: 0 16px 45px #164a2610; }
+.legal-page h1 { margin: .4rem 0 1rem; color: #083f22; font-size: clamp(2rem, 5vw, 3.4rem); }
+.legal-page h2 { margin: 2rem 0 .65rem; color: #07582c; font-size: 1.25rem; }
+.legal-page p { max-width: 78ch; color: #405b49; line-height: 1.8; }
+.legal-page aside { margin: 1.5rem 0; border-left: 4px solid #e0a800; border-radius: .5rem; background: #fff8d8; padding: 1rem; color: #594700; }
+.system-state-page { min-height: 65vh; display: grid; place-items: center; padding: 2rem; background: #f6fbf4; text-align: center; }
+.system-state-page section { max-width: 560px; border: 1px solid #d9e7da; border-radius: 1.5rem; background: #fff; padding: 3rem 2rem; }
+.system-state-page section > span { color: #07582c; font-size: 4rem; font-weight: 900; }
+.system-state-page h1 { color: #083f22; font-size: clamp(2rem, 6vw, 3.2rem); }
+.system-state-page p { margin-bottom: 1.5rem; color: #557060; line-height: 1.7; }
+.checkout-consent { align-items: flex-start !important; margin: 1rem 0; text-align: left; }
+.checkout-consent a { color: #07582c; font-weight: 750; text-decoration: underline; }
+.contact-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }

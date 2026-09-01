@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiAlertCircle, FiCheckCircle } from "react-icons/fi";
-import { fetchCurrentUser, saveSession } from "@/lib/api";
+import { fetchCurrentUser, mergeGuestCart, saveSession } from "@/lib/api";
 
 export function GoogleOAuthCallbackPage() {
   const router = useRouter();
@@ -19,8 +19,9 @@ export function GoogleOAuthCallbackPage() {
     if (immediateError) return;
 
     fetchCurrentUser()
-      .then((user) => {
+      .then(async (user) => {
         saveSession({ token: "", user });
+        await mergeGuestCart().catch(() => undefined);
         router.replace("/");
       })
       .catch((fetchError) => {

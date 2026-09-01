@@ -29,6 +29,8 @@ Market Snap Web adalah frontend untuk aplikasi online grocery berbasis cabang to
 
 Project ini dibuat sebagai repo frontend terpisah dan terhubung ke Market Snap API melalui `NEXT_PUBLIC_API_URL`.
 
+> Production handover: salin `.env.example`, isi identitas bisnis milik pembeli, lalu baca `SECURITY.md`, `THIRD_PARTY_NOTICES.md`, `docs/DEPLOYMENT.md`, `docs/PWA_SEO.md`, `docs/TROUBLESHOOTING.md`, dan `docs/HANDOVER_CHECKLIST.md`. Mode demo aktif secara default agar source code tidak mengarang identitas atau statistik bisnis.
+
 ## Table of Contents
 
 - [Preview Assets](#preview-assets)
@@ -59,7 +61,7 @@ Project ini dibuat sebagai repo frontend terpisah dan terhubung ke Market Snap A
 - Mobile-first grocery landing page with hero, category, promo, nearest store, and product sections.
 - Location-aware catalog powered by the backend nearest-store API.
 - Product listing, product detail, store detail, and stock visibility by selected branch.
-- Authenticated cart flow using a secure httpOnly session cookie.
+- Guest cart persisten di browser, merge ke cart akun setelah login/OAuth, dan secure HttpOnly session untuk fitur akun.
 - Checkout form with RajaOngkir destination ID, courier selection, and payment method.
 - Xendit payment redirect when the API returns `payment.redirectUrl`.
 - Customer profile, address page, checkout page, and order tracking pages.
@@ -208,6 +210,9 @@ npm run dev      # Start local development server
 npm run build    # Build production assets
 npm run start    # Start production server
 npm run lint     # Run ESLint
+npm run type-check # Run TypeScript without emitting files
+npm test         # Run unit tests
+npm run test:e2e # Run Playwright route/E2E smoke tests after build
 ```
 
 ## Local Brand Assets
